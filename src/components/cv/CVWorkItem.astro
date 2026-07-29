@@ -1,0 +1,144 @@
+---
+const {
+  title,
+  company,
+  location,
+  start,
+  end,
+  description,
+  bullets,
+  logo
+} = Astro.props;
+
+const isLogoObject = logo && typeof logo === "object";
+
+const lightLogo = isLogoObject ? logo.light : logo;
+const darkLogo = isLogoObject ? logo.dark : null;
+---
+
+<div class="cv-item">
+
+  {lightLogo && (
+    <div class="cv-logo-wrapper">
+
+      <!-- LIGHT LOGO -->
+      <img
+        src={`/icons/${lightLogo}`}
+        alt={`${company} logo`}
+        class="cv-logo cv-logo-light"
+      />
+
+      <!-- DARK LOGO -->
+      {darkLogo && (
+        <img
+          src={`/icons/${darkLogo}`}
+          alt={`${company} logo`}
+          class="cv-logo cv-logo-dark"
+        />
+      )}
+
+    </div>
+  )}
+
+  <div class="cv-content">
+
+    <div class="cv-item-header">
+      <strong>{title}</strong>
+      <span class="cv-dates">
+        {start} – {end ?? "Present"}
+      </span>
+    </div>
+
+    <div class="cv-sub">
+      {company} · {location}
+    </div>
+
+    {bullets ? (
+      <ul class="cv-bullets">
+        {bullets.map((b) => <li>{b}</li>)}
+      </ul>
+    ) : (
+      <p class="cv-description">{description}</p>
+    )}
+
+  </div>
+
+</div>
+
+<style>
+.cv-item {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 1rem;
+  border-left: 2px solid var(--accent);
+  padding-left: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* LOGO */
+.cv-logo-wrapper {
+  width: 36px;
+  height: 36px;
+  position: relative;
+}
+
+.cv-logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* DEFAULT: light mode */
+.cv-logo-dark {
+  display: none;
+}
+
+/* DARK MODE (IMPORTANT FIX) */
+:global(html.dark) .cv-logo-light {
+  display: none;
+}
+
+:global(html.dark) .cv-logo-dark {
+  display: block;
+}
+
+/* CONTENT */
+.cv-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.cv-item-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cv-dates {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.cv-sub {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+}
+
+.cv-bullets {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.cv-bullets li {
+  margin-bottom: 0.3rem;
+}
+
+.cv-description {
+  margin: 0;
+}
+</style>

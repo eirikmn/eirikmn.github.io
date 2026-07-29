@@ -1,0 +1,354 @@
+---
+const {
+  title,
+  authors,
+  venue,
+  year,
+  volume,
+  number,
+  pages,
+  abstract,
+  doi,
+  pdf,
+  url,
+  bibtex,
+  type
+} = Astro.props;
+
+/* =========================
+   AUTHOR HIGHLIGHTING
+========================= */
+
+const myNames = [
+  "Myrvoll-Nilsen, Eirik",
+  "Eirik Myrvoll-Nilsen"
+];
+
+let formattedAuthors = authors ?? "";
+
+myNames.forEach(name => {
+  formattedAuthors =
+    formattedAuthors.replace(
+      name,
+      `<strong>${name}</strong>`
+    );
+});
+
+/* =========================
+   SAFE ID
+========================= */
+
+const safe = (str) =>
+  str
+    ?.toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+const id = `${safe(title)}-${year}`;
+
+/* =========================
+   TYPE LABEL
+========================= */
+
+const typeKey =
+  type && type.trim() !== ""
+    ? type.toLowerCase().trim()
+    : "article";
+
+const typeLabelMap = {
+  article: "Journal article",
+  phdthesis: "PhD thesis",
+  mastersthesis: "Master’s thesis",
+  commentary: "Commentary",
+  comment: "Comment",
+  "matters-arising": "Matters Arising",
+  correspondence: "Correspondence",
+  inproceedings: "Conference paper",
+  preprint: "Preprint"
+};
+
+const typeLabel =
+  typeLabelMap[typeKey] ?? null;
+
+/* =========================
+   DOI
+========================= */
+
+let doiLink = null;
+
+if (doi) {
+  doiLink = doi.startsWith("http")
+    ? doi
+    : `https://doi.org/${doi}`;
+}
+
+/* =========================
+   META
+========================= */
+
+const metaParts = [];
+
+if (venue) metaParts.push(venue);
+
+if (volume || number) {
+  const vol =
+    volume
+      ? number
+        ? `<strong>${volume}</strong>(${number})`
+        : `<strong>${volume}</strong>`
+      : "";
+
+  if (vol) metaParts.push(vol);
+}
+
+if (pages) metaParts.push(`pp. ${pages}`);
+if (year) metaParts.push(year);
+
+const meta = metaParts.join(", ");
+---
+
+<style>
+
+.pub {
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* HEADER */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.left {
+  flex: 1;
+  min-width: 0;
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+/* TEXT */
+
+.title {
+  font-weight: 600;
+  font-size: 0.96rem;
+  line-height: 1.25;
+}
+
+.authors {
+  font-size: 0.86rem;
+  opacity: 0.9;
+  margin-top: 2px;
+}
+
+.meta {
+  font-size: 0.82rem;
+  opacity: 0.7;
+  margin-top: 2px;
+}
+
+/* TYPE BADGE (FIXED) */
+
+.type-badge {
+  font-size: 0.68rem;
+  padding: 2px 7px;
+  border-radius: 999px;
+
+  border: 1px solid var(--border-ui);
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+/* ACTION BUTTONS (FIXED) */
+
+.action-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  padding: 2px 7px;
+  border-radius: 999px;
+
+  /* FIX: unified UI border */
+  border: 1px solid var(--border-ui);
+
+  background: transparent;
+  color: var(--text);
+
+  font-size: 0.75rem;
+  text-decoration: none;
+
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.action-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+/* ABSTRACT */
+
+.abstract-wrapper {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.25s ease, opacity 0.2s ease;
+}
+
+.abstract-wrapper.open {
+  opacity: 1;
+  margin-top: 6px;
+  max-height: 500px;
+}
+
+.abstract {
+  padding: 8px 10px;
+
+  /* FIX: UI border instead of weak border */
+  border: 1px solid var(--border-ui);
+
+  border-radius: 8px;
+
+  background: rgba(0,0,0,0.02);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+html.dark .abstract {
+  background: rgba(255,255,255,0.03);
+}
+
+@media (max-width: 600px) {
+  .header {
+    flex-direction: column;
+  }
+
+  .right {
+    align-items: flex-start;
+  }
+}
+
+</style>
+
+<article class="pub" data-id={id}>
+
+  <div class="header">
+
+    <div class="left">
+
+      <div class="title">{title}</div>
+
+      <div class="authors" set:html={formattedAuthors}></div>
+
+      <div class="meta" set:html={meta}></div>
+
+    </div>
+
+    <div class="right">
+
+      {typeLabel && (
+        <span class="type-badge">
+          {typeLabel}
+        </span>
+      )}
+
+      <div class="action-row">
+
+        {abstract && (
+          <button class="action-btn" data-toggle={id}>
+            Abs
+          </button>
+        )}
+
+        {doiLink && (
+          <a href={doiLink} target="_blank" class="action-btn">
+            DOI
+          </a>
+        )}
+
+        {pdf && (
+          <a href={pdf} target="_blank" class="action-btn">
+            PDF
+          </a>
+        )}
+
+        {url && (
+          <a href={url} target="_blank" class="action-btn">
+            Link
+          </a>
+        )}
+
+        {bibtex && (
+          <button class="action-btn" data-bibtex={id}>
+            Cite
+          </button>
+        )}
+
+      </div>
+
+    </div>
+
+  </div>
+
+  {abstract && (
+    <div class="abstract-wrapper" data-panel={id}>
+      <div class="abstract" set:html={abstract}></div>
+    </div>
+  )}
+
+</article>
+
+<script>
+document.addEventListener("click", (e) => {
+
+  const btn = e.target.closest("[data-toggle]");
+  if (btn) {
+    const id = btn.getAttribute("data-toggle");
+    const panel = document.querySelector(`[data-panel="${id}"]`);
+    if (!panel) return;
+
+    const isOpen = panel.classList.contains("open");
+
+    if (isOpen) {
+      panel.classList.remove("open");
+      panel.style.maxHeight = null;
+    } else {
+      panel.classList.add("open");
+      panel.style.maxHeight = panel.scrollHeight + "px";
+    }
+  }
+
+  const citeBtn = e.target.closest("[data-bibtex]");
+  if (citeBtn) {
+    const id = citeBtn.getAttribute("data-bibtex");
+    const bib = document.querySelector(`[data-bib="${id}"]`);
+
+    if (bib) {
+      navigator.clipboard.writeText(bib.textContent);
+      citeBtn.textContent = "Copied";
+
+      setTimeout(() => {
+        citeBtn.textContent = "Cite";
+      }, 1500);
+    }
+  }
+
+});
+</script>

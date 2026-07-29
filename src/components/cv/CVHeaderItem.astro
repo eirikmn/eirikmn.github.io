@@ -1,0 +1,163 @@
+---
+import profile from "../../data/cvheader.json";
+
+const {
+  title,
+  affiliation,
+  email,
+  website,
+  orcid,
+  research,
+  note
+} = profile;
+
+const institution = affiliation?.institution;
+const location = affiliation?.location;
+---
+
+<div class="cv-item cv-header-item">
+
+  <!-- TWO-COLUMN STRUCTURE -->
+  <div class="cv-grid">
+
+    {title && (
+      <>
+        <div class="cv-label">Position</div>
+        <div class="cv-value">{title}</div>
+      </>
+    )}
+
+    {institution && (
+      <>
+        <div class="cv-label">Institution</div>
+        <div class="cv-value">{institution}</div>
+      </>
+    )}
+
+    {location && (
+      <>
+        <div class="cv-label">Location</div>
+        <div class="cv-value">{location}</div>
+      </>
+    )}
+
+    {email && (
+      <>
+        <div class="cv-label">Email</div>
+        <div class="cv-value">
+          <a href={`mailto:${email}`} class="link">{email}</a>
+        </div>
+      </>
+    )}
+
+    {website && (
+      <>
+        <div class="cv-label">Website</div>
+        <div class="cv-value">
+          <a
+            href={website.startsWith("http") ? website : `https://${website}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="link"
+          >
+            {website.replace(/^https?:\/\//, "")}
+          </a>
+        </div>
+      </>
+    )}
+
+    {orcid && (
+      <>
+        <div class="cv-label">ORCID</div>
+        <div class="cv-value">
+          <a
+            href={`https://orcid.org/${orcid}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="link"
+          >
+            {orcid}
+          </a>
+        </div>
+      </>
+    )}
+
+    {research && (
+      <>
+        <div class="cv-label">Summary</div>
+        <div class="cv-value cv-summary">{research}</div>
+      </>
+    )}
+
+  </div>
+
+  <!-- OUTSIDE NOTE -->
+  {note && (
+    <div class="cv-note">
+      {note.text}{" "}
+      {note.cv_pdf && (
+        <a href={note.cv_pdf} download class="link">
+          here.
+        </a>
+      )}
+    </div>
+  )}
+
+</div>
+
+<style>
+.cv-header-item {
+  margin: 0;
+}
+
+/* GRID */
+.cv-grid {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  column-gap: 1rem;
+  row-gap: 0.4rem;
+  font-size: 0.9rem;
+  margin-bottom: 1.25rem;
+}
+
+/* LABELS */
+.cv-label {
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* VALUES */
+.cv-value {
+  color: var(--text-muted);
+}
+
+/* LINKS */
+.link {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+
+  border-bottom: 0.5px solid color-mix(in srgb, var(--text) 35%, transparent);
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.link:hover {
+  color: var(--accent);
+  border-bottom: 1px solid var(--accent);
+}
+
+/* SUMMARY */
+.cv-summary {
+  color: var(--text);
+  max-width: 70ch;
+  line-height: 1.45;
+}
+
+/* NOTE */
+.cv-note {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  max-width: 75ch;
+}
+</style>

@@ -1,0 +1,219 @@
+---
+const {
+  title,
+  authors,
+  venue,
+  year,
+  abstract,
+  doi,
+  pdf,
+  url
+} = Astro.props;
+
+const myName = "Eirik Myrvoll-Nilsen";
+
+const formattedAuthors =
+  authors?.replace(myName, `<strong>${myName}</strong>`) ?? "";
+
+// stable id
+const id = `${title}-${year}`.replace(/\s+/g, "-").toLowerCase();
+---
+
+<style>
+  /* =========================
+     PUBLICATION CARD
+  ========================= */
+
+  .pub {
+    margin-bottom: 28px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .title {
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .authors {
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+  }
+
+  .meta {
+    font-size: 0.95rem;
+    opacity: 0.8;
+    margin-bottom: 8px;
+  }
+
+  /* =========================
+     ACTION ROW
+  ========================= */
+
+  .action-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 4px 10px;
+    border-radius: 999px;
+
+    /* FIX: use UI border, not layout border */
+    border: 1px solid var(--border-ui);
+
+    background: transparent;
+    color: var(--text);
+
+    font-size: 0.85rem;
+    text-decoration: none;
+
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .action-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+
+  /* =========================
+     ABSTRACT TOGGLE
+  ========================= */
+
+  .chevron {
+    display: inline-block;
+    transition: transform 0.2s ease;
+    transform: rotate(0deg) scale(1.6);
+  }
+
+  .chevron.open {
+    transform: rotate(90deg) scale(1.6);
+  }
+
+  .abstract-wrapper {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.25s ease, opacity 0.2s ease;
+  }
+
+  .abstract-wrapper.open {
+    opacity: 1;
+    margin-top: 10px;
+  }
+
+  .abstract {
+    padding: 10px 12px;
+
+    /* FIX: use UI border */
+    border: 1px solid var(--border-ui);
+
+    border-radius: 8px;
+
+    background: rgba(0,0,0,0.02);
+    line-height: 1.6;
+  }
+
+  html.dark .abstract {
+    background: rgba(255,255,255,0.03);
+  }
+</style>
+
+<div class="pub" data-id={id}>
+
+  <!-- TITLE -->
+  <div class="title">{title}</div>
+
+  <!-- AUTHORS -->
+  <div class="authors" set:html={formattedAuthors}></div>
+
+  <!-- META -->
+  <div class="meta">
+    {venue} • {year}
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="action-row">
+
+    {abstract && (
+      <button class="action-btn" data-toggle={id}>
+        <span class="chevron" data-chevron={id}>▸</span>
+        Abstract
+      </button>
+    )}
+
+    {doi && (
+      <a
+        href={doi}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="action-btn"
+      >
+        🔗 DOI
+      </a>
+    )}
+
+    {pdf && (
+      <a
+        href={pdf}
+        target="_blank"
+        class="action-btn"
+      >
+        ⬇ PDF
+      </a>
+    )}
+
+    {url && (
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="action-btn"
+      >
+        🔗 Link
+      </a>
+    )}
+
+  </div>
+
+  <!-- ABSTRACT -->
+  {abstract && (
+    <div class="abstract-wrapper" data-panel={id}>
+      <div class="abstract" set:html={abstract}></div>
+    </div>
+  )}
+
+</div>
+
+<script>
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-toggle]");
+    if (!btn) return;
+
+    const id = btn.getAttribute("data-toggle");
+    const panel = document.querySelector(`[data-panel="${id}"]`);
+    const chevron = document.querySelector(`[data-chevron="${id}"]`);
+
+    if (!panel || !chevron) return;
+
+    const isOpen = panel.classList.contains("open");
+
+    if (isOpen) {
+      panel.classList.remove("open");
+      panel.style.maxHeight = null;
+      chevron.classList.remove("open");
+    } else {
+      panel.classList.add("open");
+      panel.style.maxHeight = panel.scrollHeight + "px";
+      chevron.classList.add("open");
+    }
+  });
+</script>

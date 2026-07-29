@@ -1,0 +1,202 @@
+---
+const {
+  role,
+  institution,
+  location,
+  courses,
+  responsibilities
+} = Astro.props;
+
+const id = `${role}-${institution}`
+  .replace(/\s+/g, "-")
+  .toLowerCase();
+---
+
+<div class="cv-item">
+
+  <div class="cv-content">
+
+    <!-- HEADER -->
+    <div class="cv-item-header">
+      <strong>{role}</strong>
+
+      {responsibilities && (
+        <button class="toggle-btn" data-toggle={id}>
+          Details
+        </button>
+      )}
+    </div>
+
+    <!-- INSTITUTION -->
+    <div class="cv-sub">
+      {institution}{location ? ` · ${location}` : ""}
+    </div>
+
+    <!-- COURSES -->
+    {courses && (
+      <div class="cv-courses">
+        {courses.map((c) => (
+          <div class="cv-course">
+            <span class="cv-course-title">
+              {c.code} – {c.name}
+            </span>
+
+            <span class="cv-course-periods">
+              {c.periods.join(", ")}
+            </span>
+          </div>
+        ))}
+      </div>
+    )}
+
+    <!-- RESPONSIBILITIES -->
+    {responsibilities && (
+      <div class="cv-collapse" data-panel={id}>
+        <ul class="cv-bullets">
+          {responsibilities.map((b) => (
+            <li>{b}</li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+  </div>
+
+</div>
+
+<script>
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-toggle]");
+    if (!btn) return;
+
+    const id = btn.getAttribute("data-toggle");
+    const panel = document.querySelector(`[data-panel="${id}"]`);
+    if (!panel) return;
+
+    const isOpen = panel.classList.contains("open");
+
+    if (isOpen) {
+      panel.classList.remove("open");
+      panel.style.maxHeight = null;
+      btn.textContent = "Details";
+    } else {
+      panel.classList.add("open");
+      panel.style.maxHeight = panel.scrollHeight + "px";
+      btn.textContent = "Hide";
+    }
+  });
+</script>
+
+<style>
+.cv-item {
+  display: grid;
+  grid-template-columns: 1fr;
+  border-left: 2px solid var(--accent);
+  padding-left: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* =========================
+   CONTENT
+========================= */
+.cv-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.cv-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* =========================
+   BUTTON (IMPROVED CONTRAST)
+========================= */
+.toggle-btn {
+  font-size: 0.8rem;
+
+  /* slightly stronger base border */
+  border: 1px solid color-mix(in srgb, var(--border) 85%, var(--text));
+
+  background: transparent;
+  padding: 3px 10px;
+  border-radius: 999px;
+
+  cursor: pointer;
+  color: var(--text);
+
+  transition: all 0.15s ease;
+}
+
+/* hover works in BOTH themes */
+.toggle-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+
+  /* subtle but visible feedback in dark mode too */
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+/* =========================
+   SUBTEXT
+========================= */
+.cv-sub {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+/* =========================
+   COURSES
+========================= */
+.cv-courses {
+  margin-bottom: 0.5rem;
+}
+
+.cv-course {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.cv-course-periods {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* =========================
+   COLLAPSIBLE
+========================= */
+.cv-collapse {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.25s ease, opacity 0.2s ease;
+}
+
+.cv-collapse.open {
+  opacity: 1;
+}
+
+.cv-bullets {
+  margin: 0.5rem 0 0 0;
+  padding-left: 1.2rem;
+}
+
+.cv-bullets li {
+  margin-bottom: 0.3rem;
+}
+
+/* =========================
+   DARK MODE (IMPORTANT FIX)
+========================= */
+:global(html.dark) .toggle-btn {
+  border-color: color-mix(in srgb, var(--border) 70%, var(--text));
+}
+
+:global(html.dark) .toggle-btn:hover {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+</style>

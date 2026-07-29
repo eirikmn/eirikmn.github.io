@@ -1,0 +1,63 @@
+[
+  {
+    "degree": "PhD",
+    "programme": "Science",
+    "field": "Statistics",
+    "institution": "UiT The Arctic University of Norway",
+    "location": "Tromsø, Norway",
+    "city": "Tromsø",
+    "country": "Norway",
+    "start": "2016-09",
+    "end": "2020-05",
+    "logo": {
+      "light": "uit-black.svg",
+      "dark": "uit-dark.svg",
+      "fallback": "uit-light.svg"
+    },
+    "link": "https://www.uit.no",
+    "thesis": "Efficient Bayesian analysis of long memory processes applied to climate",
+    "supervisors": [
+      "Sigrunn Holbek Sørbye",
+      "Martin Rypdal",
+      "Håvard Rue"]
+  },
+    {
+    "degree": "MSc",
+    "programme": "Physics and Mathematics",
+    "field": "Industrial Mathematics",
+    "institution": "The Norwegian University of Science and Technology",
+    "location": "Trondheim, Norway",
+    "city": "Trondheim",
+    "country": "Norway",
+    "start": "2012-08",
+    "end": "2016-09",
+    "logo": {
+      "light": "ntnu-light.svg",
+      "dark": "ntnu-dark.svg",
+      "fallback": "uit-light.svg"
+    },
+    "link": "https://www.ntnu.no",
+    "thesis": "Computationally efficient Bayesian approximation of fractional Gaussian noise using AR1 processes",
+    "supervisors": [
+      "Håvard Rue", 
+      "Sigrunn Holbek Sørbye"]
+  },
+
+{
+    "degree": "BSc",
+    "programme": "Mathematical Sciences",
+    "field": "Mathematics",
+    "institution": "The Norwegian University of Science and Technology",
+    "location": "Trondheim, Norway",
+    "city": "Trondheim",
+    "country": "Norway",
+    "start": "2010-08",
+    "end": "2014-08",
+    "logo": {
+      "light": "ntnu-light.svg",
+      "dark": "ntnu-dark.svg",
+      "fallback": "uit-light.svg"
+    },
+    "link": "https://www.ntnu.no"
+  }
+]

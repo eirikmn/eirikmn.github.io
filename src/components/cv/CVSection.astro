@@ -1,0 +1,41 @@
+---
+const { id, title } = Astro.props;
+---
+
+<section id={id} class="cv-section">
+
+  <h2>{title}</h2>
+
+  <div class="cv-section-content">
+    <slot />
+  </div>
+
+</section>
+
+<style>
+.cv-section {
+  scroll-margin-top: 120px;
+  position: relative;
+  padding-top: 0;
+}
+
+/* spacing BETWEEN sections */
+.cv-section + .cv-section {
+  margin-top: 1rem;
+  padding-top: 0.0rem;
+
+  /* divider sits exactly on the boundary */
+  border-top: 1px solid color-mix(in srgb, var(--text) 20%, transparent);
+}
+
+.cv-section h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.cv-section-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.0rem;
+}
+</style>

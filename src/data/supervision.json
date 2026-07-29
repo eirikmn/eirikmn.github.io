@@ -1,0 +1,56 @@
+[
+  {
+    "candidate": "Luc Hallali",
+    "degree": "PhD",
+    "institution": "UiT The Arctic University of Norway",
+    "start": "2021-09",
+    "end": null,
+    "project": "In progress",
+    "role": "Co-supervisor until February 2025; main supervisor since then"
+  },
+{
+    "candidate": "Dennis Adamek",
+    "degree": "PhD",
+    "institution": "UiT The Arctic University of Norway",
+    "start": "2025-04",
+    "end": null,
+    "project": "In progress",
+    "role": "Co-supervisor"
+  },
+{
+    "candidate": "Jan Zavadil",
+    "degree": "PhD",
+    "institution": "UiT The Arctic University of Norway",
+    "start": "2024-09",
+    "end": null,
+    "project": "In progress",
+    "role": "Co-supervisor"
+  },
+{
+    "candidate": "Sophie Laux",
+    "degree": "MSc",
+    "institution": "UiT The Arctic University of Norway",
+    "start": "2025-08",
+    "end": "2026-05",
+    "role": "Co-supervisor",
+    "project": "Exploring early warning signals in timeseries using empirical and model-based approaches"
+  },
+{
+    "candidate": "Jørgen Knudsen",
+    "degree": "MSc",
+    "institution": "UiT The Arctic University of Norway",
+    "start": "2024-08",
+    "end": "2025-05",
+    "role": "Main supervisor",
+    "project": "Bayesian framework for curve alignment and change point detection applied to marine sediment core data"
+  },
+{
+    "candidate": "Teodor Lynghaug Skotnes",
+    "degree": "MSc",
+    "institution": "UiT The Arctic University of Norway",
+    "start": "2023-09",
+    "end": "2024-01",
+    "role": "Main supervisor",
+    "project": "Deep Learning Based Automatic Segmentation of Gas Flares in Single Beam Echo Sounder Data"
+  }
+]

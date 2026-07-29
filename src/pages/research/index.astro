@@ -1,0 +1,146 @@
+---
+import Layout from "../../layouts/Layout.astro";
+---
+
+<Layout title="Research">
+
+  <article class="page">
+
+    <h1>Research</h1>
+
+    <p class="intro">
+      My research focuses on using statistical methodology to understand complex for complex real-life problems, with an emphasis on Bayesian inference. While most of my work is in climate, I am also interested in working on any interesting problems where my statistical expertise can be useful.
+    </p>
+
+    <h2>Research themes</h2>
+
+    <p>
+      Below are some of the main research directions I work in:
+    </p>
+
+    <ul class="themes">
+      <li>
+        <a href="/research/longmemory">
+          Long-range dependence
+        </a>
+        <p>
+          Efficient Bayesian analysis of long-memory processes, with applications to climate data.
+        </p>
+      </li>
+
+      <li>
+        <a href="/research/agemodeling">
+          Bayesian age-depth modeling
+        </a>
+        <p>
+          Dating uncertainty and synchronization of layer-counted paleoclimate proxy records.
+        </p>
+      </li>
+
+      <li>
+        <a href="/research/earlywarning">
+          Early warning signals
+        </a>
+        <p>
+          A Bayesian model-based approach for identifying early warning signals preceding tipping points.
+        </p>
+      </li>
+    </ul>
+
+  
+
+    <p>
+      I have also worked on other topics, including deep learning methods as well as data integration. This page will be updated as more papers get published. 
+    </p>
+
+    <p>
+      If you are interested in a collaboration, please feel free to <a href="/contact">contact me</a>.
+    </p>
+
+    <h2>Other pages</h2>
+
+    <ul>
+      <li>Selected publications → <a href="/publications">Publications</a></li>
+      <li>Full CV → <a href="/cv">CV</a></li>
+    </ul>
+
+  </article>
+
+</Layout>
+
+<style>
+.page {
+  max-width: 750px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+  line-height: 1.7;
+  font-size: 1.05rem;
+}
+
+h1 {
+  margin-bottom: 1rem;
+}
+
+.intro {
+  font-size: 1.1rem;
+  opacity: 0.85;
+  margin-bottom: 2rem;
+}
+
+h2 {
+  margin-top: 2.5rem;
+}
+
+.themes {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.themes li {
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.themes li:hover {
+  transform: translateY(-2px);
+  border-color: #1a73e8;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+.themes a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: inherit;
+  text-decoration: none;
+}
+
+.themes a::after {
+  content: "→";
+  transition: transform 0.2s ease;
+}
+
+.themes li:hover a::after {
+  transform: translateX(4px);
+}
+
+.themes p {
+  margin-top: 0.75rem;
+  color: inherit;
+  opacity: 0.75;
+}
+
+ul {
+  padding-left: 1.2rem;
+}
+
+
+
+</style>

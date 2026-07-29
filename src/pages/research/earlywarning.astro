@@ -1,0 +1,372 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import "katex/dist/katex.min.css";
+import katex from "katex";
+import topics from "../../data/research.json";
+
+
+/* -------------------------
+   SAFE text renderer (NO math)
+------------------------- */
+const renderText = (text = "") => {
+  return text.replace(/\$(.+?)\$/g, (_, expr) => {
+    return katex.renderToString(expr, {
+      throwOnError: false
+    });
+  });
+};
+
+/* -------------------------
+   Math renderer (ONLY math)
+------------------------- */
+const renderMath = (expr = "") =>
+  katex.renderToString(expr, {
+    throwOnError: false
+  });
+
+/* -------------------------
+   Select this topic
+------------------------- */
+const topic = topics.find((t) => t.id === "agemodeling");
+
+/* -------------------------
+   CONTENT
+------------------------- */
+const demoContent = [
+  {
+    type: "heading",
+    level: 2,
+    value: "Background"
+  },
+  {
+    type: "text",
+    value:
+      "After my postdoc position at PIK finished I returned to UiT for a 13 month position as a Researcher, funded by the TiPES project. During this time I started working on early warning signals, focusing on applications in climate. When a dynamical system approaches a bifurcation point, which can induce tipping points, the system will exhibit changes to statistical indicators, including increased variance and autocorrelation. Typically, these early warning signals are estimated using a sliding window approach, and my aim was to develop an alternative approach based on Bayesian hierarchical modeling. Through this work I have collaborated Luc Hallali (UiT), Martin Rypdal (UiT), Sigrunn Holbek Sørbye (UiT), Håvard Rue (KAUST), Christian Franzke (IBS), Clara Hummel (UiT), Alessandro Cotronei (UiT) and Niklas Boers (PIK/TUM)."
+  },
+  {
+    type: "heading",
+    level: 2,
+    value: "1. Introduction"
+  },
+  {
+    type: "text",
+    value:
+    "Many systems can undergo abrupt and sometimes irreversible transitions when critical thresholds, known as <em>tipping points</em>, are crossed. In climate, anthropogenic forcing has put several important components of the Earth system at risk of crossing tipping points, with potentially severe consequences for life on the planet (McKay et al. 2022). Examples include a potential collapse of the Atlantic Meridional Overturning Circulation (AMOC; Boers 2021), destabilization of the Greenland Ice sheets (Boers and Rypdal YEAR) and dieback of the Amazon rainforest (CITE). In order to prevent possibly irreversible changes it is of crucial to know when a system is approaching a tipping point, before it is too late to course-correct."
+  },
+  {
+    type: "text",
+    value:
+    "Tipping points are naturally studied within the framework of dynamical systems, often formulated in terms of stochastic differential equations that capture the interaction between deterministic dynamics, external forcing and random fluctuations. Let, for example, $x(t)$ denote the time-dependent state variable, representing for example temperature or ice sheet volume, $dB(t)$ denote a white noise process describing the noise in the system and $F(x)$ denote the forcing of the system. The dynamical system can be expressed by"
+  },
+  {
+    type: "math",
+    value:
+      "dx(t) = F(x(t)) dt + \\sigma dB(t)."
+  },
+  {
+    type: "text",
+    value:
+      "One could think of this equation as describing the motion of a particle in the presence of a potential $V(x)$, with drift $F(x)=-V'(x)$ and diffusion term $\\sigma dB(t)$ describing its movement. Points where $dx(t)/dt=0$ are called fixed-points. These are considered stable if a small perturbation (in any direction) near the fixed point will decay over time, and unstable otherwise. The following figure shows the potential $V(x)$ for an example of a system with two stable fixed points (valleys), $x_1$ and $x_3$, separated by an unstable fixed point (peak), $x_2$. If the particle is located in the valley of an equilibrium any perturbation will be met with an opposing force pushing the particle back towards the equilibium. If the perturbation is so large that the particle crosses the unstable fixed point separating the two domains of attraction, the particle will then be pushed towards the other stable fixed point instead. This phenomenon, where the tipping point is crossed solely from perturbations caused by the internal variation of the system, is called <em>noise-induced tipping</em>."
+  },
+  {
+    type: "text",
+    value:
+      "On the other hand, if the dynamics of the system depend on some slowly changing control parameter $\\mu(t)$, then fixed points may shift, vanish or spawn, depending on the value of $\\mu(t)$. This means that the stability of an equilibrium may diminish over time and eventually be lost, forcing the state variable to another equilibrium. Points where the stability or number of fixed points changes are called <em>bifurcation points</em>, and a critical transition caused by the control parameter approaching a bifurcation point is called a <em>bifurcation-induced tipping process</em>. "
+  },
+  {
+    type: "figure",
+    src: "/images/research/earlywarning/potentials.svg",
+    caption: "The potential over the state variables before (a), at (b) and after (c) the control parameter μ has reached the bifurcation point. The stable fixed points are shown in blue, while the unstable fixed points (tipping point) are shown in red. In panel (b) the unstable and first stable fixed points coincide as a single unstable saddle point."
+  },
+  {
+  type: "video",
+  src: "/images/research/earlywarning/alltipping.mp4",
+  caption: "Potential (a) and bifurcation diagram (c) of a noise-induced tipping process with constant control parameter μ=1, against the potential (b) and bifurcation diagram (d) of a bifurcation-induced tipping process where the control parameter μ increases linearly from -3 to 3."
+},
+  {
+    type: "text",
+    value:
+      "The nature of an equilibrium can be studied by investigating the linearization of the dynamical system around some stable fixed point $x_s$"
+  },
+  {
+    type: "math",
+    value:
+      "dx(t) = -\\lambda (x(t)-x_s) dt + \\sigma dB(t),"
+  },
+  {
+    type: "text",
+    value:
+      "where $\\lambda = -F'(x_s)$ is the restoring rate. This is known as the Langevin stochastic differential equation and has the solution"
+  },
+  {
+    type: "math",
+    value:
+      "x(t) = x_0 +\\int_{0}^t e^{-\\lambda t}dB(t) ,"
+  },
+  {
+    type: "text",
+    value:
+      "which forms an Ornstein-Uhlenbeck (OU) process, and discretization yields an AR(1) process "
+  },
+  {
+    type: "math",
+    value:
+      "x_t = \\phi x_{t-1} + \\varepsilon_t, \\qquad \\varepsilon_t \\sim \\mathcal{N}\\left( 0, \\frac{1-\\phi^2}{2\\lambda}\\sigma^2 \\right)."
+  },
+
+
+  {
+    type: "text",
+    value:
+    "When a system approaches a bifurcation that induces destabilization, its restoring rate will decrease, causing it to recover more slowly from perturbations. This phenomenon is called <em>critical slowing down</em> and causes perturbations to persist for longer, leading to increased variance and autocorrelation that can serve as <em>early warning signals</em> of an impending critical transition (CITECITECITE)."
+  },
+
+  {
+    type: "text",
+    value:
+      "The most common approach to estimating early warning signals is to estimate each indicator in a sliding window (CITECITECITE), and then to use statistics like Kendall's tau to perform a hypothesis test on whether or not a statistically significant increase in the early warning signal indicators has been detected. "
+  },
+  {
+    type: "figure",
+    src: "/images/research/earlywarning/slidingews.svg",
+    caption: "Sliding window estimates of the variance and autocorrelation of the observed data up to the tipping point (vertical line). Increased variance and autocorrelations suggests that the system may be approaching a bifurcation point."
+  },
+  {
+    type: "text",
+    value:
+      "While simple, sliding windows presents some limitations as methods for detecting early warning signals. First, it requires a choice on the window length. Large windows offer higher estimation accuracy, but will be less representative of the momentary state of the indicator as it essentially applies a high pass filter, while smaller windows better capture the changes of the indicators, but will provide less accurate estimates. A good trade-off can be difficult to achieve. Moreover, if the dataset contains trends sliding windows require a more careful approach to detrending."
+  },
+  {
+    type: "heading",
+    level: 2,
+    value: "2. Model-based early warning signal detection"
+  },
+  {
+    type: "text",
+    value:
+      "In Myrvoll-Nilsen et al. (2025) we circumvent sliding windows by introducing a model-based approach to early warning signals. In short, we introduce a time-dependent AR(1) process where the lag-one autocorrelation parameter is a linear function of time"
+  },
+  {
+    type: "math",
+    value:
+      "\\phi(t) = a+bt , \\qquad t\\in (0,1) ."
+  },
+  {
+    type: "text",
+    value:
+      "We assign appropriate priors on $a$ and $b$ and incorporate this into a hierarchical Bayesian model and perform Bayesian inference using the R-INLA framework. This ensures efficient inference and gives us uncertainty quantification expressed through the posterior distributions. We say that early warning signals is detected if the posterior marginal probability of a positive slope exceeds some threshold, $1-\\alpha$, i.e."
+  },
+  {
+    type: "math",
+    value:
+      "P(b>0\\mid \\bm y) \\geq 1-\\alpha ."
+  },
+  {
+    type: "figure",
+    src: "/images/research/earlywarning/inlaews.svg",
+    caption: "The inferred evolution of the time-dependent lag-one autocorrelation parameter (a), the fitted 2nd order polynomial trend (b) and the posterior marginal distribution of the memory slope parameter (c) with area above 0 shaded."
+  },
+  {
+    type: "text",
+    value:
+    "However, Boers (2021) showed that these indicators can be biased if the system is driven by external noise that itself has increasing autocorrelation or variance,leading to false positive alarms. To account for such bias, Boettner and Boers (2022) and Morr and Boers (2024) suggest that the OU process should be driven by correlated noise rather than white noise. Based on this idea, we assume in Hallali et al. (2025) that the internal noise term is itself a time-dependent AR(1) process."
+  },
+  {
+    type: "math",
+    value:
+      "x_{t+1} = \\phi(t) x_t + \\varepsilon_{t+1}"
+  },
+  {
+    type: "math",
+    value:
+      "\\varepsilon_{t+1} = \\rho(t) \\varepsilon_t + \\xi_{t+1}"
+  },
+  {
+    type: "text",
+    value:
+      "where $x$ is the state variable, with time-dependent autocorrelation parameter $\\phi(t)$, and $\\varepsilon$ is the internal noise, with time-dependent autocorrelation parameter $\\rho(t)$."
+  },
+  {
+    type: "text",
+    value:
+      "In Sørbye et al. (2025) we have also looked at extending model-based approaches to long-range dependent processes, utilizing the computationally efficient AR(1) mixture approximation of Sørbye et al. (2019)."
+  },
+  {
+    type: "heading",
+    level: 2,
+    value: "3. Applications"
+  },
+  {
+    type: "text",
+    value:
+      "."
+  },
+{
+    type: "heading",
+    level: 2,
+    value: "4. Relevant publications"
+  },
+  {
+    type: "text",
+    value:
+    `
+    <ul>
+  <li>Myrvoll-Nilsen, E., Hallali, L. & Rypdal, M. (2025). Bayesian analysis of early warning signals using a time-dependent model, <em>Earth System Dynamics</em>, 16, 1539–1556, https://doi.org/10.5194/esd-16-1539-2025, 2025</li>
+  <li>Hallali, L., Myrvoll-Nilsen, E. & Franzke, C.L.E. (2020). Assessing AMOC stability using a Bayesian nested time-dependent autoregressive model, <em>Nonlinear Processes in Geophysics</em>, 32, 383–395, https://doi.org/10.5194/npg-32-383-2025, 2025.</li>
+  <li>Sørbye, S. H., Myrvoll-Nilsen, E., & Rue, H. (2025). Bayesian identification of early warning signals for long-range dependent climatic time series. <em>arXiv preprint</em> arXiv:2602.09731.</li>
+</ul>
+`
+  },
+  
+  {
+    type: "text",
+    value:
+      ""
+  },
+  {
+    type: "heading",
+    level: 2,
+    value: "References"
+  },
+];
+---
+
+<Layout title={topic?.title ?? "Early warning signals"}>
+  <div class="research-page">
+    <h1>{topic?.title ?? "Bayesian estimation of early warning signals"}</h1>
+
+    {topic?.summary && (
+      <p class="intro">{topic.summary}</p>
+    )}
+
+    <div class="research-grid">
+      <section class="research-card">
+        <div class="content">
+
+          {demoContent.map((block) => {
+            if (block.type === "text") {
+              return (
+                <p class="text" set:html={renderText(block.value)} />
+              );
+            }
+
+            if (block.type === "heading") {
+              const Tag = `h${block.level || 3}`;
+              return (
+                <Tag class="subheading">
+                  {block.value}
+                </Tag>
+              );
+            }
+
+            if (block.type === "math") {
+              return (
+                <div
+                  class="equation"
+                  set:html={renderMath(block.value)}
+                />
+              );
+            }
+
+            if (block.type === "figure") {
+              return (
+                <figure class="figure">
+                  <img src={block.src} alt={block.caption ?? ""} />
+                  {block.caption && (
+                    <figcaption>{block.caption}</figcaption>
+                  )}
+                </figure>
+              );
+            }
+
+            if (block.type === "video") {
+                return (
+                    <figure class="figure">
+                    <video autoplay loop muted playsinline controls class="media">
+                        <source src={block.src} type="video/mp4" />
+                    </video>
+                    {block.caption && <figcaption>{block.caption}</figcaption>}
+                    </figure>
+                );
+            }
+
+            return null;
+          })}
+
+        </div>
+      </section>
+    </div>
+  </div>
+</Layout>
+
+<style>
+.research-page {
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+  line-height: 1.7;
+  font-size: 1.05rem;
+}
+
+h1 {
+  margin-bottom: 1rem;
+}
+
+.intro {
+  margin-bottom: 2rem;
+  opacity: 0.85;
+}
+
+.research-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.research-card {
+  border-left: 2px solid var(--accent);
+  padding-left: 1rem;
+}
+
+.text {
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.subheading {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.equation {
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.figure img {
+  max-width: 600px;
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 1rem auto;
+  border-radius: 8px;
+  border: 1px solid var(--border-ui);
+}
+
+.figure figcaption {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  margin-top: 0.25rem;
+}
+
+.figure .media {
+  max-width: 600px;
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 1rem auto;
+  border-radius: 8px;
+  border: 1px solid var(--border-ui);
+}
+
+</style>

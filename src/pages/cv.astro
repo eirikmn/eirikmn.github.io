@@ -1,0 +1,178 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+import profile from "../data/cvheader.json";
+
+import work from "../data/work.json";
+import education from "../data/education.json";
+import teaching from "../data/teaching.json";
+import development from "../data/development.json";
+import supervision from "../data/supervision.json";
+import academicService from "../data/academicService.json";
+import skills from "../data/skills.json";
+
+import CVSidebar from "../components/cv/CVSidebar.astro";
+import CVSection from "../components/cv/CVSection.astro";
+
+import CVWorkItem from "../components/cv/CVWorkItem.astro";
+import CVEducationItem from "../components/cv/CVEducationItem.astro";
+import CVTeachingItem from "../components/cv/CVTeachingItem.astro";
+import CVDevelopmentItem from "../components/cv/CVDevelopmentItem.astro";
+import CVSupervisionItem from "../components/cv/CVSupervisionItem.astro";
+import CVAcademicServiceItem from "../components/cv/CVAcademicServiceItem.astro";
+import CVSkills from "../components/cv/CVSkills.astro";
+
+import CVHeaderItem from "../components/cv/CVHeaderItem.astro";
+
+const phdSupervision = supervision?.filter((s) => s.degree === "PhD") ?? [];
+const mscSupervision = supervision?.filter((s) => s.degree === "MSc") ?? [];
+---
+
+<Layout title="CV">
+
+  <div class="cv-grid">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="cv-sidebar">
+      <CVSidebar />
+    </aside>
+
+    <!-- RIGHT CONTENT -->
+    <main class="cv-content">
+
+      <!-- SUMMARY -->
+      <CVSection id="summary" title="Eirik Myrvoll-Nilsen">
+        <CVHeaderItem />
+      </CVSection>
+
+      <!-- WORK -->
+      <CVSection id="work" title="Research & Work Experience">
+        {work.map((item) => (
+          <CVWorkItem {...item} />
+        ))}
+      </CVSection>
+
+      <!-- EDUCATION -->
+      <CVSection id="education" title="Education">
+        {education.map((item) => (
+          <CVEducationItem {...item} />
+        ))}
+      </CVSection>
+
+      <!-- TEACHING -->
+      <CVSection id="teaching" title="Teaching Experience">
+        {teaching.map((item) => (
+          <CVTeachingItem {...item} />
+        ))}
+      </CVSection>
+
+      
+
+      <!-- SUPERVISION -->
+      <CVSection id="supervision" title="Supervision">
+
+        {phdSupervision.length > 0 && (
+          <>
+            <h3 class="cv-subsection">PhD Candidates</h3>
+            {phdSupervision.map((item) => (
+              <CVSupervisionItem {...item} />
+            ))}
+          </>
+        )}
+
+        {mscSupervision.length > 0 && (
+          <>
+            <h3 class="cv-subsection">Master's Students</h3>
+            {mscSupervision.map((item) => (
+              <CVSupervisionItem {...item} />
+            ))}
+          </>
+        )}
+
+      </CVSection>
+
+      <!-- SERVICE -->
+      <CVSection id="service" title="Academic Service & Outreach">
+
+        {(academicService?.leadership ?? []).length > 0 && (
+          <>
+            <h3 class="cv-subsection">Leadership & Institutional Service</h3>
+            {academicService.leadership.map((item) => (
+              <CVAcademicServiceItem {...item} />
+            ))}
+          </>
+        )}
+
+        {(academicService?.review ?? []).length > 0 && (
+          <>
+            <h3 class="cv-subsection">Peer Review</h3>
+            {academicService.review.map((item) => (
+              <CVAcademicServiceItem {...item} />
+            ))}
+          </>
+        )}
+
+        {(academicService?.outreach ?? []).length > 0 && (
+          <>
+            <h3 class="cv-subsection">Outreach & Engagement</h3>
+            {academicService.outreach.map((item) => (
+              <CVAcademicServiceItem {...item} />
+            ))}
+          </>
+        )}
+
+      </CVSection>
+
+      <!-- DEVELOPMENT (NEW SECTION) -->
+      <CVSection id="development" title="Professional Development & Certifications">
+        {development.map((item) => (
+          <CVDevelopmentItem {...item} />
+        ))}
+      </CVSection>
+      <!-- SKILLS -->
+      <CVSection id="skills" title="Skills" class="cv-skills-section">
+        <CVSkills skills={skills} />
+      </CVSection>
+
+    </main>
+
+  </div>
+
+</Layout>
+
+<style>
+.cv-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 0.5rem;
+  align-items: start;
+}
+
+.cv-sidebar {
+  position: sticky;
+  top: 100px;
+  height: fit-content;
+}
+
+.cv-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+}
+
+.cv-subsection {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0.6rem 0 0.2rem;
+  color: var(--text);
+}
+
+/* keep spacing stable for divider centering */
+:global(.cv-content .cv-item) {
+  margin-bottom: 0.1rem;
+}
+
+:global(.cv-content .cv-item:last-child) {
+  margin-bottom: 0;
+}
+</style>

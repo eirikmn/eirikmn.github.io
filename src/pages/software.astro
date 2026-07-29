@@ -1,0 +1,55 @@
+---
+import Layout from "../layouts/Layout.astro";
+import software from "../data/software.json";
+import SoftwareItem from "../components/software/SoftwareItem.astro";
+---
+
+<Layout title="Software">
+
+  <div class="software-page">
+
+    <header class="software-header">
+      <h1>Software & Projects</h1>
+      <p class="software-intro">
+        Research software and methodological packages developed as part of my work in Bayesian statistics and climate science.
+      </p>
+    </header>
+
+    <div class="software-list">
+
+      {software.map((pkg) => (
+        <SoftwareItem {...pkg} />
+      ))}
+
+    </div>
+
+  </div>
+
+</Layout>
+
+<style>
+.software-page {
+  max-width: 850px;
+  margin: 0 auto;
+}
+
+.software-header {
+  margin-bottom: 2rem;
+}
+
+.software-header h1 {
+  margin-bottom: 0.5rem;
+}
+
+.software-intro {
+  color: var(--text-muted);
+  max-width: 70ch;
+  line-height: 1.5;
+}
+
+.software-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+</style>

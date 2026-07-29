@@ -1,0 +1,162 @@
+[
+  {
+    "title": "Long-range dependence, with climate applications",
+    "summary": "By approximating a long-range dependent process using a mixture of four AR(1) process we are able to achieve efficient and accurate Bayesian inference. This methodology was used to model global mean surface temperature.",
+    "content": [
+     {
+       "type": "heading",
+       "level": 3,
+       "value": "Motivation"
+     },
+      {
+        "type": "text",
+        "value": "Long range dependence, climate motivations, computational challenges (toeplitz square, cubic), show AR(1) graph into LRD graph. Motivate AR(1) mixture representation, show graph. We find using numerical optimization, accurate using m=4, climate forcing, computationally efficiency"
+      },
+      {
+        "type": "text",
+        "value": "The main focus of my PhD was on exploring long-range dependence and its application in climate science. Stochastic processes are considered long-range dependent if they exhibit a slower than exponential decay in correlation, which means that points that are very far apart may still exhibit significant correlation. Specifically, we focused on fractional Gaussian noise (fGn) (Mandelbrot and van Ness, 1968), a Gaussian process which exhibits long-range dependence expressed parsimoniously by a single parameter, the Hurst exponent. The presence of long-range dependence guarantees a dense precision matrix (inverse covariance matrix), leading to high computational costs in terms of both time and memory for key matrix operations. This computational burden can make it challenging to perform statistical analysis on longer time series data.."
+      },
+      {
+        "type": "text",
+        "value": "In Sørbye et al. (2019) we introduce an approximate fGn model. The idea is to represent the fGn using a mixture of $m$ AR(1) processes:"
+      },
+      {
+        "type": "math",
+        "value": "\\tilde{\\boldsymbol{x}} = \\sum_{i=1}^{m} \\sqrt{w_i}\\boldsymbol{x}_i"
+      },
+      {
+        "type": "text",
+        "value": "The idea of obtaining long memory from the sum of short memory processes stretches back toGranger (1980???), who found that the sum of AR(1) processes where the lag-one autocorrelation parameter is drawn randomly from the gamma (???) distribution can be expressed by a fractionally integrated process yielding long memory sa the number of samples goes towards infinity. However, SOMEPAPER showed that the number of samples required might be too high for practical use. More recently, Fredriksen and Rypdal (2017???) finds that representing the surface temperature using an $m$-box model yields a scale invariant (CHECK). Instead of choosing the AR(1) processes randomly, we find the weights $\\boldsymbol{w}$ and autocorrelation parameters $\\boldsymbol{\\phi}$ numerically. For each hurst exponent $H\\in(0.5,1)$ we find the weights and parameters which minimizes the difference between the autocorrelation function of the mixture and the target fGn process, up to a cut-off point $k_\\text{max}=1000$:"
+      },
+      {
+        "type": "math",
+        "value": "(\\boldsymbol{w},\\boldsymbol{\\phi})_H = \\underset{\\boldsymbol{w},\\boldsymbol{\\phi}}{\\arg\\min} \\; \\sum_{k=1}^{k_\\text{max}} \\frac{1}{k} \\left(\\gamma_{\\tilde{\\boldsymbol{x}}}(k)-\\gamma_{H}(k) \\right)^2"
+      },
+      {
+        "type": "text",
+        "value": "Since the fGn process has a characteristic steep decline in the early lags, we add a $1/k$ term to emphasize these weights more. This creates a mapping $f:H\\longrightarrow (\\boldsymbol{w},\\boldsymbol{\\phi})$ between Hurst exponents and the corresponding weights and autocorrelation parameters which constitutes the best AR(1) mixture. We find that using only $m=4$ AR(1) processes we are able to achieve excellent accuracy, even for time series exceeding $k_\\text{max}$. This approximate fGn model has since been implemented directly into the R-INLA package as a standard model component."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "value": "Global mean surface temperature estimation"
+      },
+      {
+        "type": "text",
+        "value": "Sin."
+      },
+      {
+        "type": "figure",
+        "src": "/images/placeholder.jpg",
+        "caption": "Example of time warping function γ(t)",
+        "style": {
+          "width": "500px",
+          "maxWidth": "100%"
+        }
+     }
+    ]
+  },
+
+
+
+
+
+
+{
+    "title": "Age-depth modeling",
+    "summary": "Bayesian age-depth modeling and synchronization",
+    "content": [
+      {
+        "type": "heading",
+        "level": 3,
+        "value": "Motivation"
+      },
+      {
+        "type": "text",
+        "value": "To understand our past climate paleoclimatologists study climate proxies such as tree rings as stand-ins for direct meteorological measurements. Many deposits such as marine sediment and ice cores are obtained by drilling a core. At each depth increment different proxies are measured giving a record that may be used to estimate climate variables of the past. However, these proxy records are measured against core depth, not time, which is to be treated as an unknown latent variable. For this information to be useful we need to have a chronology, and age estimate for each depth. The aim of age-depth models is to use available information to estimate the latent chronology."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "value": "Uncertainty quantification"
+      },
+        {
+        "type": "text",
+        "value": "Age-depth models are typically based on two categories of information, tie-points and layer-counts. Tie-points, which has seen the most developed age models, are characterized by having some points in depth where age-information is available. This could, for example, be obtained by radiometrically dating radioactive material found in the core. The earliest age-depth models used linear, or polynomial, interpolations between the tie-points. This is problematic as the resulting dating uncertainties do not reflect the lack of information we have in-between tie-points (FIG REF). The scientific community later started adopting Bayesian age-depth models, like Bacon (CITE), BChron (CITE) and OxCal (CITE), which provide much more physically realistic dating and robust representations of uncertainties. Proper treatment of uncertainty is important since dating uncertainties propagates to further analyses, possibly affecting the strength of results and conclusions based on the model. McKay et al. (YEAR) suggests to produce an ensemble of plausible chronologies drawn from the age-depth model, and propagate the uncertainties by performing analysis on all sampled chronologies in the ensemble. It is important that each chronology is drawn from the joint distribution so that the inferred correlation structure is retained in the sample."
+      },
+      {
+        "type": "text",
+        "value": "In layer-counted archives such as tree-rings and ice cores the cores are deposited stratigraphically, as seasonal variantions leave visible layers that can be counted. Each layer correspond to one year and by counting all layers a full chronology can be obtained. Since a counting error will impact the age estimate of all layers that come after, the uncertainty will accumulate. While tie-points typically have only a few dated points with absolute dating estimates, layer-counted records will have a fully defined chronology, but with relative age estimates. There are fewer age models for layer-counted chronologies than for tie-point dated chronologies. The Banded Age Model (Comboul et al., YEAR) offers a computationally efficient method, but require assumption about the underlying parameters. Boers 2018 (CHECK) presents a Bayesian approach, but producing chronologies from the joint posterior is computationally infeasible for large proxy records like the NGRIP ice core. In Myrvoll-Nilsen et al. (2022) we propose using a Bayesian regression model to describe the layer-increments using the general latent Gaussian model framework. Exploiting a Gaussian Markov random field structure we are able to produce sampled chronologies from the joint posterior predictive distribution efficiently."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "value": "Synchronization of layer-counted records"
+      },
+      {
+        "type": "text",
+        "value": "Fitting the age-depth model using only layer-counts leaves one vulnerable to potential unknown structural biases in the layer counting process, causing the fitted age model to deviate from the true age. Incorporating external information would allow us to identify, and correct for, such biases. Tie-points can also be obtained for layer-counted processes, see for example Adolphi et al. (2018) and Muscheler et al. (2020) whom derived tie-points for the Greenland Ice core Chronology (GICC05, CITE), if these could be used to update an age-depth model fitted to the layer-counts it would possibly result in more accurate age estimates. How to incorporate this in a statistically meaningful way is not straight-forward. We first considered the case when the age model is Gaussian. Letting y represent the joint age variables, which we partition into tie-points yb and the remaining free variables ya, we find the synchronized chronology by"
+      },
+      {
+        "type": "math",
+        "value": "y_a \\mid y_b \\sim \\mathcal{N}(\\mu_{a|b}, Q_{a|b})."
+      },
+      {
+        "type": "text",
+        "value": "This method of synchronizing chronologies to tie-points is limited as it assumes that tie-points can be considered realisations of the fitted age model. If there are indeed structural biases at play causing a discrepancy between the layer-counted age model and the true age (as represented by the tie-points), then these need to be modeled as well. In Myrvoll-Nilsen et al. (2025) we add an age-discrepancy model component"
+      },
+      {
+        "type": "math",
+        "value": "\\xi(z\\mid \\theta)." 
+      },
+      {
+        "type": "text",
+        "value": "Letting $y_1$ represent the cumulative layer-counts, and $y_2$ represent the tie-points we model the two data sets using predictor"
+      },
+      {
+        "type": "math",
+        "value": "\\begin{pmatrix} \\boldsymbol{y}_1\\\\ \\boldsymbol{y}_2 \\end{pmatrix} = \\begin{pmatrix} \\boldsymbol{I} & \\boldsymbol{0}\\\\ \\boldsymbol{R} & \\boldsymbol{I} \\end{pmatrix} \\begin{pmatrix} \\Delta\\boldsymbol{y}_1\\\\ \\boldsymbol{\\xi} \\end{pmatrix}" 
+      },
+      {
+        "type": "text",
+        "value": "For larger datasets, fitting the layer-increment and the age-discrepancy models simultaneously can be computationally expensive. Since the number of tie-points is typically much smaller than the number of counted layer-increments, we can assume that the former does not affect the model of the latter. We therefore propose modeling this in two stages. First fit the layer-increment model on the counted data, then sample an ensemble of unsynchronized chronologies from the posterior predictive distribution. For each sampled chronology fit the layer-increment model to the difference between the unsynchonized sample and the tie-point. Since this is to be repeated for all samples efficiency is crucial. We use R-INLA for a substantial (and needed) reduction in computational cost. R-INLA has the added benefit in that if the points in-between tie-points are represented by missing 'NA' values, then these values will be imputed using the posterior predictive distribution. We can then very easily obtain meaningfully interpolated chronologies by adding samples from the fitted age-discrepancy model to the corresponding unsynchronized chronology sample."
+      },
+      {
+        "type": "heading",
+        "level": 3,
+        "value": "R-package"
+      },
+      {
+        "type": "text",
+        "value": "The Bayesian regression modeling modeling approach to quantifying the dating uncertainties of layer-counted records, as well as the method for synchronizing these chronologies to tie-points, is implemented in the 'Bremla' R-package. For more information about this package, see the Software page."
+      }
+    ]
+  },
+
+
+
+
+{
+    "title": "Early warning signals",
+    "summary": "Estimation of early warning signals using a Bayesian hierarchical modeling approach.",
+    "content": [
+      {
+        "type": "text",
+        "value": "Introduce potential (figure), noise induced tipping, bifurcation induced tipping (gif?), mention rate-induced tipping, langevin approximation -> OU process -> AR(1), introduce early warning signals (figure), sliding window approach, limitations, motivate. model based approach, introduce parametrization, GMRF, Show accuracy test, limitation, introduce Boers 2021 and Morr and Boers paper problems and model extension, show our time dependent version, show results, introduce INLA.ews package."
+      }
+    ]
+  },
+
+{
+    "title": "Other research",
+    "summary": "Machine learning, data integration",
+    "content": [
+      {
+        "type": "text",
+        "value": "Automatic gas flares segmentation, Curve alignment and change-point detection of marine sediment cores, mention data integration, mention automatic foraminifera counting"
+      }
+    ]
+  }
+
+
+]

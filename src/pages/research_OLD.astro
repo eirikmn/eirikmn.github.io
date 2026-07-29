@@ -1,0 +1,186 @@
+---
+import Layout from "../layouts/Layout.astro";
+import "katex/dist/katex.min.css";
+import katex from "katex";
+import topics from "../data/research.json";
+
+/* -------------------------
+   SAFE text renderer (NO math)
+------------------------- */
+const renderText = (text = "") => {
+  // First escape HTML (safety)
+  const escaped = text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  // Then render inline math: $...$
+  return escaped.replace(/\$(.+?)\$/g, (_, expr) =>
+    katex.renderToString(expr, {
+      throwOnError: false
+    })
+  );
+};
+
+/* -------------------------
+   Math renderer (ONLY math)
+------------------------- */
+const renderMath = (expr = "") =>
+  katex.renderToString(expr, {
+    throwOnError: false
+  });
+---
+
+<Layout title="Research">
+
+  <div class="research-page">
+
+    <h1>Research</h1>
+
+    <p class="intro">
+      My research focuses on statistical methodology for Bayesian inference,
+      time series alignment, and uncertainty quantification in environmental systems.
+    </p>
+
+    <div class="research-grid">
+
+      {topics.map((t) => (
+        <section class="research-card">
+
+          <h2>{t.title}</h2>
+
+          {t.summary && (
+            <p class="summary">{t.summary}</p>
+          )}
+
+          {/* =========================
+              CONTENT BLOCKS (ORDERED)
+          ========================= */}
+          {t.content?.length > 0 && (
+            <div class="content">
+              {t.content.map((block) => {
+
+                if (block.type === "text") {
+                  return (
+                    <p class="text" set:html={renderText(block.value)} />
+                  );
+                }
+                if (block.type === "heading") {
+                  const Tag = `h${block.level || 3}`;
+
+                  return (
+                    <Tag class="subheading">
+                      {block.value}
+                    </Tag>
+                  );
+                }
+
+                if (block.type === "math") {
+                  return (
+                    <div
+                      class="equation"
+                      set:html={renderMath(block.value)}
+                    />
+                  );
+                }
+
+                if (block.type === "figure") {
+                  const style = block.style
+                    ? Object.entries(block.style)
+                      .map(([k, v]) => `${k}: ${v}`)
+                      .join(";")
+                    : "";
+                  return (
+                    <figure class="figure">
+                      <img src={block.src} alt={block.caption ?? ""} style={style} />
+                      {block.caption && <figcaption>{block.caption}</figcaption>}
+                    </figure>
+                  );
+                }
+
+                return null;
+              })}
+            </div>
+          )}
+
+        </section>
+      ))}
+
+    </div>
+
+  </div>
+
+</Layout>
+
+<style>
+.research-page {
+  max-width: 850px;
+  margin: 0 auto;
+}
+
+.intro {
+  margin-bottom: 2rem;
+  opacity: 0.85;
+  line-height: 1.6;
+}
+
+.research-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.research-card {
+  border-left: 2px solid var(--accent);
+  padding-left: 1rem;
+}
+
+h2 {
+  margin: 0;
+}
+
+.summary {
+  font-weight: 500;
+  margin: 0.5rem 0;
+}
+
+.subheading {
+  margin-top: 1.2rem;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+h3.subheading {
+  font-size: 1.05rem;
+}
+
+h4.subheading {
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+
+.text {
+  line-height: 1.6;
+  margin: 0.5rem 0;
+}
+
+.equation {
+  margin: 0.75rem 0;
+}
+
+.figure {
+  margin: 1rem 0;
+}
+
+.figure img {
+  max-width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--border-ui);
+}
+
+.figure figcaption {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  margin-top: 0.25rem;
+}
+</style>

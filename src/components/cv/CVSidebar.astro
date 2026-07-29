@@ -1,0 +1,43 @@
+<nav class="cv-nav">
+
+  <a href="#summary">Summary</a>
+  <a href="#work">Experience</a>
+  <a href="#education">Education</a>
+  <a href="#teaching">Teaching</a>
+  <a href="#supervision">Supervision</a>
+  <a href="#service">Service</a>
+  <a href="#development">Development</a>
+  <a href="#skills">Skills</a>
+
+</nav>
+
+<style>
+.cv-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: sticky;
+  top: 100px;
+}
+
+/* links */
+.cv-nav a {
+  text-decoration: none;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+/* hover state */
+.cv-nav a:hover {
+  color: var(--accent);
+  transform: translateX(2px);
+}
+
+/* optional: active section styling (future-proofing) */
+.cv-nav a.active {
+  color: var(--text);
+  font-weight: 600;
+}
+</style>

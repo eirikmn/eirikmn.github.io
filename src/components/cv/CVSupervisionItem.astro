@@ -1,0 +1,121 @@
+---
+const {
+  candidate,
+  institution,
+  location,
+  start,
+  end,
+  project,
+  role,
+  roleTimeline
+} = Astro.props;
+
+const formatRole = (roles) => {
+  if (!roles || roles.length === 0) return null;
+
+  return roles
+    .map((r) => {
+      const endText = r.end ?? "present";
+      return `${r.role} (${r.start}–${endText})`;
+    })
+    .join(" → ");
+};
+---
+
+<div class="cv-item">
+
+  <div class="cv-content">
+
+    <!-- HEADER -->
+    <div class="cv-item-header">
+      <strong>{candidate}</strong>
+
+      <span class="cv-dates">
+        {start} – {end ?? "Present"}
+      </span>
+    </div>
+
+    <!-- ROLE (primary signal) -->
+    {role && (
+      <div class="cv-role">
+        {role}
+      </div>
+    )}
+
+    <!-- INSTITUTION -->
+    <div class="cv-sub">
+      {institution}{location ? ` · ${location}` : ""}
+    </div>
+
+    <!-- PROJECT -->
+    {project && (
+      <div class="cv-project">
+        {project}
+      </div>
+    )}
+
+    <!-- ROLE TIMELINE -->
+    {roleTimeline && roleTimeline.length > 0 && (
+      <div class="cv-role-timeline">
+        {formatRole(roleTimeline)}
+      </div>
+    )}
+
+  </div>
+
+</div>
+
+<style>
+.cv-item {
+  border-left: 2px solid var(--accent);
+  padding-left: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.cv-content {
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER */
+.cv-item-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+}
+
+.cv-dates {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+/* ROLE (important: supervisory authority) */
+.cv-role {
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-top: 0.2rem;
+  margin-bottom: 0.35rem;
+}
+
+/* INSTITUTION */
+.cv-sub {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 0.35rem;
+}
+
+/* PROJECT */
+.cv-project {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+/* ROLE TIMELINE */
+.cv-role-timeline {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+</style>

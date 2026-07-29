@@ -1,0 +1,90 @@
+---
+const {
+  title,
+  organization,
+  start,
+  end,
+  details,
+  period
+} = Astro.props;
+
+const formattedTime =
+  period ?? (start || end
+    ? `${start ?? "—"} – ${end ?? "Present"}`
+    : null);
+---
+
+<div class="cv-item">
+
+  <div class="cv-content">
+
+    <!-- HEADER -->
+    <div class="cv-item-header">
+
+      <strong>
+        {title}
+      </strong>
+
+      {formattedTime && (
+        <span class="cv-dates">
+          {formattedTime}
+        </span>
+      )}
+
+    </div>
+
+    <!-- ORGANIZATION -->
+    <div class="cv-sub">
+      {organization}
+    </div>
+
+    <!-- OPTIONAL DETAILS -->
+    {details && (
+      <div class="cv-details">
+        {details}
+      </div>
+    )}
+
+  </div>
+
+</div>
+
+<style>
+.cv-item {
+  border-left: 2px solid var(--accent);
+  padding-left: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.cv-content {
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER */
+.cv-item-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+}
+
+.cv-dates {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* ORGANIZATION */
+.cv-sub {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+}
+
+/* OPTIONAL DETAILS */
+.cv-details {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+</style>

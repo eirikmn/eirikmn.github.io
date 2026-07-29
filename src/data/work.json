@@ -1,0 +1,151 @@
+[
+  {
+    "title": "Postdoctoral Researcher",
+    "company": "UiT The Arctic University of Norway",
+    "location": "Tromsø, Norway",
+    "project": "Transforming Ocean surveying by the power of DL and statistical methods",
+    "projectnumber": "332901",
+    "projectwebsite": "https://en.uit.no/project/tranocs",
+    "projectshort": "tranocs",
+    "funder": "Norwegian Research Council",
+    "funderprogram": "IKTPLUSS-IKT og digital innovasjon",
+    "logo": {
+      "light": "uit-black.svg",
+      "dark": "uit-dark.svg",
+      "fallback": "uit-light.svg"
+    },
+    "link": "https://www.uit.no",
+    "type": "academic",
+    "city": "Tromsø",
+    "country": "Norway",
+    "start": "2023-02",
+    "end": null,
+    "bullets": [
+      "Research on deep learning and data integration",
+      "Bayesian estimation of early warning signals",
+      "Collaboration on interdisciplinary projects"
+    ]
+  },
+
+  {
+    "title": "Visiting Scholar",
+    "company": "The University of North Carolina at Chapel Hill",
+    "location": "Chapel Hill, NC, USA",
+    "project": "Transforming Ocean surveying by the power of DL and statistical methods",
+    "projectnumber": "350036",
+    "projectwebsite": "https://en.uit.no/project/tranocs",
+    "projectshort": "TiPES",
+    "funder": "The Research Council of Norway",
+    "funderprogram": "Funding for Research Stays Abroad for Doctoral and Postdoctoral Fellows",
+"logo": {
+      "light": "unc-dark.svg",
+      "dark": "unc-dark.svg",
+      "fallback": "unc-dark.svg"
+    },
+    "link": "https://www.uit.no",
+    "type": "academic",
+    "city": "Tromsø",
+    "country": "Norway",
+    "start": "2022-01",
+    "end": "2023-01",
+    "bullets": [
+      "Data integration"
+    ]
+  },
+{
+    "title": "Researcher",
+    "company": "UiT The Arctic University of Norway",
+    "location": "Tromsø, Norway",
+    "project": "Tipping Points in the Earth System",
+    "projectnumber": "",
+    "projectwebsite": "https://www.tipes.dk",
+    "projectshort": "TiPES",
+    "funder": "EU",
+    "funderprogram": "Horizon 2020",
+"logo": {
+      "light": "uit-black.svg",
+      "dark": "uit-dark.svg",
+      "fallback": "uit-light.svg"
+    },
+    "link": "https://www.uit.no",
+    "type": "academic",
+    "city": "Tromsø",
+    "country": "Norway",
+    "start": "2022-01",
+    "end": "2023-01",
+    "bullets": [
+      "Bayesian estimation of early warning signals"
+    ]
+  },
+  {
+    "title": "Postdoctoral Researcher",
+    "company": "Potsdam Institute for Climate Impact Research",
+    "location": "Potsdam, Germany",
+    "project": "Tipping Points in the Earth System",
+    "projectnumber": "",
+    "projectwebsite": "https://www.tipes.dk",
+    "projectshort": "TiPES",
+    "funder": "EU",
+    "funderprogram": "Horizon 2020",
+"logo": {
+      "light": "pik-black.svg",
+      "dark": "pik-dark.svg",
+      "fallback": "uit-light.svg"
+    },
+    "link": "https://www.pik-potsdam.de/en",
+    "type": "academic",
+    "city": "Potsdam",
+    "country": "Germany",
+    "start": "2020-07",
+    "end": "2021-12",
+    "bullets": [
+      "Uncertainty quantification of layer-counted proxy records",
+      "Synchronization of layer-counted proxy records"
+    ]
+  },
+  {
+    "title": "University Teacher",
+    "company": "UiT The Arctic University of Norway",
+    "location": "Tromsø, Norway",
+    "project": "Tipping Points in the Earth System",
+    "projectnumber": "",
+    "projectwebsite": "https://www.tipes.dk",
+    "projectshort": "TiPES",
+    "funder": "EU",
+    "funderprogram": "Horizon 2020",
+"logo": {
+      "light": "uit-black.svg",
+      "dark": "uit-dark.svg",
+      "fallback": "uit-light.svg"
+    },
+    "link": "https://www.uit.no",
+    "type": "academic",
+    "city": "Tromsø",
+    "country": "Norway",
+    "start": "2020-01",
+    "end": "2020-06",
+    "bullets": [
+      "Responsible for STA-1001 Probability and Statistics"
+    ]
+  },
+  {
+    "title": "PhD Researcher",
+    "company": "UiT The Arctic University of Norway",
+    "location": "Tromsø, Norway",
+"logo": {
+      "light": "uit-black.svg",
+      "dark": "uit-dark.svg",
+      "fallback": "uit-light.svg"
+    },
+    "link": "https://www.uit.no",
+    "type": "academic",
+    "city": "Tromsø",
+    "country": "Norway",
+    "start": "2016-09",
+    "end": "2019-12",
+    "bullets": [
+      "Efficient Bayesian inference of long-range dependent time series",
+      "Applications in climate"
+    ]
+  }
+]

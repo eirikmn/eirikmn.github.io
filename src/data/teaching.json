@@ -1,0 +1,107 @@
+[
+  {
+    "role": "Course coordinator and lecturer",
+    "institution": "UiT The Arctic University of Norway",
+    "location": "Tromsø, Norway",
+    "start": "2020-01",
+    "end": null,
+"logo": {
+      "light": "uit-black.svg",
+      "dark": "uit-dark.svg",
+      "fallback": "uit-light.svg"
+    },
+    "link": "https://www.ntnu.no",
+    "courses": [
+      {
+        "code": "STA-2004",
+        "name": "Statistical Methods",
+        "periods": ["Spring 2026"]
+      },
+      {
+        "code": "STA-1001",
+        "name": "Probability and Statistics",
+        "periods": ["Spring 2020"]
+      }
+    ],
+    "responsibilities": [
+      "Full course responsibility including lectures and administration",
+      "Exam preparation and grading",
+      "Development of exercises and teaching material"
+    ]
+  },
+  {
+    "role": "Research Assistant",
+    "institution": "Norwegian University of Science and Technology",
+    "location": "Trondheim, Norway",
+    "start": "2016-01",
+    "end": "2016-04",
+    "logo": {
+      "light": "uit-dark.svg",
+      "dark": "uit-light.svg",
+      "fallback": "uit-light.svg"
+    },
+    "courses": [
+      {
+        "code": "TDT4102",
+        "name": "Procedural and Object-Oriented Programming",
+        "periods": ["Spring 2016"]
+      }
+    ],
+    "responsibilities": [
+      "Responsible for mandatory exercise program",
+      "Held lectures related to exercises",
+      "Managed team of teaching assistants",
+      "Weekly exercise supervision"
+    ]
+  },
+  {
+    "role": "Senior Teaching Assistant",
+    "institution": "Norwegian University of Science and Technology",
+    "location": "Trondheim, Norway",
+    "start": "2015-01",
+    "end": "2015-04",
+    "logo": {
+      "light": "uit-dark.svg",
+      "dark": "uit-light.svg",
+      "fallback": "uit-light.svg"
+    },
+    "courses": [
+      {
+        "code": "TDT4102",
+        "name": "Procedural and Object-Oriented Programming",
+        "periods": ["Spring 2015"]
+      }
+    ],
+    "responsibilities": [
+      "Developed mandatory exercises",
+      "Weekly exercise supervision"
+    ]
+  },
+  {
+    "role": "Teaching Assistant",
+    "institution": "Norwegian University of Science and Technology",
+    "location": "Trondheim, Norway",
+    "start": "2013-01",
+    "end": "2015-11",
+    "logo": {
+      "light": "uit-dark.svg",
+      "dark": "uit-light.svg",
+      "fallback": "uit-light.svg"
+    },
+    "courses": [
+      {
+        "code": "TDT4102",
+        "name": "Procedural and Object-Oriented Programming",
+        "periods": ["Spring 2013", "Spring 2014"]
+      },
+      {
+        "code": "TMA4240",
+        "name": "Statistics",
+        "periods": ["Fall 2014", "Fall 2015"]
+      }
+    ],
+    "responsibilities": [
+      "Weekly exercise supervision"
+    ]
+  }
+]

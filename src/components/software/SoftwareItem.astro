@@ -1,0 +1,416 @@
+---
+const {
+  name,
+  tagline,
+  summary = [],
+  details,
+  install,
+  demo,
+  cite,
+  github,
+  language,
+  keywords = []
+} = Astro.props;
+
+const idBase = name.replace(/\s+/g, "-").toLowerCase();
+
+const panels = {
+  details: `${idBase}-details`,
+  install: `${idBase}-install`,
+  demo: `${idBase}-demo`,
+  cite: `${idBase}-cite`
+};
+
+const detailsArray = Array.isArray(details)
+  ? details
+  : typeof details === "string"
+    ? details.split("\n\n")
+    : [];
+
+const dependencyInstallCmd =
+  install?.dependencies?.length > 0
+    ? `install.packages(c(${install.dependencies.map(d => `"${d}"`).join(", ")}))`
+    : null;
+
+const formatCode = (input) => {
+  if (!input) return null;
+  if (typeof input === "string") return input;
+  if (Array.isArray(input)) return input.join("\n");
+  if (typeof input === "object" && Array.isArray(input.code)) {
+    return input.code.join("\n");
+  }
+  return null;
+};
+
+const linkify = (text) => {
+  if (!text) return text;
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  return text.replace(urlRegex, (url) =>
+    `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`
+  );
+};
+---
+
+<div class="software-item">
+
+  <!-- HEADER -->
+  <div class="software-header">
+    <div>
+      <strong>{name}</strong>
+      {tagline && <div class="software-tagline">{tagline}</div>}
+
+      {(language || keywords?.length > 0) && (
+        <div class="software-meta">
+          {language && <span class="badge language">{language}</span>}
+          {keywords?.length > 0 && (
+            <div class="keywords">
+              {keywords.map(k => (
+                <span class="badge keyword">{k}</span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  </div>
+
+
+
+  <!-- SUMMARY -->
+  {summary?.length > 0 && (
+    <ul class="software-summary">
+      {summary.map((s) => <li>{s}</li>)}
+    </ul>
+  )}
+
+  <!-- ACTIONS -->
+  <div class="software-actions">
+
+    <button data-toggle={panels.details}>ℹ Details</button>
+    <button data-toggle={panels.install}>⬇ Install</button>
+    <button data-toggle={panels.demo}>▶ Demo</button>
+
+    {github && (
+      <a class="github-btn" href={github} target="_blank" rel="noopener noreferrer">
+        <svg class="github-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            fill="currentColor"
+            d="M12 .5C5.7.5.7 5.7.7 12.1c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2.1c-3.2.7-3.9-1.4-3.9-1.4-.5-1.2-1.2-1.5-1.2-1.5-1-.7.1-.7.1-.7 1.1.1 1.7 1.1 1.7 1.1 1 .1.8 2.2 3.2 1.6.1-.7.4-1.2.7-1.5-2.6-.3-5.3-1.3-5.3-6 0-1.3.5-2.3 1.1-3.1-.1-.3-.5-1.4.1-3 0 0 .9-.3 3 1.1.9-.2 1.9-.3 2.9-.3s2 .1 2.9.3c2.1-1.4 3-1.1 3-1.1.6 1.6.2 2.7.1 3 .7.8 1.1 1.8 1.1 3.1 0 4.7-2.7 5.7-5.3 6 .4.4.8 1.1.8 2.3v3.4c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.3 5.7 18.3.5 12 .5z"
+          />
+        </svg>
+        <span>GitHub</span>
+      </a>
+    )}
+
+    <button data-toggle={panels.cite}>📚 Cite</button>
+
+  </div>
+
+  <!-- DETAILS -->
+  <div id={panels.details} class="panel">
+    {detailsArray.map((p) => (
+      <p>{p}</p>
+    ))}
+  </div>
+
+  <!-- INSTALL -->
+  <div id={panels.install} class="panel">
+
+    {install?.note && (
+      <>
+        <div class="panel-title">Before installing</div>
+        <ul>
+          {install.note.map((n) => (
+            <li set:html={linkify(n)}></li>
+          ))}
+        </ul>
+      </>
+    )}
+
+    {formatCode(install?.r) && (
+      <>
+        <div class="panel-title">Install</div>
+        <div class="code-wrapper">
+          <button class="copy-btn">Copy</button>
+          <pre class="code"><code>{formatCode(install.r)}</code></pre>
+        </div>
+      </>
+    )}
+
+  </div>
+
+  <!-- DEMO -->
+  <div id={panels.demo} class="panel">
+
+    {demo?.code && (
+      <>
+        <div class="panel-title">R code</div>
+        <div class="code-wrapper">
+          <button class="copy-btn">Copy</button>
+          <pre class="code"><code>{demo.code.join("\n")}</code></pre>
+        </div>
+      </>
+    )}
+
+    {demo?.output && (
+      <>
+        <div class="panel-title">Output</div>
+        <div class="code-wrapper">
+          <button class="copy-btn">Copy</button>
+          <pre class="code"><code>{demo.output.join("\n")}</code></pre>
+        </div>
+      </>
+    )}
+
+
+{/* ADD THIS */}
+{demo?.plots?.length > 0 && (
+  <>
+    <div class="panel-title">Plots</div>
+    <div class="demo-plots">
+      {demo.plots.map((p) => (
+        <img src={p} alt="Demo plot" />
+      ))}
+    </div>
+  </>
+)}
+
+  </div>
+<!-- CITE -->
+<div id={panels.cite} class="panel">
+
+  {cite?.text && (
+    <div class="cite-text">
+      <p set:html={cite.text}></p>
+    </div>
+  )}
+
+  
+
+  {cite?.papers?.length > 0 && (
+    <>
+      <div class="panel-title"></div>
+      <ul>
+        {cite.papers.map((p) => <li set:html={p}></li>)}
+      </ul>
+    </>
+  )}
+
+  {/* NEW SECTION: more_text */}
+  {cite?.more_text && (
+    <div class="cite-text">
+      <p set:html={cite.more_text}></p>
+    </div>
+  )}
+
+  {/* NEW SECTION: more_papers */}
+  {cite?.more_papers?.length > 0 && (
+    <>
+      <div class="panel-title"></div>
+      <ul>
+        {cite.more_papers.map((p) => <li set:html={p}></li>)}
+      </ul>
+    </>
+  )}
+
+ 
+</div>
+
+</div>
+
+
+<script>
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-toggle]");
+
+  if (btn) {
+    const el = document.getElementById(btn.dataset.toggle);
+    if (!el) return;
+
+    const allPanels = document.querySelectorAll(".panel");
+    const allButtons = document.querySelectorAll(".software-actions [data-toggle]");
+
+    const isOpening = !el.classList.contains("open");
+
+    // close everything
+    allPanels.forEach(p => p.classList.remove("open"));
+    allButtons.forEach(b => b.classList.remove("active"));
+
+    // toggle selected one
+    if (isOpening) {
+      el.classList.add("open");
+      btn.classList.add("active");
+    }
+
+    return;
+  }
+
+  const copyBtn = e.target.closest(".copy-btn");
+  if (copyBtn) {
+    const wrapper = copyBtn.closest(".code-wrapper");
+    const codeEl = wrapper.querySelector("code");
+
+    navigator.clipboard.writeText(codeEl.innerText);
+
+    copyBtn.textContent = "Copied!";
+    setTimeout(() => copyBtn.textContent = "Copy", 1200);
+  }
+});
+</script>
+
+<style>
+/* =========================
+   THEME VARIABLES
+   ========================= */
+
+:root {
+  --code-bg: #f3f4f6;
+  --code-text: #111827;
+  --code-border: #e5e7eb;
+
+  --text: #111827;
+  --border-ui: #e5e7eb;
+  --accent: #2563eb;
+}
+
+html.dark {
+  --code-bg: #1f2937;
+  --code-text: #e5e7eb;
+  --code-border: #374151;
+
+  --text: #e5e7eb;
+  --border-ui: #374151;
+  --accent: #60a5fa;
+}
+
+/* fallback */
+[data-theme="dark"] {
+  --code-bg: #1f2937;
+  --code-text: #e5e7eb;
+  --code-border: #374151;
+}
+
+/* ========================= */
+
+.software-item {
+  border-left: 2px solid var(--accent);
+  border-right: 1px solid var(--border-ui);
+  border-bottom: 1px solid var(--border-ui);
+  border-top: 1px solid var(--border-ui);
+  padding-left: 1rem;
+  padding-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* HEADER */
+.software-tagline {
+  font-size: 0.85rem;
+  color: var(--text);
+  opacity: 0.7;
+}
+
+/* META */
+.badge {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border-ui);
+  background: transparent;
+  color: var(--text);
+}
+
+/* ACTIONS */
+.software-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.25rem 0;
+}
+
+.software-actions button,
+.github-btn {
+  font-size: 0.8rem;
+  border: 1px solid var(--border-ui);
+  background: transparent;
+  padding: 3px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.software-actions button.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+}
+
+/* FIXED GITHUB ICON */
+.github-icon {
+  width: 14px;
+  height: 14px;
+  color: currentColor;
+}
+
+/* PANELS */
+.panel { display: none; }
+.panel.open { display: block; margin-top: 0.35rem; }
+
+/* CODE */
+.code-wrapper {
+  position: relative;
+}
+
+.code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+  background: var(--code-bg);
+  color: var(--code-text);
+  border: 1px solid var(--code-border);
+  padding: 0.75rem;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+/* COPY BUTTON */
+.copy-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-ui);
+  background: rgba(0,0,0,0.5);
+  color: white;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.demo-plots img {
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-top: 0.5rem;
+
+  border-radius: 8px;
+  border: 1px solid var(--border-ui);
+
+  object-fit: contain;
+}
+
+.demo-plots {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.code-wrapper:hover .copy-btn {
+  opacity: 1;
+}
+</style>

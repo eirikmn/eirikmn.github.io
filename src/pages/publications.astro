@@ -1,0 +1,41 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { loadBib } from "../lib/bib";
+import Publication from "../components/Publication-list.astro";
+
+const papers = loadBib("./src/data/papers.bib");
+
+// newest first
+papers.sort((a, b) => b.year - a.year);
+---
+
+<Layout title="Publications">
+
+  <section>
+
+    <h1>Publications</h1>
+
+    <p>
+      A list of peer-reviewed articles and preprints.
+    </p>
+
+    {papers.map((paper) => (
+      <Publication
+        title={paper.title}
+        type={paper.type}
+        authors={paper.authors}
+        venue={paper.journal || paper.school}
+        year={paper.year}
+        abstract={paper.abstract}
+        doi={paper.doi}
+        pdf={paper.pdf}
+        url={paper.url}
+        volume={paper.volume}
+        number={paper.number}
+        pages={paper.pages}
+      />
+    ))}
+
+  </section>
+
+</Layout>

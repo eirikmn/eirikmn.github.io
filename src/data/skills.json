@@ -1,0 +1,10 @@
+{
+  "programming": ["R", "Python", "MATLAB", "C/C++"],
+  "frameworks": ["INLA", "Stan", "PyTorch"],
+  "tools": ["tidyverse", "Git", "LaTeX"],
+  "languages": [
+    "Norwegian (native)",
+    "English (fluent)",
+    "German (elementary)"
+  ]
+}

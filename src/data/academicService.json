@@ -1,0 +1,93 @@
+{
+  "leadership": [
+    {
+      "title": "Treasurer and Board Member",
+      "organization": "The Norwegian Statistical Association",
+      "start": "2023-06",
+      "end": null,
+      "url": "https://sites.google.com/site/statistiskforening/english"
+    },
+    {
+      "title": "Deputy Representative for Temporary Employees",
+      "organization": "Faculty Board (NT-Fak), UiT The Arctic University of Norway",
+      "start": "2023-01",
+      "end": "2023-12",
+      "url": "https://en.uit.no/enhet/ntfak?p_dimension_id=88131"
+    },
+    {
+      "title": "President",
+      "organization": "Association of Doctoral Organizations in Norway",
+      "start": "2018-05",
+      "end": "2019-05",
+      "url": "https://stipendiat.no"
+    },
+    {
+      "title": "Vice President",
+      "organization": "Association of Doctoral Organizations in Norway",
+      "start": "2017-05",
+      "end": "2018-05",
+      "url": "https://stipendiat.no"
+    },
+    {
+      "title": "Vice President",
+      "organization": "TODOS - Tromsø Doctoral Students (Now ArcticDoc)",
+      "start": "2017-01",
+      "end": "2018-06",
+      "url": "https://site.uit.no/arcticdoc/about/"
+    },
+    {
+      "title": "TODOS Representative",
+      "organization": "Strategisk Forskningsutvalg (SFU)",
+      "start": "2017-01",
+      "end": "2018-06",
+      "url": "https://uit.no/moteportalen/ikb/utvalg?p_document_id=787829"
+    },
+    {
+      "title": "Student Representative (IME Faculty)",
+      "organization": "Student Parliament, Norwegian University of Science and Technology",
+      "start": "2015-01",
+      "end": "2015-11",
+      "url": "https://studenttinget.no"
+    }
+  ],
+
+  "review": [
+    {
+      "title": "Earth System Dynamics",
+      "organization": "Three times",
+      "start": "2021",
+      "end": "2024"
+    },
+    {
+      "title": "Journal of Climate",
+      "organization": "Once",
+      "period": "2022"
+    }
+  ],
+
+  "outreach": [    
+    
+    {
+      "title": "Panel discussant for publication discussion",
+      "organization": "TEST Journal Webinar",
+      "details": "Paper: Data integration via analysis of subspaces (DIVAS)",
+      "period": "2025-03"
+    },
+    {
+      "title": "AI Exhibition",
+      "details": "Contributed to an AI Exhibition for the Northern Norwegian Science Centre",
+      "start": "2024-01",
+      "end": "2024-03"
+    },
+    {
+      "title": "Organized a reading group on multimodal data",
+      "period": "Spring 2024"
+    },
+    {
+      "title": "Session chair",
+      "organization": "NORDSTAT 2021",
+      "details": "Session C3: Applications, models and methods for high-dimensional and complex data I, at 28th Nordic Conference in Mathematical Statistics.",
+      "period": "2021-06"
+    }
+  ]
+}

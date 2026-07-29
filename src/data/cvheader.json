@@ -1,0 +1,16 @@
+{
+  "name": "Eirik Myrvoll-Nilsen",
+  "title": "Postdoctoral Research Fellow",
+  "affiliation": {
+    "institution": "UiT The Arctic University of Norway",
+    "location": "Tromsø, Norway"
+  },
+  "email": "eirik.myrvoll-nilsen@uit.no",
+  "website": "http://www.eirikmyrvollnilsen.com",
+  "orcid": "0000-0002-1643-5661",
+  "research": "Bayesian statistician working with climate, age-depth modeling and data integration.",
+  "note": {
+    "text": "This is a web version of my CV. A downloadable PDF version is available",
+    "cv_pdf": "/CV.pdf"
+  }
+}
