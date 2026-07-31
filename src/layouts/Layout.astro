@@ -129,6 +129,13 @@ const personSchema = {
   <meta name="twitter:description" content={description} />
   <meta name="twitter:image" content={imageURL} />
 
+  <!-- icons. SVG first for modern browsers; the .ico carries
+       hand-snapped 16/32/48 bitmaps for the small sizes and
+       for anything that ignores SVG. -->
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
+  <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)" />
 

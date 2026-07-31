@@ -7,10 +7,20 @@ const { email, affiliation, office } = profile;
 
 /* A plain link rather than an embedded map: an iframe would
    add weight and set third-party cookies on a site that
-   currently needs no consent banner. */
-const mapUrl =
-  "https://www.openstreetmap.org/search?query=" +
-  encodeURIComponent(`${office.street}, ${office.postcode}`);
+   currently needs no consent banner.
+
+   All four Forskningsparken buildings share the street
+   address Sykehusvegen 23, so a text search resolves to the
+   complex's single address node rather than to BT3. When
+   office.lat/lon are filled in, we drop a marker on the exact
+   spot instead; otherwise fall back to the address search. */
+const hasCoords =
+  typeof office.lat === "number" && typeof office.lon === "number";
+
+const mapUrl = hasCoords
+  ? `https://www.openstreetmap.org/?mlat=${office.lat}&mlon=${office.lon}#map=19/${office.lat}/${office.lon}`
+  : "https://www.openstreetmap.org/search?query=" +
+    encodeURIComponent(`${office.street}, ${office.postcode}`);
 ---
 
 <Layout
@@ -66,9 +76,14 @@ const mapUrl =
         {office.building}<br />
         {office.street}<br />
         {office.postcode}
-        <br />
         <a class="map-link" href={mapUrl} target="_blank" rel="noopener noreferrer">
-          View on map →
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"
+            />
+          </svg>
+          View on map
         </a>
       </dd>
 
@@ -186,10 +201,47 @@ const mapUrl =
   overflow-wrap: anywhere;
 }
 
+/* A small pill, echoing the buttons under "Elsewhere".
+   It needs its own styling because it carries a class, which
+   excludes it from the global content-link rule — otherwise
+   it would fall back to the browser's blue underlined link. */
 .map-link {
-  display: inline-block;
-  margin-top: 0.35rem;
-  font-size: 0.9rem;
+  /* flex rather than inline-flex, plus fit-content, so the
+     pill starts its own line under the address instead of
+     trailing the last line of it */
+  display: flex;
+  width: fit-content;
+
+  align-items: center;
+  gap: 0.35rem;
+
+  margin-top: 0.6rem;
+  padding: 3px 10px 3px 8px;
+
+  border: 1px solid var(--border-ui);
+  border-radius: 999px;
+
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.82rem;
+  line-height: 1.6;
+
+  transition: border-color 0.2s ease, color 0.2s ease,
+              background 0.2s ease;
+}
+
+.map-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+/* inherits colour from the link, so it follows the theme
+   and the hover state without extra rules */
+.map-link svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
 @media (max-width: 640px) {

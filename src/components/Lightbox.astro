@@ -45,7 +45,10 @@
     /* mark up the page figures as interactive. Done in JS so
        no page template has to change, and so the affordance
        never appears if this script fails to load. */
-    document.querySelectorAll(".figure img").forEach((el) => {
+    /* .figure img covers the research pages; .demo-plots img
+       covers the output plots in the software panels, which
+       are detail-heavy and worth enlarging. */
+    document.querySelectorAll(".figure img, .demo-plots img").forEach((el) => {
       el.classList.add("zoomable");
       el.tabIndex = 0;
       el.setAttribute("role", "button");
@@ -105,7 +108,7 @@
     }
 
     function openFrom(target) {
-      const image = target.closest(".figure img");
+      const image = target.closest(".figure img, .demo-plots img");
       if (image) return openImage(image);
 
       const frame = target.closest(".video-frame");
@@ -127,7 +130,7 @@
       if (e.target.closest?.(".lightbox")) return;
 
       const hit =
-        e.target.closest?.(".figure img") || e.target.closest?.(".video-frame");
+        e.target.closest?.(".figure img, .demo-plots img") || e.target.closest?.(".video-frame");
       if (!hit) return;
 
       e.preventDefault();
@@ -157,7 +160,8 @@
 <style is:global>
   /* ---- the page-side affordance ---- */
 
-  .figure img.zoomable {
+  .figure img.zoomable,
+  .demo-plots img.zoomable {
     cursor: zoom-in;
   }
 

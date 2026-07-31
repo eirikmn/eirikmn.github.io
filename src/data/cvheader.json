@@ -10,12 +10,14 @@
     "location": "Tromsø, Norway"
   },
   "office": {
-    "building": "Forskningsparken",
+    "building": "Forskningsparken, building BT3",
     "street": "Sykehusvegen 23",
-    "postcode": "9019 Tromsø, Norway"
+    "postcode": "9019 Tromsø, Norway",
+    "lat": 69.6806486,
+    "lon": 18.9874937
   },
   "email": "eirik.myrvoll-nilsen@uit.no",
-  "website": "http://www.eirikmyrvollnilsen.com",
+  "website": "https://eirikmyrvollnilsen.com",
   "orcid": "0000-0002-1643-5661",
   "research": "Bayesian statistician working with climate, age-depth modeling and data integration.",
   "note": {

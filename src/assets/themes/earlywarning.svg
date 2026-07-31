@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 72" role="img" aria-hidden="true">
+  <!--
+    Early warning signals.
+
+    A ball sitting in a potential well that has become far
+    too shallow, wobbling, with the abyss immediately to its
+    right. The wobble marks are the early warning; the ball
+    has not read the paper.
+  -->
+
+  <!-- potential: shallow well on the left, cliff on the right -->
+  <path d="M6 20 C 16 20, 20 46, 32 46 C 44 46, 46 30, 56 30 C 68 30, 72 66, 92 68"
+        fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" opacity="0.5"/>
+
+  <!-- the ball, in what is left of the well -->
+  <circle cx="32" cy="41" r="5.5" fill="var(--accent)"/>
+
+  <!-- it is not sitting still -->
+  <g stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" opacity="0.65">
+    <line x1="21" y1="37" x2="24.5" y2="37"/>
+    <line x1="39.5" y1="37" x2="43" y2="37"/>
+    <line x1="22.5" y1="31.5" x2="25.5" y2="33.5"/>
+    <line x1="41.5" y1="31.5" x2="38.5" y2="33.5"/>
+  </g>
+
+  <!-- the tipping point it is about to discover -->
+  <circle cx="56" cy="30" r="2.4" fill="none"
+          stroke="currentColor" stroke-width="1.5" opacity="0.55"/>
+</svg>

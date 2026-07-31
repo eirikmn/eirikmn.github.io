@@ -9,6 +9,7 @@ const {
   cite,
   github,
   language,
+  research,
   keywords = []
 } = Astro.props;
 
@@ -56,19 +57,32 @@ const linkify = (text) => {
   <!-- HEADER -->
   <div class="software-header">
     <div>
-      <strong>{name}</strong>
+      {/* language sits with the name: it is an attribute of
+          the package, and putting it here makes it scannable
+          when comparing several. A badge, not a button —
+          nothing here is clickable. */}
+      <div class="software-title">
+        <strong>{name}</strong>
+        {language && <span class="badge language">{language}</span>}
+      </div>
+
       {tagline && <div class="software-tagline">{tagline}</div>}
 
-      {(language || keywords?.length > 0) && (
+      {/* Context rather than an action, so it sits with the
+          description instead of in the button row — which was
+          already full at five on a phone. */}
+      {research && (
+        <a class="research-link" href={research.href}>
+          <span class="research-label">Research:</span>
+          {research.label}
+        </a>
+      )}
+
+      {keywords?.length > 0 && (
         <div class="software-meta">
-          {language && <span class="badge language">{language}</span>}
-          {keywords?.length > 0 && (
-            <div class="keywords">
-              {keywords.map(k => (
-                <span class="badge keyword">{k}</span>
-              ))}
-            </div>
-          )}
+          {keywords.map(k => (
+            <span class="badge keyword">{k}</span>
+          ))}
         </div>
       )}
     </div>
@@ -315,10 +329,63 @@ html.dark {
 }
 
 /* HEADER */
+
+.software-title {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.software-title strong {
+  font-size: 1.05rem;
+}
+
+/* the language badge is a label, so it stays quiet: no
+   hover state, no pointer cursor, slightly muted */
+.badge.language {
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  /* nudge up so it optically centres against the name */
+  transform: translateY(-1px);
+}
+
 .software-tagline {
+  margin-top: 0.3rem;
   font-size: 0.85rem;
   color: var(--text);
   opacity: 0.7;
+}
+
+/* the research this package came out of — context, not an
+   action, so it lives here rather than in the button row */
+.research-link {
+  display: inline-flex;
+  align-items: baseline;
+  /* the colon now separates label from value, so the gap can
+     come back to a normal word space */
+  gap: 0.3rem;
+
+  margin-top: 0.5rem;
+  font-size: 0.82rem;
+
+  color: var(--accent);
+  text-decoration: none;
+
+  transition: color 0.15s ease;
+}
+
+.research-label {
+  color: var(--text-muted);
+}
+
+.research-link::after {
+  content: "→";
+  transition: transform 0.2s ease;
+}
+
+.research-link:hover::after {
+  transform: translateX(3px);
 }
 
 /* META */
@@ -335,13 +402,6 @@ html.dark {
 
   margin-top: 0.6rem;
   min-width: 0;
-}
-
-/* dissolve the wrapper so the keywords share the same
-   wrapping row as the language badge, rather than being one
-   rigid block that has to fit or overflow */
-.keywords {
-  display: contents;
 }
 
 .badge {
@@ -371,7 +431,8 @@ html.dark {
 }
 
 .software-actions button,
-.github-btn {
+.github-btn,
+.research-btn {
   font-size: 0.8rem;
   border: 1px solid var(--border-ui);
   background: transparent;

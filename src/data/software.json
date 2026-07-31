@@ -8,10 +8,11 @@
       "Fast Bayesian inference using R-INLA",
       "Jointly models trends and increasing autocorrelation"
     ],
-    "language": "",
+    "language": "R",
     "keywords": [
-      "R-package", "Bayesian", "INLA", "Early Warning Signals", "Tipping Points"
-],
+      "Early Warning Signals",
+      "Tipping Points"
+    ],
     "details": [
       "Critical slowing down refers to the generic dynamical phenomenon that occurs as a system approaches a bifurcation-induced tipping point, where the stability of an equilibrium state is progressively lost. As the dominant restoring forces weaken near the bifurcation, the system’s recovery from perturbations becomes increasingly slow, leading to a characteristic increase in the autocorrelation and variance of fluctuations. These statistical changes give rise to so-called early warning signals, which can be detected in time series data prior to a transition. In the context of bifurcation-induced tipping points, such signals provide indirect probabilistic evidence that a system is approaching a critical threshold, beyond which a small perturbation may trigger a qualitative shift to an alternative stable state.",
       "Typically, early warning signals are estimated using a sliding windows approach. This can be problematic, especially for short time series, as it requires a choice for the window length. Short windows allow for better representation of the momentary state which can capture rapid changes in stability, but provides a more limited number of data points for estimation, leading to inaccurate estimates. Long windows improves precision, but may smooth out abrupt transitions making them harder to detect in time.",
@@ -30,7 +31,11 @@
         "Make sure you have R installed (https://cran.r-project.org)",
         "Install INLA (https://www.r-inla.org/download/)"
       ],
-      "dependencies": ["INLA", "Matrix", "stats"],
+      "dependencies": [
+        "INLA",
+        "Matrix",
+        "stats"
+      ],
       "r": [
         "library(remotes)",
         "remotes::install_github('eirikmn/INLA.ews')"
@@ -38,79 +43,73 @@
     },
     "demo": {
       "code": [
-"set.seed(1)",
-"n = 500",
-" ",
-"time = 1:n",
-"phis = seq(0.4,0.7,length.out=n)",
-"data = ar1_timedep_sim(n,sigma=1,phis=phis)",
-" ",
-"object = inla.ews(data,model='ar1')",
-"",
-"summary(object)",
-"plot(object)"
-],
+        "set.seed(1)",
+        "n = 500",
+        " ",
+        "time = 1:n",
+        "phis = seq(0.4,0.7,length.out=n)",
+        "data = ar1_timedep_sim(n,sigma=1,phis=phis)",
+        " ",
+        "object = inla.ews(data,model='ar1')",
+        "",
+        "summary(object)",
+        "plot(object)"
+      ],
       "output": [
-"Call:",
-"inla.ews(data, model = 'ar1')",
-" ",
-"Time used:",
-"   Running INLA Post processing           Total ",
-"         3.8047         31.4884         35.5473 ",
-" ",
-"Posterior marginal distributions for all parameters have been computed.",
-" ",
-"Summary statistics for fixed effects:",
-"              mean     sd 0.025quant 0.5quant 0.975quant",
-"(Intercept) 0.0442 0.0715     -0.096   0.0441     0.1851",
-" ",
-"Summary statistics using ar1 model:",
-"        mean     sd 0.025quant 0.5quant 0.975quant",
-"a     0.3120 0.0548     0.2108   0.3095     0.4243",
-"b     0.3535 0.0633     0.2255   0.3547     0.4736",
-"sigma 1.0618 0.0684     0.9348   1.0590     1.2032",
-" ",
-"Memory evolution is sampled on an irregular grid. ",
-"Summary for first and last point in smoothed trajectory (a+b*time):",
-"          mean     sd 0.025quant 0.5quant 0.975quant",
-"phi0[1] 0.3120 0.0548     0.2108   0.3095     0.4243",
-"phi0[n] 0.6656 0.0456     0.5727   0.6668     0.7524",
-" ",
-"Probability of positive slope 'b' is 0.999995",
-" ",
-"Marginal log-Likelihood: -664.50"
-],
-  "plots": [
-    "/plots/inla.ews_demo.png"
-  ]
+        "Call:",
+        "inla.ews(data, model = 'ar1')",
+        " ",
+        "Time used:",
+        "   Running INLA Post processing           Total ",
+        "         3.8047         31.4884         35.5473 ",
+        " ",
+        "Posterior marginal distributions for all parameters have been computed.",
+        " ",
+        "Summary statistics for fixed effects:",
+        "              mean     sd 0.025quant 0.5quant 0.975quant",
+        "(Intercept) 0.0442 0.0715     -0.096   0.0441     0.1851",
+        " ",
+        "Summary statistics using ar1 model:",
+        "        mean     sd 0.025quant 0.5quant 0.975quant",
+        "a     0.3120 0.0548     0.2108   0.3095     0.4243",
+        "b     0.3535 0.0633     0.2255   0.3547     0.4736",
+        "sigma 1.0618 0.0684     0.9348   1.0590     1.2032",
+        " ",
+        "Memory evolution is sampled on an irregular grid. ",
+        "Summary for first and last point in smoothed trajectory (a+b*time):",
+        "          mean     sd 0.025quant 0.5quant 0.975quant",
+        "phi0[1] 0.3120 0.0548     0.2108   0.3095     0.4243",
+        "phi0[n] 0.6656 0.0456     0.5727   0.6668     0.7524",
+        " ",
+        "Probability of positive slope 'b' is 0.999995",
+        " ",
+        "Marginal log-Likelihood: -664.50"
+      ],
+      "plots": [
+        "/plots/inla.ews_demo.png"
+      ]
     },
     "cite": {
       "text": "If you use this package, please cite:",
       "papers": [
-"Myrvoll-Nilsen, E., Hallali, L., & Rypdal, M. (2025). <strong>Bayesian analysis of early warning signals using a time-dependent model</strong>. <em>Earth System Dynamics</em>, <strong>16</strong>(5), 1539-1556.",
-"Hallali, L., Myrvoll-Nilsen, E., & Franzke, C. L. (2025). <strong>Assessing AMOC stability using a Bayesian nested time-dependent autoregressive model</strong>. <em>Nonlinear Processes in Geophysics</em>, <strong>32</strong>(4), 383-395."],
+        "Myrvoll-Nilsen, E., Hallali, L., & Rypdal, M. (2025). <strong>Bayesian analysis of early warning signals using a time-dependent model</strong>. <em>Earth System Dynamics</em>, <strong>16</strong>(5), 1539-1556.",
+        "Hallali, L., Myrvoll-Nilsen, E., & Franzke, C. L. (2025). <strong>Assessing AMOC stability using a Bayesian nested time-dependent autoregressive model</strong>. <em>Nonlinear Processes in Geophysics</em>, <strong>32</strong>(4), 383-395."
+      ],
       "bibtex": "@article{...}",
-"more_text": "Since this work is also based on other work, consider citing the following papers:",
+      "more_text": "Since this work is also based on other work, consider citing the following papers:",
       "more_papers": [
-"INLA:<br> Rue, H., Martino, S., & Chopin, N. (2009). <strong>Approximate Bayesian inference for latent Gaussian models by using integrated nested Laplace approximations</strong>. <em>Journal of the Royal Statistical Society Series B: Statistical Methodology</em>, <strong>71</strong>(2), 319-392.",
-      "Nested AR(1) model: <br>Boers, N. (2021). <strong>Observation-based early-warning signals for a collapse of the Atlantic Meridional Overturning Circulation</strong>. <em>Nature Climate Change</em>, <strong>11</strong>(8), 680-688.",
-      "Nested AR(1) model: <br>Morr, A., & Boers, N. (2024). <strong>Detection of approaching critical transitions in natural systems driven by red noise</strong>. <em>Physical Review X</em>, <strong>14</strong>(2), 021037."
-],
+        "INLA:<br> Rue, H., Martino, S., & Chopin, N. (2009). <strong>Approximate Bayesian inference for latent Gaussian models by using integrated nested Laplace approximations</strong>. <em>Journal of the Royal Statistical Society Series B: Statistical Methodology</em>, <strong>71</strong>(2), 319-392.",
+        "Nested AR(1) model: <br>Boers, N. (2021). <strong>Observation-based early-warning signals for a collapse of the Atlantic Meridional Overturning Circulation</strong>. <em>Nature Climate Change</em>, <strong>11</strong>(8), 680-688.",
+        "Nested AR(1) model: <br>Morr, A., & Boers, N. (2024). <strong>Detection of approaching critical transitions in natural systems driven by red noise</strong>. <em>Physical Review X</em>, <strong>14</strong>(2), 021037."
+      ],
       "more_bibtex": "@article{...}"
     },
-    "github": "https://github.com/eirikmn/INLA.ews"
+    "github": "https://github.com/eirikmn/INLA.ews",
+    "research": {
+      "href": "/research/earlywarning",
+      "label": "Early warning signals"
+    }
   },
-
-
-
-
-
-
-
-
-
-
-
   {
     "name": "Bremla",
     "tagline": "Bayesian age-depth modeling and synchronization of layer-counted archives",
@@ -118,11 +117,13 @@
       "Uncertainty quantification of layer-counted data using a Bayesian regression model",
       "Joint synchronization of multiple chronologies using tie-points",
       "Scalable inference using R-INLA"
-    ], 
-  "language": "",
-  "keywords": [
-    "R-package", "Bayesian", "INLA", "Age-Depth model", "Uncertainty quantification", "Chronology synchronization"
-  ],
+    ],
+    "language": "R",
+    "keywords": [
+      "Age-Depth model",
+      "Uncertainty quantification",
+      "Chronology synchronization"
+    ],
     "details": [
       "The Bremla package provides a Bayesian framework for constructing and synchronizing chronologies in stratigraphic archives, with particular emphasis on layer-counted and depth-indexed records such as ice cores, sediment cores, and varved deposits. Accurate chronological inference is essential in paleoclimatology and Earth system science, as uncertainties in age models propagate directly into estimates of rates, variability, and phase relationships in paleoclimate records (McKay et al., 2021).",
       "At its core, Bremla represents the age–depth relationship as a hierarchical Bayesian latent Gaussian model in which accumulation or deposition rates are treated as latent stochastic processes. Depth is typically observed with negligible error, while age is inferred indirectly, primarily through layer counts. This formulation yields a flexible class of models in which posterior samples of the full age–depth function can be obtained by sampling from the joint posterior distribution. By exploiting Gaussian Markov random field (GMRF) structure, the resulting sparse precision matrices enable efficient computation and sampling with linear complexity in the number of depth points (Rue and Held, 2005), making the approach scalable to high-resolution datasets such as the NGRIP ice core (NGRIP members, 2004).",
@@ -141,7 +142,11 @@
         "Make sure you have R installed (https://cran.r-project.org)",
         "Install INLA (https://www.r-inla.org/download/)"
       ],
-      "dependencies": ["INLA", "Matrix", "stats"],
+      "dependencies": [
+        "INLA",
+        "Matrix",
+        "stats"
+      ],
       "r": [
         "library(remotes)",
         "remotes::install_github('eirikmn/bremla')"
@@ -149,121 +154,115 @@
     },
     "demo": {
       "code": [
-"library(bremla)",
-" ",
-"set.seed(1)",
-" ",
-"nsims = 200 #number of chronology samples to produce",
-" ",
-"###### SIMULATE DATA ######",
-"n=200",
-"depth = seq(0,1,length.out=n)",
-"dy_noise <- as.numeric(arima.sim(model=list(ar=c(0.8)),n=n,sd=sqrt(1-0.8^2)))",
-"proxy <- as.numeric(arima.sim(model=list(ar=c(0.9)),n=n,sd=sqrt(1-0.9^2)))*5",
-" ",
-"dy <- 20*depth + proxy + dy_noise",
-"age = cumsum(dy)",
-" ",
-"data = data.frame(age=age,dy=dy,proxy=proxy,depth=depth)",
-"data = rbind(c(0,NA,NA,0),data) #First row is only used to extract y0 and z0.",
-" ",
-"###### MAKE TRUE AGE ######",
-"agedisc = sin(3*pi/2/n*(1:n))*1:n/n*50",
-"trueage = age+agedisc",
-" ",
-"###### TIE-POINTS ######",
-"tp_ind = c(40,80,160)",
-"tp_depths = depth[tp_ind]",
-"tp_mean = trueage[tp_ind]",
-"tp_std = c(1,5,25)",
-" ",
-"control.sim=list(synchronized=TRUE,",
-"                 summary=list(compute=TRUE))",
-" ",
-"###### Define layer-increment model ######",
-" ",
-"formula = dy~-1+depth + proxy ## fixed effects",
-" ",
-"control.fit = list(noise='ar1', hyperprior = list( #Fit unsynchronized model",
-"  prec = list(prior='loggamma', param = c(1,0.01)),",
-"  rho = list(prior='normal', param = c(0,0.15)))",
-")",
-" ",
-"###### Define age-discrepancy model ######",
-" ",
-"agedisc=list(model='rw2') #uses 2nd order random walk model for age discrepancues",
-"synchronization=list(locations=tp_depths,locations_unit='depth', #set TP depth locations",
-"                     method='gauss',params=list(mean=tp_mean,sd=tp_std), #set Gaussian TP uncertainties",
-"                     agedisc=agedisc",
-"                     )",
-" ",
-" ",
-"###### Run Bremla ######",
-" ",
-"results = bremla(formula,data,nsims=nsims,reference.label='simulated timescale',",
-"                synchronization=synchronization,",
-"                control.fit=control.fit,",
-"                control.sim=control.sim)",
-" ",
-"summary(results)",
-"plot(results)"
-],
+        "library(bremla)",
+        " ",
+        "set.seed(1)",
+        " ",
+        "nsims = 200 #number of chronology samples to produce",
+        " ",
+        "###### SIMULATE DATA ######",
+        "n=200",
+        "depth = seq(0,1,length.out=n)",
+        "dy_noise <- as.numeric(arima.sim(model=list(ar=c(0.8)),n=n,sd=sqrt(1-0.8^2)))",
+        "proxy <- as.numeric(arima.sim(model=list(ar=c(0.9)),n=n,sd=sqrt(1-0.9^2)))*5",
+        " ",
+        "dy <- 20*depth + proxy + dy_noise",
+        "age = cumsum(dy)",
+        " ",
+        "data = data.frame(age=age,dy=dy,proxy=proxy,depth=depth)",
+        "data = rbind(c(0,NA,NA,0),data) #First row is only used to extract y0 and z0.",
+        " ",
+        "###### MAKE TRUE AGE ######",
+        "agedisc = sin(3*pi/2/n*(1:n))*1:n/n*50",
+        "trueage = age+agedisc",
+        " ",
+        "###### TIE-POINTS ######",
+        "tp_ind = c(40,80,160)",
+        "tp_depths = depth[tp_ind]",
+        "tp_mean = trueage[tp_ind]",
+        "tp_std = c(1,5,25)",
+        " ",
+        "control.sim=list(synchronized=TRUE,",
+        "                 summary=list(compute=TRUE))",
+        " ",
+        "###### Define layer-increment model ######",
+        " ",
+        "formula = dy~-1+depth + proxy ## fixed effects",
+        " ",
+        "control.fit = list(noise='ar1', hyperprior = list( #Fit unsynchronized model",
+        "  prec = list(prior='loggamma', param = c(1,0.01)),",
+        "  rho = list(prior='normal', param = c(0,0.15)))",
+        ")",
+        " ",
+        "###### Define age-discrepancy model ######",
+        " ",
+        "agedisc=list(model='rw2') #uses 2nd order random walk model for age discrepancues",
+        "synchronization=list(locations=tp_depths,locations_unit='depth', #set TP depth locations",
+        "                     method='gauss',params=list(mean=tp_mean,sd=tp_std), #set Gaussian TP uncertainties",
+        "                     agedisc=agedisc",
+        "                     )",
+        " ",
+        " ",
+        "###### Run Bremla ######",
+        " ",
+        "results = bremla(formula,data,nsims=nsims,reference.label='simulated timescale',",
+        "                synchronization=synchronization,",
+        "                control.fit=control.fit,",
+        "                control.sim=control.sim)",
+        " ",
+        "summary(results)",
+        "plot(results)"
+      ],
       "output": [
-"Call:",
-"bremla(formula, data, nsims = nsims, reference.label = 'simulated timescale',     synchronization = synchronization, control.fit = control.fit, control.sim = control.sim)",
-"",
-" ",
-"Time used:",
-"  Model fitting Chron. sampling           Total ",
-"         3.3144        671.0021        680.2630 ",
-" ",
-"The fixed component is explained by linear predictor: ",
-"dy ~ -1 + depth + proxy",
-" ",
-"The noise component is explained by an ar1 process.",
-" ",
-"The model is fitted using INLA, with following estimates for the hyperparameters:",
-"                mean     sd quant0.025 quant0.25 quant0.5 quant0.75 quant0.975",
-"sigma_epsilon 0.9749 0.1021     0.7996    0.9022   0.9653    1.0383     1.1997",
-"phi           0.7993 0.0410     0.7127    0.7727   0.8012    0.8283     0.8725",
-" ",
-"Simulating 200 chronologies, using simulated timescale as reference.",
-" ",
-"Chronologies are synchronized assuming no age discrepancy.",
-" ",
-"200 synchronized chronologies sampled using 3 tie-point distributions (Gaussian).",
-"Tie-points are fixed at NGRIP depths (m):",
-"0.1959799, 0.3969849, 0.798995."
-],
-  "plots": [
-    "/plots/bremla_demo.png"
-  ]
+        "Call:",
+        "bremla(formula, data, nsims = nsims, reference.label = 'simulated timescale',     synchronization = synchronization, control.fit = control.fit, control.sim = control.sim)",
+        "",
+        " ",
+        "Time used:",
+        "  Model fitting Chron. sampling           Total ",
+        "         3.3144        671.0021        680.2630 ",
+        " ",
+        "The fixed component is explained by linear predictor: ",
+        "dy ~ -1 + depth + proxy",
+        " ",
+        "The noise component is explained by an ar1 process.",
+        " ",
+        "The model is fitted using INLA, with following estimates for the hyperparameters:",
+        "                mean     sd quant0.025 quant0.25 quant0.5 quant0.75 quant0.975",
+        "sigma_epsilon 0.9749 0.1021     0.7996    0.9022   0.9653    1.0383     1.1997",
+        "phi           0.7993 0.0410     0.7127    0.7727   0.8012    0.8283     0.8725",
+        " ",
+        "Simulating 200 chronologies, using simulated timescale as reference.",
+        " ",
+        "Chronologies are synchronized assuming no age discrepancy.",
+        " ",
+        "200 synchronized chronologies sampled using 3 tie-point distributions (Gaussian).",
+        "Tie-points are fixed at NGRIP depths (m):",
+        "0.1959799, 0.3969849, 0.798995."
+      ],
+      "plots": [
+        "/plots/bremla_demo.png"
+      ]
     },
     "cite": {
       "text": "If you use this package, please cite:",
       "bibtex": "@article{...}",
       "papers": [
-      "Synchronization methodology: <br>Myrvoll-Nilsen, E., Riechers, K., & Boers, N. (2025). <strong>Synchronization of layer-counted paleoclimatic proxy archives using a Bayesian regression modeling framework</strong>. <em>Bayesian Analysis Advance Publication</em>",
-      "Bayesian regression age-depth modeling: <br>Myrvoll-Nilsen, E., Riechers, K., Rypdal, M. W., & Boers, N. (2022). <strong>Comprehensive uncertainty estimation of the timing of Greenland warmings in the Greenland ice core records</strong>. <em>Climate of the Past</em>, <strong>18</strong>(6), 1275-1294."
+        "Synchronization methodology: <br>Myrvoll-Nilsen, E., Riechers, K., & Boers, N. (2025). <strong>Synchronization of layer-counted paleoclimatic proxy archives using a Bayesian regression modeling framework</strong>. <em>Bayesian Analysis Advance Publication</em>",
+        "Bayesian regression age-depth modeling: <br>Myrvoll-Nilsen, E., Riechers, K., Rypdal, M. W., & Boers, N. (2022). <strong>Comprehensive uncertainty estimation of the timing of Greenland warmings in the Greenland ice core records</strong>. <em>Climate of the Past</em>, <strong>18</strong>(6), 1275-1294."
       ],
       "more_text": "Since this package use the INLA methodology, please consider citing:",
       "more_papers": [
-"INLA: <br>Rue, H., Martino, S., & Chopin, N. (2009). <strong>Approximate Bayesian inference for latent Gaussian models by using integrated nested Laplace approximations</strong>. <em>Journal of the Royal Statistical Society Series B: Statistical Methodology</em>, <strong>71</strong>(2), 319-392."
-],
+        "INLA: <br>Rue, H., Martino, S., & Chopin, N. (2009). <strong>Approximate Bayesian inference for latent Gaussian models by using integrated nested Laplace approximations</strong>. <em>Journal of the Royal Statistical Society Series B: Statistical Methodology</em>, <strong>71</strong>(2), 319-392."
+      ],
       "more_bibtex": "@article{...}"
     },
-    "github": "https://github.com/eirikmn/bremla"
+    "github": "https://github.com/eirikmn/bremla",
+    "research": {
+      "href": "/research/agemodeling",
+      "label": "Bayesian age-depth modeling"
+    }
   },
-
-
-
-
-
-
-
-
-
-
   {
     "name": "INLA.climate",
     "tagline": "Full Bayesian analysis of radiative forcing climate model",
@@ -272,102 +271,105 @@
       "Efficient Bayesian inference using R-INLA and an approximate fractional Gaussian noise model",
       "Supports prediction and estimation of transient climate sensitivity"
     ],
-    "language": "",
+    "language": "R",
     "keywords": [
-      "R-package", "Bayesian", "INLA", "Global mean surface temperature", "Prediction", "Climate sensitivity"
-],
+      "Global mean surface temperature",
+      "Prediction",
+      "Climate sensitivity"
+    ],
     "details": [
-"Quantifying the response of global mean surface temperature to radiative forcing is fundamental for assessing the risks associated with anthropogenic climate change. Statistical models used for this purpose must adequately represent both the forced response and the structure of internal climate variability.",
-
-"Simple energy balance models with a single heat reservoir naturally give rise to autoregressive processes of order one (AR(1)), which are characterized by a single decorrelation timescale. However, such models fail to capture the approximately scale-invariant variability observed in empirical records of global mean surface temperature. These records exhibit long-range dependence and power-law scaling over a wide range of timescales (Rybski et al., 2006; Huybers and Curry, 2005; Franzke, 2010; Lovejoy and Schertzer, 2013; Rypdal and Rypdal, 2016). This has motivated the use of long-memory stochastic processes, such as fractional Gaussian noise (fGn), which explicitly represent persistent correlations and have been shown to provide a more realistic statistical description of temperature variability (Rypdal and Rypdal, 2016; Fredriksen and Rypdal, 2016).",
-
-"A key computational challenge is that, unlike AR(1) processes, fGn is not a Gaussian Markov random field and therefore does not admit a sparse precision matrix. This makes likelihood-based inference and Bayesian computation considerably more demanding. To address this, Sørbye et al. (2019) introduced an approximation in which fGn is represented as a weighted sum of a small number of AR(1) processes. This construction recovers a sparse Markov structure, enabling efficient inference while retaining the essential long-memory properties of fGn.",
-
-"The R package INLA.climate builds on these developments by providing a flexible framework for modeling the temperature response to radiative forcing within a hierarchical Bayesian setting. It leverages the R-INLA methodology (Rue et al., 2009) to perform fast and accurate approximate Bayesian inference, and incorporates the fGn approximation of Sørbye et al. (2019) to represent internal variability. This allows users to combine physically motivated response models with realistic stochastic structure, facilitating efficient estimation of key quantities such as climate sensitivity and uncertainty in the forced response across multiple timescales. (Myrvoll-Nilsen et al., 2020)",
-
-"In addition to model fitting, INLA.climate provides tools for prediction and climate sensitivity analysis within the same coherent Bayesian framework. In particular, it enables probabilistic projections of global mean surface temperature under user-specified future radiative forcing scenarios, allowing uncertainty in both the forced response and internal variability to be propagated forward in time. The package also facilitates estimation of key climate metrics such as the transient climate response (TCR), derived directly from the inferred model parameters. By integrating inference, prediction, and sensitivity analysis, the framework supports a comprehensive and computationally efficient approach to quantifying future climate change and its associated uncertainties.",
-
-"References:",
-
-"Franzke, C. (2010). Long-range dependence and climate noise characteristics of Antarctic temperature data. Journal of Climate, 23(22), 6074-6081.",
-"Fredriksen, H. B., & Rypdal, K. (2016). Spectral characteristics of instrumental and climate model surface temperatures. Journal of Climate, 29(4), 1253-1268.",
-"Huybers, P., & Curry, W. (2006). Links between annual, Milankovitch and continuum temperature variability. Nature, 441(7091), 329-332.",
-"Lovejoy, S., & Schertzer, D. (2013). The weather and climate: emergent laws and multifractal cascades. Cambridge University Press.",
-"Myrvoll-Nilsen, E., Sørbye, S. H., Fredriksen, H. B., Rue, H., & Rypdal, M. (2020). Statistical estimation of global surface temperature response to forcing under the assumption of temporal scaling. Earth System Dynamics, 11(2), 329-345.",
-"Rue, H., Martino, S., & Chopin, N. (2009). Approximate Bayesian inference for latent Gaussian models by using integrated nested Laplace approximations. Journal of the Royal Statistical Society Series B: Statistical Methodology, 71(2), 319-392.",
-"Rybski, D., Bunde, A., Havlin, S., & Von Storch, H. (2006). Long‐term persistence in climate and the detection problem. Geophysical Research Letters, 33(6).",
-"Rypdal, M., & Rypdal, K. (2016). Late Quaternary temperature variability described as abrupt transitions on a 1/f noise background. Earth System Dynamics, 7(1), 281-293.",
-"Sørbye, S. H., Myrvoll-Nilsen, E., & Rue, H. (2019). An approximate fractional Gaussian noise model with O(n) computational cost. Statistics and Computing, 29(4), 821-833."
+      "Quantifying the response of global mean surface temperature to radiative forcing is fundamental for assessing the risks associated with anthropogenic climate change. Statistical models used for this purpose must adequately represent both the forced response and the structure of internal climate variability.",
+      "Simple energy balance models with a single heat reservoir naturally give rise to autoregressive processes of order one (AR(1)), which are characterized by a single decorrelation timescale. However, such models fail to capture the approximately scale-invariant variability observed in empirical records of global mean surface temperature. These records exhibit long-range dependence and power-law scaling over a wide range of timescales (Rybski et al., 2006; Huybers and Curry, 2005; Franzke, 2010; Lovejoy and Schertzer, 2013; Rypdal and Rypdal, 2016). This has motivated the use of long-memory stochastic processes, such as fractional Gaussian noise (fGn), which explicitly represent persistent correlations and have been shown to provide a more realistic statistical description of temperature variability (Rypdal and Rypdal, 2016; Fredriksen and Rypdal, 2016).",
+      "A key computational challenge is that, unlike AR(1) processes, fGn is not a Gaussian Markov random field and therefore does not admit a sparse precision matrix. This makes likelihood-based inference and Bayesian computation considerably more demanding. To address this, Sørbye et al. (2019) introduced an approximation in which fGn is represented as a weighted sum of a small number of AR(1) processes. This construction recovers a sparse Markov structure, enabling efficient inference while retaining the essential long-memory properties of fGn.",
+      "The R package INLA.climate builds on these developments by providing a flexible framework for modeling the temperature response to radiative forcing within a hierarchical Bayesian setting. It leverages the R-INLA methodology (Rue et al., 2009) to perform fast and accurate approximate Bayesian inference, and incorporates the fGn approximation of Sørbye et al. (2019) to represent internal variability. This allows users to combine physically motivated response models with realistic stochastic structure, facilitating efficient estimation of key quantities such as climate sensitivity and uncertainty in the forced response across multiple timescales. (Myrvoll-Nilsen et al., 2020)",
+      "In addition to model fitting, INLA.climate provides tools for prediction and climate sensitivity analysis within the same coherent Bayesian framework. In particular, it enables probabilistic projections of global mean surface temperature under user-specified future radiative forcing scenarios, allowing uncertainty in both the forced response and internal variability to be propagated forward in time. The package also facilitates estimation of key climate metrics such as the transient climate response (TCR), derived directly from the inferred model parameters. By integrating inference, prediction, and sensitivity analysis, the framework supports a comprehensive and computationally efficient approach to quantifying future climate change and its associated uncertainties.",
+      "References:",
+      "Franzke, C. (2010). Long-range dependence and climate noise characteristics of Antarctic temperature data. Journal of Climate, 23(22), 6074-6081.",
+      "Fredriksen, H. B., & Rypdal, K. (2016). Spectral characteristics of instrumental and climate model surface temperatures. Journal of Climate, 29(4), 1253-1268.",
+      "Huybers, P., & Curry, W. (2006). Links between annual, Milankovitch and continuum temperature variability. Nature, 441(7091), 329-332.",
+      "Lovejoy, S., & Schertzer, D. (2013). The weather and climate: emergent laws and multifractal cascades. Cambridge University Press.",
+      "Myrvoll-Nilsen, E., Sørbye, S. H., Fredriksen, H. B., Rue, H., & Rypdal, M. (2020). Statistical estimation of global surface temperature response to forcing under the assumption of temporal scaling. Earth System Dynamics, 11(2), 329-345.",
+      "Rue, H., Martino, S., & Chopin, N. (2009). Approximate Bayesian inference for latent Gaussian models by using integrated nested Laplace approximations. Journal of the Royal Statistical Society Series B: Statistical Methodology, 71(2), 319-392.",
+      "Rybski, D., Bunde, A., Havlin, S., & Von Storch, H. (2006). Long‐term persistence in climate and the detection problem. Geophysical Research Letters, 33(6).",
+      "Rypdal, M., & Rypdal, K. (2016). Late Quaternary temperature variability described as abrupt transitions on a 1/f noise background. Earth System Dynamics, 7(1), 281-293.",
+      "Sørbye, S. H., Myrvoll-Nilsen, E., & Rue, H. (2019). An approximate fractional Gaussian noise model with O(n) computational cost. Statistics and Computing, 29(4), 821-833."
     ],
     "install": {
       "note": [
         "Make sure you have R installed (https://cran.r-project.org)",
         "Install INLA (https://www.r-inla.org/download/)"
       ],
-      "dependencies": ["INLA", "Matrix", "stats"],
+      "dependencies": [
+        "INLA",
+        "Matrix",
+        "stats"
+      ],
       "r": [
         "library(remotes)",
         "remotes::install_github('eirikmn/INLA.climate')"
       ]
     },
     "demo": {
-"code": [
-"library(INLA.climate)",
-" ",
-"data(HadCRUT) #load HadCRUT GMST data",
-"data(HansenForcingGHG) #Load Hansen et al. (2010)  forcing",
-" ",
-"result <- inla.climate(data=HadCRUT$Temperature,forcing=HansenForcingGHG$Forcing,",
-"                               compute.mu = 2) ## computes forcing response",
-" ",
-"summary(result)",
-"plot(result)"
-
+      "code": [
+        "library(INLA.climate)",
+        " ",
+        "data(HadCRUT) #load HadCRUT GMST data",
+        "data(HansenForcingGHG) #Load Hansen et al. (2010)  forcing",
+        " ",
+        "result <- inla.climate(data=HadCRUT$Temperature,forcing=HansenForcingGHG$Forcing,",
+        "                               compute.mu = 2) ## computes forcing response",
+        " ",
+        "summary(result)",
+        "plot(result)"
       ],
       "output": [
-"Call:",
-"inla.climate(data = HadCRUT$Temperature, forcing = HansenForcingGHG$Forcing,     compute.mu = 2)",
-" ",
-"Time used:",
-"Running INLA  Sampling mu        Total ",
-"       4.612        5.157       10.816 ",
-" ",
-"Random effects:",
-"Name Model",
-"idy  RGeneric2",
-" ",
-"Model hyperparameters:",
-"          mean     sd 0.025quant 0.5quant 0.975quant",
-"H       0.8401 0.0445     0.7514   0.8407     0.9226",
-"Sigmax  0.1316 0.0151     0.1064   0.1299     0.1655",
-"Sigmaf  0.0647 0.0087     0.0488   0.0644     0.0828",
-"F0     -0.1245 0.0870    -0.2951  -0.1248     0.0467",
-" ",
-"Full Bayesian analysis of forcing response computed from 100000 samples.",
-" ",
-"Deviance Information Criterion (DIC) ...: -1355.04",
-"Effective number of parameters .........: 165.88",
-" ",
-"Marginal log-Likelihood: 898.67",
-"Posterior marginals for linear predictor and fitted values computed"
+        "Call:",
+        "inla.climate(data = HadCRUT$Temperature, forcing = HansenForcingGHG$Forcing,     compute.mu = 2)",
+        " ",
+        "Time used:",
+        "Running INLA  Sampling mu        Total ",
+        "       4.612        5.157       10.816 ",
+        " ",
+        "Random effects:",
+        "Name Model",
+        "idy  RGeneric2",
+        " ",
+        "Model hyperparameters:",
+        "          mean     sd 0.025quant 0.5quant 0.975quant",
+        "H       0.8401 0.0445     0.7514   0.8407     0.9226",
+        "Sigmax  0.1316 0.0151     0.1064   0.1299     0.1655",
+        "Sigmaf  0.0647 0.0087     0.0488   0.0644     0.0828",
+        "F0     -0.1245 0.0870    -0.2951  -0.1248     0.0467",
+        " ",
+        "Full Bayesian analysis of forcing response computed from 100000 samples.",
+        " ",
+        "Deviance Information Criterion (DIC) ...: -1355.04",
+        "Effective number of parameters .........: 165.88",
+        " ",
+        "Marginal log-Likelihood: 898.67",
+        "Posterior marginals for linear predictor and fitted values computed"
       ],
-
-  "plots": [
-    "/plots/INLA.climate_demo.png"
-  ]
+      "plots": [
+        "/plots/INLA.climate_demo.png"
+      ]
     },
     "cite": {
       "text": "If you use this package, please cite:",
       "bibtex": "@article{...}",
       "papers": [
-"Myrvoll-Nilsen, E., Sørbye, S. H., Fredriksen, H. B., Rue, H., & Rypdal, M. (2020). <strong>Statistical estimation of global surface temperature response to forcing under the assumption of temporal scaling</strong>. <em>Earth System Dynamics</em>, <strong>11</strong>(2), 329-345."
+        "Myrvoll-Nilsen, E., Sørbye, S. H., Fredriksen, H. B., Rue, H., & Rypdal, M. (2020). <strong>Statistical estimation of global surface temperature response to forcing under the assumption of temporal scaling</strong>. <em>Earth System Dynamics</em>, <strong>11</strong>(2), 329-345."
       ],
       "more_text": "Since this package builds upon methodology from other papers, please consider citing:",
       "more_papers": [
-"Approximate fGn model: <br>Sørbye, S. H., Myrvoll-Nilsen, E., & Rue, H. (2019). <strong>An approximate fractional Gaussian noise model with O(n) computational cost</strong>. <em>Statistics and Computing</em>, <strong>29</strong>(4), 821-833.",
-"INLA: <br>Rue, H., Martino, S., & Chopin, N. (2009). <strong>Approximate Bayesian inference for latent Gaussian models by using integrated nested Laplace approximations</strong>. <em>Journal of the Royal Statistical Society Series B: Statistical Methodology</em>, <strong>71</strong>(2), 319-392."],
+        "Approximate fGn model: <br>Sørbye, S. H., Myrvoll-Nilsen, E., & Rue, H. (2019). <strong>An approximate fractional Gaussian noise model with O(n) computational cost</strong>. <em>Statistics and Computing</em>, <strong>29</strong>(4), 821-833.",
+        "INLA: <br>Rue, H., Martino, S., & Chopin, N. (2009). <strong>Approximate Bayesian inference for latent Gaussian models by using integrated nested Laplace approximations</strong>. <em>Journal of the Royal Statistical Society Series B: Statistical Methodology</em>, <strong>71</strong>(2), 319-392."
+      ],
       "more_bibtex": "@article{...}"
     },
-    "github": "https://github.com/eirikmn/INLA.climate"
+    "github": "https://github.com/eirikmn/INLA.climate",
+    "research": {
+      "href": "/research/longmemory",
+      "label": "Long-range dependence"
+    }
   }
 ]

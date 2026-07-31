@@ -6,42 +6,65 @@
    wording and the styling live in one place.
 
    Props:
-     heading - optional small heading above the cards
+     featured - render only the themes marked featured. The
+                home page uses this so new themes can be added
+                to /research without crowding the front page.
+
+   The thumbnails are inlined rather than loaded via <img> so
+   they can use currentColor and var(--accent), and therefore
+   follow the light/dark theme with no extra work.
 ========================================================= */
 
-const { heading = null } = Astro.props;
+import fs from "node:fs";
+import path from "node:path";
+
+const dir = path.join(process.cwd(), "src/assets/themes");
+const figure = (name) =>
+  fs.readFileSync(path.join(dir, `${name}.svg`), "utf-8");
+
+const { featured = false } = Astro.props;
 
 const themes = [
   {
+    id: "longmemory",
     href: "/research/longmemory",
     title: "Long-range dependence",
     blurb:
-      "Efficient Bayesian analysis of long-memory processes, with applications to climate data."
+      "Efficient Bayesian analysis of long-memory processes, with applications to climate data.",
+    featured: true
   },
   {
+    id: "agemodeling",
     href: "/research/agemodeling",
     title: "Bayesian age-depth modeling",
     blurb:
-      "Dating uncertainty and synchronization of layer-counted paleoclimate proxy records."
+      "Dating uncertainty and synchronization of layer-counted paleoclimate proxy records.",
+    featured: true
   },
   {
+    id: "earlywarning",
     href: "/research/earlywarning",
     title: "Early warning signals",
     blurb:
-      "A Bayesian model-based approach for identifying early warning signals preceding tipping points."
+      "A Bayesian model-based approach for identifying early warning signals preceding tipping points.",
+    featured: true
   }
 ];
+
+const shown = featured ? themes.filter((t) => t.featured) : themes;
 ---
 
-{heading && <h2>{heading}</h2>}
-
 <ul class="themes">
-  {themes.map((theme) => (
+  {shown.map((theme) => (
     <li>
-      <a class="theme-link" href={theme.href}>
-        {theme.title}
-      </a>
-      <p>{theme.blurb}</p>
+      <div class="theme-figure" set:html={figure(theme.id)} />
+
+      <div class="theme-body">
+        <a class="theme-link" href={theme.href}>
+          {theme.title}
+        </a>
+        <p>{theme.blurb}</p>
+      </div>
     </li>
   ))}
 </ul>
@@ -56,6 +79,11 @@ const themes = [
 }
 
 .themes li {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: center;
+
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 1.25rem 1.5rem;
@@ -75,9 +103,24 @@ const themes = [
   transform: translateY(-2px);
   border-color: var(--accent);
   background: color-mix(in srgb, var(--bg) 86%, var(--accent));
-
-  /* derived from --text so the shadow is visible in dark mode */
   box-shadow: 0 8px 24px color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+/* ---- thumbnail ---- */
+
+.theme-figure {
+  min-width: 0;
+  color: var(--text);
+}
+
+.theme-figure :global(svg) {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.theme-body {
+  min-width: 0;
 }
 
 .themes a {
@@ -125,8 +168,16 @@ const themes = [
 }
 
 .themes p {
-  margin-top: 0.75rem;
+  margin-top: 0.5rem;
   margin-bottom: 0;
   color: var(--text-muted);
+}
+
+@media (max-width: 560px) {
+  .themes li {
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1.1rem 1.2rem;
+  }
 }
 </style>

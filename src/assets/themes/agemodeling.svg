@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 72" role="img" aria-hidden="true">
+  <!--
+    Bayesian age-depth modeling.
+
+    An ice core with layers that get thinner and less certain
+    the further down you go — and a question mark where the
+    date should be. Counting them is the easy part.
+  -->
+
+  <!-- the core -->
+  <rect x="14" y="6" width="30" height="60" rx="4"
+        fill="currentColor" opacity="0.10"/>
+  <rect x="14" y="6" width="30" height="60" rx="4"
+        fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.45"/>
+
+  <!-- layers: clear at the top, crowded and faint at depth -->
+  <g stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round">
+    <line x1="18" y1="14" x2="40" y2="14"/>
+    <line x1="18" y1="22" x2="40" y2="22" opacity="0.9"/>
+    <line x1="18" y1="29" x2="40" y2="29" opacity="0.8"/>
+    <line x1="18" y1="35" x2="40" y2="35" opacity="0.7"/>
+    <line x1="18" y1="40" x2="40" y2="40" opacity="0.6"/>
+    <line x1="18" y1="44" x2="40" y2="44" opacity="0.5"/>
+    <line x1="18" y1="47.5" x2="40" y2="47.5" opacity="0.4"/>
+    <line x1="18" y1="50.5" x2="40" y2="50.5" opacity="0.32"/>
+    <line x1="18" y1="53" x2="40" y2="53" opacity="0.26"/>
+    <line x1="18" y1="55" x2="40" y2="55" opacity="0.2"/>
+  </g>
+
+  <!-- depth arrow -->
+  <g fill="currentColor" opacity="0.35">
+    <rect x="52" y="12" width="1.5" height="42"/>
+    <path d="M52.75 60 L49 53 L56.5 53 Z"/>
+  </g>
+
+  <!-- and the age is...? -->
+  <text x="66" y="44" font-family="Inter, system-ui, sans-serif"
+        font-size="30" font-weight="600" fill="var(--accent)">?</text>
+</svg>

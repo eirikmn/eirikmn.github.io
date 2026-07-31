@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 72" role="img" aria-hidden="true">
+  <!--
+    Long-range dependence.
+
+    An autocorrelation function that decays and decays and
+    then, pointedly, refuses to reach zero. The trailing
+    dots are the joke: it is still going.
+
+    Colours come from the page: currentColor for the axes,
+    the accent custom property for the data.
+  -->
+
+  <!-- axes -->
+  <g fill="currentColor" opacity="0.35">
+    <rect x="10" y="8"  width="1.5" height="52"/>
+    <rect x="10" y="58.5" width="80" height="1.5"/>
+  </g>
+
+  <!-- hyperbolically decaying bars -->
+  <g fill="var(--accent)">
+    <rect x="15" y="12" width="5" height="46.5"/>
+    <rect x="23" y="26" width="5" height="32.5"/>
+    <rect x="31" y="35" width="5" height="23.5"/>
+    <rect x="39" y="41" width="5" height="17.5"/>
+    <rect x="47" y="45" width="5" height="13.5"/>
+    <rect x="55" y="48" width="5" height="10.5"/>
+    <rect x="63" y="50" width="5" height="8.5"/>
+    <rect x="71" y="51.5" width="5" height="7"/>
+  </g>
+
+  <!-- ... still not zero -->
+  <g fill="var(--accent)" opacity="0.55">
+    <circle cx="82" cy="55" r="1.6"/>
+    <circle cx="87" cy="55" r="1.6"/>
+    <circle cx="92" cy="55" r="1.6"/>
+  </g>
+</svg>
