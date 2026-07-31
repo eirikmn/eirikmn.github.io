@@ -1,14 +1,140 @@
 ---
 import "katex/dist/katex.min.css";
+import Footer from "../components/Footer.astro";
+import profiles from "../data/profiles.json";
+import cv from "../data/cvheader.json";
 
-const { title = "Test" } = Astro.props;
+/* =========================================================
+   Props
+     title       - page title. Appended with the site name
+                   unless `standaloneTitle` is set.
+     description - 1-2 sentences. Used for the search result
+                   snippet and the link preview.
+     image       - social card, relative to the site root.
+     noindex     - keep the page out of search results.
+========================================================= */
+
+const {
+  title = "Eirik Myrvoll-Nilsen",
+  description = "Eirik Myrvoll-Nilsen is a postdoctoral research fellow at UiT The Arctic University of Norway, working on Bayesian statistics for climate: long-range dependence, age-depth modeling and early warning signals.",
+  image = "/og-image.png",
+  standaloneTitle = false,
+  noindex = false
+} = Astro.props;
+
+const SITE_NAME = "Eirik Myrvoll-Nilsen";
+const AUTHOR = "Eirik Myrvoll-Nilsen";
+
+/* Astro.site comes from `site` in astro.config.mjs */
+const base = Astro.site ?? new URL("https://eirikmyrvollnilsen.com");
+
+/* Normalise trailing slashes so a page is never indexed
+   under two URLs — but keep the one on the root, since
+   that is the form the sitemap and the server both use. */
+const path = Astro.url.pathname;
+const canonical =
+  path === "/"
+    ? new URL("/", base).href
+    : new URL(path.replace(/\/$/, ""), base).href;
+const imageURL = new URL(image, base).href;
+
+const fullTitle =
+  standaloneTitle || title === SITE_NAME
+    ? title
+    : `${title} · ${SITE_NAME}`;
+
+/* Structured data. Tells Google that this site and the
+   person behind the ORCID / Scholar / GitHub profiles are
+   the same entity, which is what connects the site to an
+   existing scholarly identity. */
+const personSchema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: AUTHOR,
+  url: base.href,
+  image: imageURL,
+  jobTitle: cv.title,
+  email: `mailto:${cv.email}`,
+
+  affiliation: {
+    "@type": "CollegeOrUniversity",
+    name: cv.affiliation.institution,
+    url: cv.affiliation.institutionUrl,
+    department: {
+      "@type": "Organization",
+      name: cv.affiliation.department
+    }
+  },
+
+  /* worksFor is the employment relationship; affiliation is
+     the academic one. Search engines read them differently. */
+  worksFor: {
+    "@type": "CollegeOrUniversity",
+    name: cv.affiliation.institution,
+    url: cv.affiliation.institutionUrl
+  },
+
+  /* street address, so the site can be placed geographically */
+  workLocation: {
+    "@type": "Place",
+    name: cv.office.building,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: cv.office.street,
+      addressLocality: "Tromsø",
+      postalCode: "9019",
+      addressCountry: "NO"
+    }
+  },
+  knowsAbout: [
+    "Bayesian statistics",
+    "Long-range dependence",
+    "Age-depth modeling",
+    "Early warning signals",
+    "Climate science",
+    "Integrated nested Laplace approximations"
+  ],
+  /* same list the footer renders, so the two cannot drift */
+  sameAs: profiles.map((p) => p.url)
+};
 ---
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>{title}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>{fullTitle}</title>
+  <meta name="description" content={description} />
+  <meta name="author" content={AUTHOR} />
+  <link rel="canonical" href={canonical} />
+
+  {noindex && <meta name="robots" content="noindex, follow" />}
+
+  <!-- link previews: Slack, Bluesky, LinkedIn, iMessage, ... -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content={SITE_NAME} />
+  <meta property="og:title" content={fullTitle} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:image" content={imageURL} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content={`${AUTHOR} — ${SITE_NAME}`} />
+  <meta property="og:locale" content="en_GB" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={fullTitle} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={imageURL} />
+
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)" />
+
+  <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+
+  <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -45,6 +171,19 @@ const { title = "Test" } = Astro.props;
       --accent: #4da3ff;
     }
 
+    /* Secondary text: dates, affiliations, captions, nav.
+       Declared once — custom properties resolve at use
+       time, so this re-derives itself from whichever
+       palette is active rather than needing a duplicate
+       in the html.dark block above.
+
+       65% keeps it clear of the 4.5:1 contrast floor in
+       both themes: roughly 5.9:1 on white, 7.8:1 on the
+       dark background. */
+    :root {
+      --text-muted: color-mix(in srgb, var(--text) 65%, var(--bg));
+    }
+
     /* =========================
        BASE LAYOUT
     ========================= */
@@ -65,6 +204,78 @@ const { title = "Test" } = Astro.props;
       padding: 0;
     }
 
+    /* =========================
+       FOCUS
+
+       One ring for every interactive element. :focus-visible
+       rather than :focus, so it appears for keyboard and
+       assistive-tech users without flashing on mouse clicks.
+    ========================= */
+
+    /* :global() because this block is scoped — without it the
+       rule would only reach the header and skip link, not the
+       links and buttons inside each page. */
+    :global(:focus-visible) {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+      border-radius: 2px;
+    }
+
+    /* =========================
+       SKIP LINK
+
+       Without this, reaching the content by keyboard means
+       tabbing past the brand, five nav links and the theme
+       toggle on every single page.
+    ========================= */
+
+    .skip-link {
+      position: absolute;
+      left: 8px;
+      top: -100px;
+      z-index: 2000;
+
+      padding: 10px 16px;
+      border-radius: 8px;
+
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--accent);
+      text-decoration: none;
+
+      transition: top 0.15s ease;
+    }
+
+    .skip-link:focus {
+      top: 8px;
+    }
+
+    /* =========================
+       REDUCED MOTION
+
+       Honour the OS-level setting. Transitions and transforms
+       collapse to effectively instant rather than being
+       removed, so state changes still register.
+    ========================= */
+
+    @media (prefers-reduced-motion: reduce) {
+      :global(*),
+      :global(*::before),
+      :global(*::after) {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+
+      /* the lift on the research cards is motion for its own
+         sake; SectionNav no longer nudges on hover at all */
+      :global(.themes li:hover),
+      :global(.themes li:hover a::after) {
+        transform: none !important;
+      }
+    }
+
     .container {
       max-width: 850px;
       margin: 64px auto;
@@ -75,21 +286,52 @@ const { title = "Test" } = Astro.props;
       margin-bottom: 64px;
     }
 
+    /* =========================
+       HEADINGS
+
+       An explicit scale: 2 / 1.45 / 1.15 rem against a 1rem
+       body. h2 previously had no font-size at all and fell
+       back to the browser's 1.5em, and h3 at 1.1rem was only
+       10% larger than body text — not enough to register as
+       a heading.
+
+       Every heading gets noticeably more space above than
+       below, so it binds to the section it introduces rather
+       than floating between two paragraphs.
+    ========================= */
+
     h1 {
       font-size: 2rem;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-top: 0;
       margin-bottom: 16px;
     }
 
     h2 {
-      margin-bottom: 18px;
+      font-size: 1.45rem;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+
+      margin-top: 48px;
+      margin-bottom: 16px;
+
       padding-bottom: 6px;
       border-bottom: 1px solid var(--border);
     }
 
     h3 {
-      font-size: 1.1rem;
-      margin-top: 28px;
-      margin-bottom: 10px;
+      font-size: 1.15rem;
+      line-height: 1.3;
+
+      margin-top: 32px;
+      margin-bottom: 8px;
+    }
+
+    /* no leading gap when a heading opens a section */
+    h2:first-child,
+    h3:first-child {
+      margin-top: 0;
     }
 
     p {
@@ -112,6 +354,24 @@ const { title = "Test" } = Astro.props;
     a:hover {
       opacity: 0.8;
     }
+    :global(.container a:not([class])),
+    :global(.link) {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 500;
+
+      border-bottom: 0.5px solid color-mix(in srgb, var(--text) 35%, transparent);
+      transition: color 0.15s ease, border-color 0.15s ease;
+
+      overflow-wrap: anywhere;
+    }
+
+    :global(.container a:not([class]):hover),
+    :global(.link:hover) {
+      color: var(--accent);
+      border-bottom: 1px solid var(--accent);
+      opacity: 1;
+    }
     
 
     /* =========================
@@ -123,7 +383,17 @@ const { title = "Test" } = Astro.props;
       justify-content: space-between;
       align-items: center;
 
-      padding: 14px 24px;
+      /* The bar itself stays full-bleed, so the border and the
+         blurred background still span the window. Its contents
+         are pulled in to line up with the 850px text column
+         below: .container is content-box, so its text starts at
+         (100% - 850px) / 2 from each edge.
+
+         max() keeps the plain 24px gutter once the viewport is
+         narrower than the column, which makes this a no-op on
+         anything below roughly 900px. */
+      padding: 14px max(24px, calc((100% - 850px) / 2));
+
       border-bottom: 1px solid var(--border);
 
       backdrop-filter: blur(8px);
@@ -225,10 +495,61 @@ const { title = "Test" } = Astro.props;
     .toggle-btn:hover {
       box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent);
     }
+
+    @media (max-width: 600px) {
+    body {
+      font-size: 1rem;
+    }
+    .container {
+      width: 100%;
+      margin: 32px auto;
+      padding: 0 18px;
+      box-sizing: border-box;
+    }
+    header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "brand toggle"
+      "nav   nav";
+    row-gap: 10px;
+    align-items: center;
+    padding: 10px 18px;
+  }
+
+  .left {
+    grid-area: brand;
+    font-size: 1rem;
+  }
+
+  /* dissolve the wrapper so nav and toggle can sit on different rows */
+  .right {
+    display: contents;
+  }
+
+  nav {
+    grid-area: nav;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px 12px;
+    font-size: 0.85rem;
+  }
+
+  .toggle {
+    grid-area: toggle;
+    width: 32px;
+    height: 32px;
+    justify-self: end;
+  }
+  :global(.cv-section) { scroll-margin-top: 90px; }
+  }
   </style>
 </head>
 
 <body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
 
   <header>
     <div class="left">
@@ -250,11 +571,13 @@ const { title = "Test" } = Astro.props;
     </div>
   </header>
 
-  <main>
+  <main id="main-content" tabindex="-1">
     <div class="container">
       <slot />
     </div>
   </main>
+
+  <Footer />
 
   <!-- =========================
        THEME SCRIPT

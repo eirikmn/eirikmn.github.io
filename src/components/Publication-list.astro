@@ -105,6 +105,27 @@ if (pages) metaParts.push(`pp. ${pages}`);
 if (year) metaParts.push(year);
 
 const meta = metaParts.join(", ");
+
+/* =========================
+   SEARCH HAYSTACK
+
+   Everything the search box on /publications matches
+   against, lowercased once at build time. The abstract is
+   included so a query hits even while its panel is closed.
+========================= */
+
+const searchText = [
+  title,
+  authors,
+  venue,
+  year,
+  typeLabel,
+  abstract,
+  doi
+]
+  .filter(Boolean)
+  .join(" ")
+  .toLowerCase();
 ---
 
 <style>
@@ -194,7 +215,10 @@ const meta = metaParts.join(", ");
   text-decoration: none;
 
   cursor: pointer;
-  transition: all 0.15s ease;
+  /* enumerate rather than `all`: animating every property
+     includes layout ones and can cause jank */
+  transition: border-color 0.15s ease, color 0.15s ease,
+              background 0.15s ease;
 }
 
 .action-btn:hover {
@@ -238,16 +262,28 @@ html.dark .abstract {
 @media (max-width: 600px) {
   .header {
     flex-direction: column;
+    gap: 8px;
   }
 
+  /* badge and action buttons share one wrapping row */
   .right {
-    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+  }
+
+  /* dissolve the wrapper so its buttons become direct
+     children of .right and flow inline with the badge */
+  .action-row {
+    display: contents;
   }
 }
 
 </style>
 
-<article class="pub" data-id={id}>
+<article class="pub" data-id={id} data-search={searchText}>
 
   <div class="header">
 

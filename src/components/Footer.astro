@@ -1,0 +1,201 @@
+---
+/* =========================================================
+   SITE FOOTER
+
+   Three jobs, in order of how much they matter for an
+   academic site:
+
+   1. Repeat your scholarly identity. Someone who arrives on
+      a research subpage from a search result has no other
+      cue about who wrote it. Name, position, institution.
+
+   2. Offer the profile links. ORCID and Scholar are the two
+      an academic reader is most likely to want next, and
+      they are the ones that connect this site to your
+      publication record.
+
+   3. Give a route onward. Long pages currently just end.
+
+   Deliberately NOT here: a copyright notice on every
+   heading, social feeds, a newsletter box, "made with love".
+========================================================= */
+
+import profile from "../data/cvheader.json";
+import profiles from "../data/profiles.json";
+
+const { name, title, affiliation, email } = profile;
+
+const year = new Date().getFullYear();
+
+/* Build date. Deploys follow commits, so this is a decent
+   proxy for "is this site still maintained" — the question
+   a reader actually has. */
+const updated = new Date().toLocaleDateString("en-GB", {
+  month: "long",
+  year: "numeric"
+});
+
+const pages = [
+  { label: "Research", href: "/research" },
+  { label: "Publications", href: "/publications" },
+  { label: "Software", href: "/software" },
+  { label: "CV", href: "/cv" },
+  { label: "Contact", href: "/contact" }
+];
+---
+
+<footer class="site-footer">
+
+  <div class="footer-inner">
+
+    <div class="footer-grid">
+
+      <!-- WHO -->
+      <div class="footer-col">
+        <p class="footer-name">{name}</p>
+        <p class="footer-line">{title}</p>
+        <p class="footer-line">{affiliation.institution}</p>
+        <p class="footer-line">{affiliation.location}</p>
+        <p class="footer-line">
+          <a href={`mailto:${email}`} class="footer-link">{email}</a>
+        </p>
+      </div>
+
+      <!-- WHERE ELSE -->
+      <div class="footer-col">
+        <h2 class="footer-heading">Profiles</h2>
+        <ul class="footer-list">
+          {profiles.map((p) => (
+            <li>
+              <a
+                class="footer-link"
+                href={p.url}
+                target="_blank"
+                rel="noopener noreferrer me"
+              >
+                {p.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <!-- ONWARD -->
+      <div class="footer-col">
+        <h2 class="footer-heading">Pages</h2>
+        <ul class="footer-list">
+          {pages.map((p) => (
+            <li>
+              <a class="footer-link" href={p.href}>{p.label}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="footer-base">
+      <span>© {year} {name}</span>
+      <span>Updated {updated}</span>
+    </div>
+
+  </div>
+
+</footer>
+
+<style>
+.site-footer {
+  margin-top: 5rem;
+  border-top: 1px solid var(--border);
+
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* align with the 850px text column, exactly as the header does */
+.footer-inner {
+  padding: 2.5rem max(24px, calc((100% - 850px) / 2)) 2rem;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 2rem;
+}
+
+.footer-col {
+  min-width: 0;
+}
+
+.footer-name {
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.footer-line {
+  margin: 0 0 0.2rem;
+  line-height: 1.5;
+}
+
+.footer-heading {
+  margin: 0 0 0.5rem;
+  padding: 0;
+  border: none;
+
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.footer-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  line-height: 1.9;
+}
+
+/* not .link: these should stay quiet until hovered, or the
+   footer turns into a wall of underlines */
+.footer-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.footer-link:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  opacity: 1;
+}
+
+.footer-base {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+
+  font-size: 0.8rem;
+}
+
+@media (max-width: 700px) {
+  .footer-inner {
+    padding: 2rem 18px 1.5rem;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  /* the identity block spans both columns above the lists */
+  .footer-col:first-child {
+    grid-column: 1 / -1;
+  }
+}
+</style>

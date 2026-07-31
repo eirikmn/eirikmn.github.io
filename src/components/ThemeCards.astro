@@ -1,0 +1,132 @@
+---
+/* =========================================================
+   RESEARCH THEME CARDS
+
+   Used on both the home page and the research index, so the
+   wording and the styling live in one place.
+
+   Props:
+     heading - optional small heading above the cards
+========================================================= */
+
+const { heading = null } = Astro.props;
+
+const themes = [
+  {
+    href: "/research/longmemory",
+    title: "Long-range dependence",
+    blurb:
+      "Efficient Bayesian analysis of long-memory processes, with applications to climate data."
+  },
+  {
+    href: "/research/agemodeling",
+    title: "Bayesian age-depth modeling",
+    blurb:
+      "Dating uncertainty and synchronization of layer-counted paleoclimate proxy records."
+  },
+  {
+    href: "/research/earlywarning",
+    title: "Early warning signals",
+    blurb:
+      "A Bayesian model-based approach for identifying early warning signals preceding tipping points."
+  }
+];
+---
+
+{heading && <h2>{heading}</h2>}
+
+<ul class="themes">
+  {themes.map((theme) => (
+    <li>
+      <a class="theme-link" href={theme.href}>
+        {theme.title}
+      </a>
+      <p>{theme.blurb}</p>
+    </li>
+  ))}
+</ul>
+
+<style>
+.themes {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.themes li {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+
+  transition: transform 0.2s ease, border-color 0.2s ease,
+              background 0.2s ease, box-shadow 0.2s ease;
+
+  /* same tint as .contact-card: the page background nudged
+     towards the accent, so it follows the active theme */
+  background: color-mix(in srgb, var(--bg) 92%, var(--accent));
+
+  /* positioning context for the stretched link below */
+  position: relative;
+}
+
+.themes li:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--bg) 86%, var(--accent));
+
+  /* derived from --text so the shadow is visible in dark mode */
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+.themes a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* STRETCHED LINK
+
+   An invisible overlay makes the whole card clickable while
+   the <a> still wraps only the title, so the link's
+   accessible name stays "Long-range dependence" rather than
+   the title plus the entire description. */
+.themes a::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 12px;
+}
+
+/* focus ring belongs on the card, not just the title */
+.themes a:focus-visible {
+  outline: none;
+}
+
+.themes a:focus-visible::before {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.themes a::after {
+  content: "→";
+  transition: transform 0.2s ease;
+}
+
+.themes li:hover a::after {
+  transform: translateX(4px);
+}
+
+.themes p {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+  color: var(--text-muted);
+}
+</style>

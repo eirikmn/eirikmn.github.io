@@ -2,8 +2,17 @@
   "name": "Eirik Myrvoll-Nilsen",
   "title": "Postdoctoral Research Fellow",
   "affiliation": {
+    "department": "Department of Mathematics and Statistics",
+    "group": "Machine Learning Group",
+    "groupUrl": "https://uit.no/research/machinelearning",
     "institution": "UiT The Arctic University of Norway",
+    "institutionUrl": "https://uit.no",
     "location": "Tromsø, Norway"
+  },
+  "office": {
+    "building": "Forskningsparken",
+    "street": "Sykehusvegen 23",
+    "postcode": "9019 Tromsø, Norway"
   },
   "email": "eirik.myrvoll-nilsen@uit.no",
   "website": "http://www.eirikmyrvollnilsen.com",

@@ -51,17 +51,18 @@ const time =
 </div>
 
 <style>
-.cv-item {
-  border-left: 2px solid var(--accent);
-  padding-left: 1rem;
-  margin-bottom: 0.6rem;
+/* only what differs from src/styles/cv.css */
 
+/* this entry type has no .cv-content wrapper, so the
+   flex column lives on the item itself */
+.cv-item {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-/* 🔑 THIS is the important fix */
+/* grid rather than flex so the date column is `auto`
+   and the title takes the remaining space */
 .cv-item-header {
   display: grid;
   grid-template-columns: 1fr auto;

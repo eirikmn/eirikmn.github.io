@@ -1,13 +1,14 @@
 [
   {
+    "id": "longmemory",
     "title": "Long-range dependence, with climate applications",
     "summary": "By approximating a long-range dependent process using a mixture of four AR(1) process we are able to achieve efficient and accurate Bayesian inference. This methodology was used to model global mean surface temperature.",
     "content": [
-     {
-       "type": "heading",
-       "level": 3,
-       "value": "Motivation"
-     },
+      {
+        "type": "heading",
+        "level": 3,
+        "value": "Motivation"
+      },
       {
         "type": "text",
         "value": "Long range dependence, climate motivations, computational challenges (toeplitz square, cubic), show AR(1) graph into LRD graph. Motivate AR(1) mixture representation, show graph. We find using numerical optimization, accurate using m=4, climate forcing, computationally efficiency"
@@ -53,16 +54,11 @@
           "width": "500px",
           "maxWidth": "100%"
         }
-     }
+      }
     ]
   },
-
-
-
-
-
-
-{
+  {
+    "id": "agemodeling",
     "title": "Age-depth modeling",
     "summary": "Bayesian age-depth modeling and synchronization",
     "content": [
@@ -80,7 +76,7 @@
         "level": 3,
         "value": "Uncertainty quantification"
       },
-        {
+      {
         "type": "text",
         "value": "Age-depth models are typically based on two categories of information, tie-points and layer-counts. Tie-points, which has seen the most developed age models, are characterized by having some points in depth where age-information is available. This could, for example, be obtained by radiometrically dating radioactive material found in the core. The earliest age-depth models used linear, or polynomial, interpolations between the tie-points. This is problematic as the resulting dating uncertainties do not reflect the lack of information we have in-between tie-points (FIG REF). The scientific community later started adopting Bayesian age-depth models, like Bacon (CITE), BChron (CITE) and OxCal (CITE), which provide much more physically realistic dating and robust representations of uncertainties. Proper treatment of uncertainty is important since dating uncertainties propagates to further analyses, possibly affecting the strength of results and conclusions based on the model. McKay et al. (YEAR) suggests to produce an ensemble of plausible chronologies drawn from the age-depth model, and propagate the uncertainties by performing analysis on all sampled chronologies in the ensemble. It is important that each chronology is drawn from the joint distribution so that the inferred correlation structure is retained in the sample."
       },
@@ -107,7 +103,7 @@
       },
       {
         "type": "math",
-        "value": "\\xi(z\\mid \\theta)." 
+        "value": "\\xi(z\\mid \\theta)."
       },
       {
         "type": "text",
@@ -115,7 +111,7 @@
       },
       {
         "type": "math",
-        "value": "\\begin{pmatrix} \\boldsymbol{y}_1\\\\ \\boldsymbol{y}_2 \\end{pmatrix} = \\begin{pmatrix} \\boldsymbol{I} & \\boldsymbol{0}\\\\ \\boldsymbol{R} & \\boldsymbol{I} \\end{pmatrix} \\begin{pmatrix} \\Delta\\boldsymbol{y}_1\\\\ \\boldsymbol{\\xi} \\end{pmatrix}" 
+        "value": "\\begin{pmatrix} \\boldsymbol{y}_1\\\\ \\boldsymbol{y}_2 \\end{pmatrix} = \\begin{pmatrix} \\boldsymbol{I} & \\boldsymbol{0}\\\\ \\boldsymbol{R} & \\boldsymbol{I} \\end{pmatrix} \\begin{pmatrix} \\Delta\\boldsymbol{y}_1\\\\ \\boldsymbol{\\xi} \\end{pmatrix}"
       },
       {
         "type": "text",
@@ -132,11 +128,8 @@
       }
     ]
   },
-
-
-
-
-{
+  {
+    "id": "earlywarning",
     "title": "Early warning signals",
     "summary": "Estimation of early warning signals using a Bayesian hierarchical modeling approach.",
     "content": [
@@ -146,8 +139,8 @@
       }
     ]
   },
-
-{
+  {
+    "id": "other",
     "title": "Other research",
     "summary": "Machine learning, data integration",
     "content": [
@@ -157,6 +150,4 @@
       }
     ]
   }
-
-
 ]

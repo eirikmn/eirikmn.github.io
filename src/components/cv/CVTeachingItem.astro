@@ -88,27 +88,12 @@ const id = `${role}-${institution}`
 </script>
 
 <style>
-.cv-item {
-  display: grid;
-  grid-template-columns: 1fr;
-  border-left: 2px solid var(--accent);
-  padding-left: 1rem;
-  margin-bottom: 1.5rem;
-}
+/* only what differs from src/styles/cv.css */
 
-/* =========================
-   CONTENT
-========================= */
-.cv-content {
-  display: flex;
-  flex-direction: column;
-}
-
+/* centre rather than baseline: the right-hand slot
+   holds a button, not text */
 .cv-item-header {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 1rem;
 }
 
 /* =========================
@@ -127,7 +112,8 @@ const id = `${role}-${institution}`
   cursor: pointer;
   color: var(--text);
 
-  transition: all 0.15s ease;
+  transition: border-color 0.15s ease, color 0.15s ease,
+              background 0.15s ease;
 }
 
 /* hover works in BOTH themes */

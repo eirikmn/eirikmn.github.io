@@ -90,8 +90,10 @@ const linkify = (text) => {
     <button data-toggle={panels.install}>⬇ Install</button>
     <button data-toggle={panels.demo}>▶ Demo</button>
 
+    <button data-toggle={panels.cite}>📚 Cite</button>
+
     {github && (
-      <a class="github-btn" href={github} target="_blank" rel="noopener noreferrer">
+      <a class="github-btn" href={github} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
         <svg class="github-icon" viewBox="0 0 24 24" aria-hidden="true">
           <path
             fill="currentColor"
@@ -101,8 +103,6 @@ const linkify = (text) => {
         <span>GitHub</span>
       </a>
     )}
-
-    <button data-toggle={panels.cite}>📚 Cite</button>
 
   </div>
 
@@ -263,24 +263,23 @@ document.addEventListener("click", (e) => {
    THEME VARIABLES
    ========================= */
 
+/* Only the code-block palette belongs here. This block used
+   to also redefine --text, --border-ui and --accent with
+   values that differed from Layout.astro, which meant the
+   Software page was quietly running a second colour scheme
+   (accent #2563eb rather than the site's #1da1f2). Removed
+   so the tokens resolve to the site palette. */
+
 :root {
   --code-bg: #f3f4f6;
   --code-text: #111827;
   --code-border: #e5e7eb;
-
-  --text: #111827;
-  --border-ui: #e5e7eb;
-  --accent: #2563eb;
 }
 
 html.dark {
   --code-bg: #1f2937;
   --code-text: #e5e7eb;
   --code-border: #374151;
-
-  --text: #e5e7eb;
-  --border-ui: #374151;
-  --accent: #60a5fa;
 }
 
 /* fallback */
@@ -292,15 +291,27 @@ html.dark {
 
 /* ========================= */
 
+/* same panel treatment as .contact-card on the Contact page:
+   a uniform border, 12px radius, and the page background
+   nudged towards the accent so the tint follows the theme */
 .software-item {
-  border-left: 2px solid var(--accent);
-  border-right: 1px solid var(--border-ui);
-  border-bottom: 1px solid var(--border-ui);
-  border-top: 1px solid var(--border-ui);
-  padding-left: 1rem;
-  padding-bottom: 1rem;
+  padding: 1.5rem;
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  background: color-mix(in srgb, var(--bg) 92%, var(--accent));
+
   display: flex;
   flex-direction: column;
+}
+
+@media (max-width: 600px) {
+  /* 1.5rem each side costs 48px of a 339px column, and these
+     panels carry code blocks */
+  .software-item {
+    padding: 1.1rem;
+  }
 }
 
 /* HEADER */
@@ -311,9 +322,40 @@ html.dark {
 }
 
 /* META */
+/* The badges had no layout rules at all. As bare inline
+   <span>s, a multi-word keyword like "Global mean surface
+   temperature" could break across two lines mid-pill, which
+   splits the border open and reads as a cropped button. */
+
+.software-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+
+  margin-top: 0.6rem;
+  min-width: 0;
+}
+
+/* dissolve the wrapper so the keywords share the same
+   wrapping row as the language badge, rather than being one
+   rigid block that has to fit or overflow */
+.keywords {
+  display: contents;
+}
+
 .badge {
+  /* inline-block is the actual fix: such a box is never split
+     across line boxes, so the border always closes around the
+     whole label. If a very long keyword ever does need two
+     lines, the pill grows taller instead of breaking apart. */
+  display: inline-block;
+  max-width: 100%;
+
   font-size: 0.7rem;
+  line-height: 1.5;
   padding: 2px 8px;
+
   border-radius: 999px;
   border: 1px solid var(--border-ui);
   background: transparent;
@@ -324,7 +366,7 @@ html.dark {
 .software-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.3rem;
   margin: 0.25rem 0;
 }
 
@@ -333,15 +375,36 @@ html.dark {
   font-size: 0.8rem;
   border: 1px solid var(--border-ui);
   background: transparent;
-  padding: 3px 10px;
+  padding: 3px 8px;
   border-radius: 999px;
   cursor: pointer;
   color: var(--text);
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.3rem;
   text-decoration: none;
   white-space: nowrap;
+}
+
+/* keep all five actions on one row on phones */
+@media (max-width: 600px) {
+  .software-actions {
+    gap: 0.25rem;
+    flex-wrap: nowrap;
+  }
+
+  .software-actions button,
+  .github-btn {
+    font-size: 0.74rem;
+    padding: 3px 7px;
+    gap: 0.25rem;
+  }
+
+  /* the mark is recognisable on its own; the label is
+     what pushes the row over the edge */
+  .github-btn span {
+    display: none;
+  }
 }
 .software-actions button.active {
   border-color: var(--accent);

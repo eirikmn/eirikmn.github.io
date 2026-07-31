@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# retired page kept in the repo but not part of the site
+Disallow: /research_OLD
+
+Sitemap: https://eirikmyrvollnilsen.com/sitemap.xml

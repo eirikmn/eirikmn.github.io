@@ -1,6 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
 
+/* shared styling for every CV entry type */
+import "../styles/cv.css";
+
 import profile from "../data/cvheader.json";
 
 import work from "../data/work.json";
@@ -14,8 +17,8 @@ import skills from "../data/skills.json";
 import CVSidebar from "../components/cv/CVSidebar.astro";
 import CVSection from "../components/cv/CVSection.astro";
 
+/* CVWorkItem renders both work and education entries */
 import CVWorkItem from "../components/cv/CVWorkItem.astro";
-import CVEducationItem from "../components/cv/CVEducationItem.astro";
 import CVTeachingItem from "../components/cv/CVTeachingItem.astro";
 import CVDevelopmentItem from "../components/cv/CVDevelopmentItem.astro";
 import CVSupervisionItem from "../components/cv/CVSupervisionItem.astro";
@@ -28,16 +31,14 @@ const phdSupervision = supervision?.filter((s) => s.degree === "PhD") ?? [];
 const mscSupervision = supervision?.filter((s) => s.degree === "MSc") ?? [];
 ---
 
-<Layout title="CV">
+<Layout
+  title="CV"
+  description="Curriculum vitae of Eirik Myrvoll-Nilsen: research and work experience, education, teaching, supervision, academic service and skills. Downloadable as PDF."
+>
 
   <div class="cv-grid">
 
-    <!-- LEFT SIDEBAR -->
-    <aside class="cv-sidebar">
-      <CVSidebar />
-    </aside>
-
-    <!-- RIGHT CONTENT -->
+    <!-- CONTENT -->
     <main class="cv-content">
 
       <!-- SUMMARY -->
@@ -55,7 +56,7 @@ const mscSupervision = supervision?.filter((s) => s.degree === "MSc") ?? [];
       <!-- EDUCATION -->
       <CVSection id="education" title="Education">
         {education.map((item) => (
-          <CVEducationItem {...item} />
+          <CVWorkItem {...item} />
         ))}
       </CVSection>
 
@@ -136,28 +137,41 @@ const mscSupervision = supervision?.filter((s) => s.degree === "MSc") ?? [];
 
     </main>
 
+    <!-- SECTION NAV -->
+    <aside class="cv-sidebar">
+      <CVSidebar />
+    </aside>
+
   </div>
 
 </Layout>
 
 <style>
+/* page layout only — entry styling lives in src/styles/cv.css */
+
+/* Nav on the right, matching the research subpages. With it
+   on the left the CV content started 228px in from the page
+   edge, so its left margin lined up with nothing — not the
+   header brand, not the footer, not any other page's h1. */
 .cv-grid {
   display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 0.5rem;
+  grid-template-columns: minmax(0, 1fr) 200px;
+  gap: 2rem;
   align-items: start;
 }
 
 .cv-sidebar {
   position: sticky;
-  top: 100px;
+  top: 96px;
   height: fit-content;
+  min-width: 0;
 }
 
 .cv-content {
   display: flex;
   flex-direction: column;
   gap: 1.8rem;
+  min-width: 0;
 }
 
 .cv-subsection {
@@ -167,12 +181,16 @@ const mscSupervision = supervision?.filter((s) => s.degree === "MSc") ?? [];
   color: var(--text);
 }
 
-/* keep spacing stable for divider centering */
-:global(.cv-content .cv-item) {
-  margin-bottom: 0.1rem;
-}
+@media (max-width: 900px) {
+  .cv-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
 
-:global(.cv-content .cv-item:last-child) {
-  margin-bottom: 0;
+  /* nav above the content once it is no longer a column */
+  .cv-sidebar {
+    position: static;
+    order: -1;
+  }
 }
 </style>

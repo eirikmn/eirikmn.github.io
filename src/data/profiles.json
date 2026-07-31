@@ -1,0 +1,27 @@
+[
+  {
+    "label": "ORCID",
+    "url": "https://orcid.org/0000-0002-1643-5661",
+    "scholarly": true
+  },
+  {
+    "label": "Google Scholar",
+    "url": "https://scholar.google.com/citations?user=FHoe1FQAAAAJ",
+    "scholarly": true
+  },
+  {
+    "label": "ResearchGate",
+    "url": "https://www.researchgate.net/profile/Eirik-Myrvoll-Nilsen",
+    "scholarly": true
+  },
+  {
+    "label": "GitHub",
+    "url": "https://github.com/eirikmn",
+    "scholarly": false
+  },
+  {
+    "label": "LinkedIn",
+    "url": "https://www.linkedin.com/in/eirik-myrvoll-nilsen-816b7379/",
+    "scholarly": false
+  }
+]

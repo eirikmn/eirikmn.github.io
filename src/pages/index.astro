@@ -1,309 +1,309 @@
 ---
 import Layout from "../layouts/Layout.astro";
+/* the home page's own publication card: stacked title /
+   authors / venue with the chevron-toggled abstract.
+   /publications uses Publication-list.astro, which is the
+   denser two-column list style. */
 import Publication from "../components/Publication.astro";
+import ThemeCards from "../components/ThemeCards.astro";
+import { loadBib } from "../lib/bib";
+import profile from "../data/cvheader.json";
 import newsData from "../data/news.json";
 
 const news = [...newsData].sort(
   (a, b) => new Date(b.date) - new Date(a.date)
 );
+
+/* Selected publications are chosen by citation key rather than
+   retyped, so titles, venues, DOIs and abstracts stay in step
+   with papers.bib and the /publications page. */
+const FEATURED = [
+  "myrvoll2025bayesian",
+  "myrvoll2025synchronization",
+  "Sorbye2019"
+];
+
+const papers = loadBib("./src/data/papers.bib");
+
+const selected = FEATURED
+  .map((key) => papers.find((p) => p.key === key))
+  .filter(Boolean);
 ---
 
-<Layout title="Icon test">
-
-  <style>
-
-/* =========================
-   NEWS
-========================= */
-
-  .news-list {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 2rem 0;
-  }
-
-  .news-item {
-    display: grid;
-    grid-template-columns: 110px 1fr;
-    gap: 1rem;
-    padding: 0.8rem 0;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .news-date {
-    color: var(--text-muted, #777);
-    font-size: 0.9rem;
-    white-space: nowrap;
-  }
-
-  .news-content h3 {
-    margin: 0 0 0.25rem 0;
-    font-size: 1rem;
-  }
-
-  .news-content p {
-    margin: 0;
-  }
-
-  @media (max-width: 600px) {
-    .news-item {
-      grid-template-columns: 1fr;
-      gap: 0.25rem;
-    }
-
-    .news-date {
-      font-weight: 600;
-    }
-  }
-    /* =========================
-       PROFILE HEADER
-    ========================= */
-
-    .profile-header {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      margin-bottom: 32px;
-    }
-
-    .profile-header img {
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      object-fit: cover;
-
-      border: 2px solid var(--border);
-
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-
-      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-    .profile-link {
-  display: inline-block;
-  border-radius: 50%;
-}
-
-.profile-link img {
-  display: block;
-}
-
-.profile-link:hover img {
-  transform: scale(1.02);
-  border-color: var(--accent);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-}
-
-html.dark .profile-link:hover img {
-  box-shadow: 0 10px 30px rgba(255,255,255,0.12);
-}
-
-
-    html.dark .profile-header img {
-      box-shadow: 0 6px 25px rgba(255,255,255,0.08);
-    }
-
-    .profile-header img:hover {
-      transform: scale(1.02);
-      border-color: var(--accent);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-    }
-
-    html.dark .profile-header img:hover {
-      box-shadow: 0 10px 30px rgba(255,255,255,0.12);
-    }
-    
-
-    .intro h1 {
-      margin: 0 0 6px 0;
-      font-size: 1.8rem;
-    }
-
-    .intro p {
-      margin: 0;
-      opacity: 0.85;
-      line-height: 1.5;
-      max-width: 500px;
-    }
-
-    /* =========================
-       ICONS
-    ========================= */
-
-    .icon-row {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-      margin-top: 40px;
-    }
-
-    .icon {
-      width: 64px;
-      height: 64px;
-      display: inline-block;
-    }
-
-    .icon img {
-      width: 100%;
-      height: 100%;
-      display: block;
-
-      transition: transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
-
-      filter: invert(0);
-    }
-
-    html.dark .icon img {
-      filter: invert(1);
-    }
-
-    .icon:hover img {
-      transform: translateY(-3px) scale(1.05);
-      opacity: 0.85;
-      filter: invert(48%) sepia(90%) saturate(1000%) hue-rotate(180deg);
-    }
-
-    html.dark .icon:hover img {
-      transform: translateY(-3px) scale(1.05);
-      opacity: 0.9;
-      filter: invert(1) invert(48%) sepia(90%) saturate(1000%) hue-rotate(180deg);
-    }
-
-    /* =========================
-       RESPONSIVE
-    ========================= */
-
-    @media (max-width: 600px) {
-      .profile-header {
-        flex-direction: column;
-        text-align: center;
-      }
-
-      .intro p {
-        max-width: 100%;
-      }
-    }
-
-  </style>
+<Layout
+  title="Eirik Myrvoll-Nilsen"
+  description="Postdoctoral research fellow at UiT The Arctic University of Norway. I work on Bayesian statistics for climate science: long-range dependence, age-depth modeling and early warning signals for tipping points."
+>
 
   <section>
 
     <!-- PROFILE HEADER -->
     <div class="profile-header">
 
-      <a href="/contact" class="profile-link" aria-label="Go to contact page">
-        <img src="/profile.jpg" alt="Profile picture" />
-      </a>
+      <img src="/profile.jpg" alt="Eirik Myrvoll-Nilsen" />
 
       <div class="intro">
         <h1>Eirik Myrvoll-Nilsen</h1>
 
-        <p>
-          I am a researcher working mostly on Bayesian statistics and latent Gaussian models. My work focuses on developing statistical methods for modeling complex stochastic processes and quantifying uncertainty. I apply these methods to problems in climate science and paleoclimate reconstruction.
+        <p class="tagline">
+          {profile.title} · {profile.affiliation.institution}
         </p>
+
         <p>
-          I'm always happy to discuss research ideas, potential collaborations, or student projects. <a href="/contact">contact me</a> if you are interested.
+          I work on Bayesian statistics and latent Gaussian models, mostly
+          applied to climate science: long-range dependence, uncertainty
+          quantification and synchronization of paleoclimate proxy records,
+          and early warning signals ahead of tipping points. More recently
+          I have also worked with deep learning methods and data integration.
+        </p>
+
+        <p>
+          I'm always happy to discuss research ideas, potential collaborations,
+          or student projects. <a href="/contact">Contact me</a> if you are
+          interested.
         </p>
       </div>
 
     </div>
 
-    <h2>News</h2>
+    <!-- RESEARCH -->
+    <h2>Research</h2>
 
-<ul class="news-list">
-  {news.map((item) => (
-    <li class="news-item">
-      <div class="news-date">
-        {new Date(item.date).toLocaleDateString("en-GB", {
-          year: "numeric",
-          month: "short",
-          day: "numeric"
-        })}
-      </div>
-
-      <div class="news-content">
-        <h3>{item.title}</h3>
-        <p>{item.text}</p>
-        {item.url && (
     <p>
-      <a href={item.url}>Read more →</a>
+      The main directions I work in — each has a page with the methods,
+      figures and papers behind it.
     </p>
-  )}
-      </div>
-    </li>
-  ))}
-</ul>
 
+    <ThemeCards />
 
-    <h2>Selected Publications</h2>
+    <p class="more-link">
+      <a href="/research">All research themes →</a>
+    </p>
 
-    <Publication
-      title="An approximate fractional Gaussian noise model with O(n) computational cost"
-      authors="Sigrunn Holbek Sørbye, Eirik Myrvoll-Nilsen and Håvard Rue"
-      venue="Statistics and Computing"
-      year="2019"
-      abstract="Fractional Gaussian noise (fGn) is a stationary time series model with long-memory properties applied in various fields like econometrics, hydrology and climatology. The computational cost in fitting an fGn model of length n using a likelihood-based approach is O(n^2), exploiting the Toeplitz structure of the covariance matrix. In most realistic cases, we do not observe the fGn process directly but only through indirect Gaussian observations, so the Toeplitz structure is easily lost and the computational cost increases to O(n^3). This paper presents an approximate fGn model of O(n) computational cost, both with direct and indirect Gaussian observations, with or without conditioning. This is achieved by approximating fGn with a weighted sum of independent first-order autoregressive (AR) processes, fitting the parameters of the approximation to match the autocorrelation function of the fGn model. The resulting approximation is stationary despite being Markov and gives a remarkably accurate fit using only four AR components. Specifically, the given approximate fGn model is incorporated within the class of latent Gaussian models in which Bayesian inference is obtained using the methodology of integrated nested Laplace approximation. The performance of the approximate fGn model is demonstrated in simulations and two real data examples."
-      doi="https://doi.org/10.1007/s11222-018-9843-1"
-      pdf="/papers/paper-fgnapprox.pdf"
-    />
+    <!-- SELECTED PUBLICATIONS -->
+    <h2>Selected publications</h2>
 
-    <Publication
-      title="Synchronization of Layer-Counted Paleoclimatic Proxy Archives Using a Bayesian Regression Modeling Framework"
-      authors="Eirik Myrvoll-Nilsen, Keno Riechers and Niklas Boers"
-      venue="Bayesian Analysis Advance Publication"
-      year="2025"
-      abstract="Layer-counted proxy records from paleoclimatic archives are subject to considerable dating uncertainties. These uncertainties originate from irregularities in the archive’s deposition process that result, in turn, in errors during the layer counting process. Dating uncertainties can be quantified by assuming a probabilistic model for the relationship between the depth of a sample in the proxy archive and the age of that sample. However, systematic biases in counting or depositional processes can cause the counted chronology to deviate substantially from the true age and possibly corrupt the age model. By synchronizing a given chronology with other, independently dated archives, one can constrain the dating uncertainties and correct potential biases. This can be done by matching the chronology to tie-points obtained by identifying characteristic events which were recorded simultaneously by different archives or with independent methods. However, updating the counted age–depth relationship under the consideration of tie-points is not straightforward and no generally accepted method is presently available for layer-counted archives. A key requirement for such a method is that it should include an appropriate uncertainty-sensitive interpolation between tie-points. Using a Gaussian model to represent a potential bias, we show how tie-points and their uncertainties can be incorporated into a previously suggested Bayesian modeling framework to reflect the general uncertainties of a counted chronology. Both the uncertainty inherent to the tie-points and the age-correlation between the data from different depths in the archive are consistently represented in this approach. We demonstrate the methodology in two applications: first, using synthetic data, and second, applying the methodology to data from the NGRIP ice core, an iconic paleoclimate proxy archive."
-      doi="https://doi.org/10.1214/25-BA1509"
-      pdf="/papers/paper-sync.pdf"
-    />
+    <div class="pub-feature-list">
+      {selected.map((paper) => (
+        <Publication
+          title={paper.title}
+          authors={paper.authors}
+          venue={paper.journal || paper.school}
+          year={paper.year}
+          abstract={paper.abstract}
+          doi={paper.doi}
+          pdf={paper.pdf}
+          url={paper.url}
+        />
+      ))}
+    </div>
 
-    <Publication
-      title="Bayesian analysis of early warning signals using a time-dependent model"
-      authors="Eirik Myrvoll-Nilsen, Luc Hallali and Martin Rypdal"
-      venue="Earth System Dynamics"
-      year="2025"
-      abstract="A tipping point is defined by the IPCC as a critical threshold beyond which a system reorganizes, often abruptly and/or irreversibly. Tipping points can be crossed solely by internal variation in the system or by approaching a bifurcation point where the current state loses stability, which forces the system to move to another stable state. It can be shown that before a bifurcation point is reached there are observable changes in the statistical properties of the state variable. These are known as early warning signals and include increased fluctuation and autocorrelation time. It is currently debated whether or not Dansgaard–Oeschger (DO) events, which are abrupt warmings of the North Atlantic region which occurred during the last glacial period, are preceded by early warning signals. To express the changes in statistical behavior we propose a model based on the well-known first-order autoregressive (AR) process, with modifications to the autocorrelation parameter such that it depends linearly on time. In order to estimate the time evolution of the autocorrelation parameter we adopt a hierarchical Bayesian modeling framework, from which Bayesian analysis can be performed using the methodology of integrated nested Laplace approximations. We then apply the model to segments of the oxygen isotope ratios from the Northern Greenland Ice Core Project record corresponding to 17 DO events. Statistically significant early warning signals are detected for a number of DO events, which suggests that such events could indeed exhibit signs of ongoing destabilization and may have been caused by approaching a bifurcation point. The methodology developed to perform the given early warning analyses can be applied more generally and is publicly available as the R package INLA.ews."
-      doi="https://doi.org/10.5194/esd-16-1539-2025"
-      pdf="/papers/paper-ews1.pdf"
-    />
+    <p class="more-link">
+      <a href="/publications">All publications →</a>
+    </p>
 
+    <!-- NEWS -->
+    {news.length > 0 && (
+      <>
+        <h2>News</h2>
 
+        <ul class="news-list">
+          {news.map((item) => (
+            <li class="news-item">
+              <div class="news-date">
+                {new Date(item.date).toLocaleDateString("en-GB", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric"
+                })}
+              </div>
+
+              <div class="news-content">
+                <h3>{item.title}</h3>
+                <p>{item.text}</p>
+                {item.url && (
+                  <p>
+                    <a href={item.url}>Read more →</a>
+                  </p>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </>
+    )}
 
   </section>
 
-
-
-  <!-- ICON ROW -->
-  <div class="icon-row">
-
-    <a class="icon" href="mailto:test@example.com">
-      <img src="/icons/email.svg" alt="Email" />
-    </a>
-
-    <a class="icon" href="https://github.com/eirikmn" target="_blank">
-      <img src="/icons/github.svg" alt="GitHub" />
-    </a>
-
-    <a class="icon" href="https://www.linkedin.com/in/eirik-myrvoll-nilsen-816b7379/" target="_blank">
-      <img src="/icons/linkedin.svg" alt="LinkedIn" />
-    </a>
-
-    <a class="icon" href="https://www.researchgate.net/profile/Eirik-Myrvoll-Nilsen" target="_blank">
-      <img src="/icons/researchgate.svg" alt="ResearchGate" />
-    </a>
-
-    <a class="icon" href="https://scholar.google.com/citations?user=FHoe1FQAAAAJ&hl=no&oi=sra" target="_blank">
-      <img src="/icons/googlescholar.svg" alt="Google Scholar" />
-    </a>
-
-    <a class="icon" href="https://orcid.org/0000-0002-1643-5661" target="_blank">
-      <img src="/icons/orcid.svg" alt="ORCID" />
-    </a>
-
-    <a class="icon" href="/CV.pdf" target="_blank">
-      <img src="/icons/cv-square.svg" alt="CV" />
-    </a>
-
-  </div>
-
 </Layout>
+
+<style>
+/* =========================
+   PROFILE HEADER
+========================= */
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.profile-header img {
+  width: clamp(150px, 15vw, 180px);
+  height: clamp(150px, 15vw, 180px);
+  flex-shrink: 0;
+
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border);
+
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--text) 15%, transparent);
+}
+
+.intro {
+  min-width: 0;
+}
+
+.intro h1 {
+  margin: 0 0 4px 0;
+  font-size: 1.85rem;
+}
+
+/* affiliation line, directly under the name */
+.tagline {
+  margin: 0 0 14px 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.intro p {
+  margin: 0 0 12px 0;
+  line-height: 1.55;
+  max-width: 58ch;
+}
+
+.intro p:last-child {
+  margin-bottom: 0;
+}
+
+/* =========================
+   SECTION SEPARATORS
+
+   A rule above each section heading, so Research, Selected
+   publications and News read as distinct blocks rather than
+   one continuous scroll.
+
+   Note this styles h2 locally. The h1/h2/h3 rules in
+   Layout.astro are scoped to Layout's own markup, which
+   contains no headings, so they never reach page content —
+   these headings would otherwise be browser defaults.
+========================= */
+
+section > h2 {
+  font-size: 1.45rem;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+
+  margin: 3.25rem 0 0.5rem;
+  padding-top: 2.25rem;
+
+  border-top: 1px solid var(--border);
+}
+
+/* =========================
+   SELECTED PUBLICATIONS
+
+   Each card carries its own bottom rule as a separator
+   between papers, but on the last one that rule sits between
+   the section's content and the "All publications" link,
+   reading as a divider where there is nothing to divide.
+
+   :global() because .pub belongs to Publication.astro's
+   scope — the wrapper is ours, the card is not.
+========================= */
+
+.pub-feature-list :global(.pub:last-child) {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* =========================
+   SECTION FOOTER LINKS
+========================= */
+
+.more-link {
+  margin: 1.25rem 0 0;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+/* =========================
+   NEWS
+========================= */
+
+.news-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.news-item {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 1rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+/* the rule separates one item from the next, so the last one
+   would leave a stray line hanging above the footer */
+.news-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.news-date {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.news-content h3 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+}
+
+.news-content p {
+  margin: 0;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 600px) {
+  .profile-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .profile-header img {
+    align-self: center;
+  }
+
+  .intro p {
+    max-width: 100%;
+  }
+
+  .news-item {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+
+  .news-date {
+    font-weight: 600;
+  }
+}
+</style>

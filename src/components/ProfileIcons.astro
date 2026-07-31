@@ -1,0 +1,135 @@
+---
+/* =========================================================
+   PROFILE LINKS
+
+   The icon row that used to sit at the foot of the home page,
+   moved here as labelled buttons.
+
+   Labels rather than bare icons: on a contact page the point
+   is to be unambiguous, and the ORCID and ResearchGate marks
+   are not recognisable to everyone the way GitHub's is. The
+   label also means the link works if an icon fails to load.
+========================================================= */
+
+import profile from "../data/cvheader.json";
+
+const links = [
+  { label: "Email",          href: `mailto:${profile.email}`,                                        icon: "email.svg" },
+  { label: "Google Scholar", href: "https://scholar.google.com/citations?user=FHoe1FQAAAAJ",         icon: "googlescholar.svg" },
+  { label: "ORCID",          href: `https://orcid.org/${profile.orcid}`,                             icon: "orcid.svg" },
+  { label: "ResearchGate",   href: "https://www.researchgate.net/profile/Eirik-Myrvoll-Nilsen",      icon: "researchgate.svg" },
+  { label: "GitHub",         href: "https://github.com/eirikmn",                                     icon: "github.svg" },
+  { label: "LinkedIn",       href: "https://www.linkedin.com/in/eirik-myrvoll-nilsen-816b7379/",     icon: "linkedin.svg" },
+  { label: "CV (PDF)",       href: "/CV.pdf",                                                        icon: "cv-square.svg" }
+];
+
+const isExternal = (href) => href.startsWith("http");
+---
+
+<ul class="profile-links">
+  {links.map((link) => (
+    <li>
+      <a
+        class="profile-link"
+        href={link.href}
+        target={isExternal(link.href) ? "_blank" : undefined}
+        rel={isExternal(link.href) ? "noopener noreferrer me" : undefined}
+      >
+        <img src={`/icons/${link.icon}`} alt="" aria-hidden="true" />
+        <span>{link.label}</span>
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+.profile-links {
+  list-style: none;
+  padding: 0;
+  margin: 1.25rem 0 0;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.6rem;
+}
+
+.profile-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  padding: 0.6rem 0.9rem;
+
+  border: 1px solid var(--border-ui);
+  border-radius: 8px;
+
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.9rem;
+
+  transition: border-color 0.2s ease, color 0.2s ease,
+              background 0.2s ease;
+}
+
+.profile-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+/* =========================
+   ICONS
+
+   Filters carried over verbatim from the original icon row
+   on the home page: invert for dark mode, and the
+   invert/sepia/saturate/hue-rotate stack that tints them to
+   the accent blue on hover. The dark-mode hover keeps the
+   leading invert(1) so the tint is applied to the already
+   inverted image.
+========================= */
+
+.profile-link img {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  display: block;
+
+  transition: transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
+
+  filter: invert(0);
+}
+
+html.dark .profile-link img {
+  filter: invert(1);
+}
+
+.profile-link:hover img {
+  transform: translateY(-3px) scale(1.05);
+  opacity: 0.85;
+  filter: invert(48%) sepia(90%) saturate(1000%) hue-rotate(180deg);
+}
+
+html.dark .profile-link:hover img {
+  transform: translateY(-3px) scale(1.05);
+  opacity: 0.9;
+  filter: invert(1) invert(48%) sepia(90%) saturate(1000%) hue-rotate(180deg);
+}
+
+@media (max-width: 600px) {
+  .profile-links {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .profile-link {
+    padding: 0.55rem 0.7rem;
+    font-size: 0.82rem;
+    gap: 0.45rem;
+  }
+
+  .profile-link img {
+    width: 20px;
+    height: 20px;
+  }
+}
+</style>

@@ -1,0 +1,178 @@
+---
+/* =========================================================
+   SECTION NAV
+
+   A sticky in-page contents list with scroll-spy. Used by
+   both the CV and the research subpages, which previously
+   had two separate implementations that had already drifted
+   apart in hover behaviour, active styling and markup.
+
+   Placement is the parent's job — this component only
+   handles its own internals — but both callers put it in the
+   right-hand column so the content keeps the same left edge
+   as the header, the footer and every other page.
+
+   Props:
+     items - [{ label, id }], ids must match elements on the page
+     label - small caps heading above the list; pass null to omit
+========================================================= */
+
+const { items = [], label = "Sections" } = Astro.props;
+---
+
+{items.length > 1 && (
+  <nav class="section-nav" aria-label={label ?? "Sections"}>
+
+    {label && <p class="section-nav-label">{label}</p>}
+
+    <ul class="section-nav-list">
+      {items.map((item) => (
+        <li>
+          <a
+            href={`#${item.id}`}
+            class="section-nav-link"
+            data-section-nav={item.id}
+          >
+            {item.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+  </nav>
+)}
+
+<script>
+  /* Scroll-spy. The rootMargin pins the "you are here" line
+     near the top of the viewport, so the highlight advances
+     as a heading reaches the top rather than when it drifts
+     into the middle of the screen. */
+
+  const links = document.querySelectorAll(".section-nav-link");
+
+  if (links.length) {
+    const byId = new Map();
+    links.forEach((a) => byId.set(a.dataset.sectionNav, a));
+
+    const targets = [...byId.keys()]
+      .map((id) => document.getElementById(id))
+      .filter(Boolean);
+
+    let active = null;
+
+    const setActive = (id) => {
+      if (id === active) return;
+      byId.get(active)?.classList.remove("active");
+      byId.get(id)?.classList.add("active");
+      active = id;
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
+        if (visible.length) setActive(visible[0].target.id);
+      },
+      { rootMargin: "-90px 0px -70% 0px", threshold: 0 }
+    );
+
+    targets.forEach((el) => observer.observe(el));
+  }
+</script>
+
+<style>
+.section-nav {
+  font-size: 0.85rem;
+}
+
+.section-nav-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+
+  color: var(--text-muted);
+  margin: 0 0 0.75rem;
+}
+
+.section-nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.section-nav-link {
+  display: block;
+  line-height: 1.35;
+
+  color: var(--text-muted);
+  text-decoration: none;
+
+  /* the rule doubles as the active marker, so reserve the
+     space up front and nothing shifts when it appears */
+  border-left: 2px solid transparent;
+  padding-left: 0.7rem;
+  margin-left: -0.7rem;
+
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.section-nav-link:hover {
+  color: var(--accent);
+}
+
+/* Marked by colour and a rule rather than font-weight:
+   changing the weight reflows the text and makes the list
+   twitch as you scroll past each section. */
+.section-nav-link.active {
+  color: var(--text);
+  border-left-color: var(--accent);
+}
+
+/* ---------------------------------------------------------
+   MOBILE
+
+   A sticky column would take most of the screen, so it
+   becomes a wrapped row of pills above the content.
+--------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .section-nav {
+    padding-bottom: 0.9rem;
+    margin-bottom: 1.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-nav-label {
+    margin-bottom: 0.55rem;
+  }
+
+  .section-nav-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .section-nav-link {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+
+    padding: 4px 9px;
+    margin-left: 0;
+
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  .section-nav-link.active {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+}
+</style>

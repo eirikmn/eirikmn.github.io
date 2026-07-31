@@ -1,0 +1,272 @@
+---
+/* =========================================================
+   MEDIA LIGHTBOX
+
+   Drop <Lightbox /> anywhere on a page and every <img>
+   inside a .figure, plus every .video-frame, becomes
+   click-to-enlarge.
+
+   Built on the native <dialog> element, so focus trapping,
+   Escape-to-close, inertness of the page behind, and the
+   backdrop all come from the browser rather than from
+   several hundred lines of library code.
+========================================================= */
+---
+
+<dialog id="lightbox" class="lightbox" aria-label="Enlarged figure">
+
+  <button
+    type="button"
+    class="lightbox-close"
+    aria-label="Close (Esc)"
+  >&times;</button>
+
+  <div class="lightbox-inner">
+    <img class="lightbox-img" src="" alt="" hidden />
+    <video class="lightbox-video" loop muted playsinline controls hidden></video>
+    <p class="lightbox-caption"></p>
+  </div>
+
+</dialog>
+
+<script>
+  const dialog = document.getElementById("lightbox");
+
+  if (dialog) {
+    const img = dialog.querySelector(".lightbox-img");
+    const video = dialog.querySelector(".lightbox-video");
+    const caption = dialog.querySelector(".lightbox-caption");
+    const closeBtn = dialog.querySelector(".lightbox-close");
+
+    /* the element that had focus before opening, so we can
+       hand it back on close */
+    let lastFocused = null;
+
+    /* mark up the page figures as interactive. Done in JS so
+       no page template has to change, and so the affordance
+       never appears if this script fails to load. */
+    document.querySelectorAll(".figure img").forEach((el) => {
+      el.classList.add("zoomable");
+      el.tabIndex = 0;
+      el.setAttribute("role", "button");
+      el.setAttribute("aria-haspopup", "dialog");
+      if (!el.title) el.title = "Click to enlarge";
+    });
+
+    document.querySelectorAll(".video-frame").forEach((el) => {
+      el.tabIndex = 0;
+      el.setAttribute("role", "button");
+      el.setAttribute("aria-haspopup", "dialog");
+      el.setAttribute("aria-label", "Enlarge animation");
+      if (!el.title) el.title = "Click to enlarge";
+    });
+
+    function captionFor(el) {
+      return (
+        el.closest("figure")?.querySelector("figcaption")?.textContent?.trim() ?? ""
+      );
+    }
+
+    function show(text) {
+      caption.textContent = text;
+      caption.hidden = text === "";
+
+      lastFocused = document.activeElement;
+      dialog.showModal();
+      closeBtn.focus();
+    }
+
+    function openImage(source) {
+      video.hidden = true;
+      img.hidden = false;
+
+      /* currentSrc respects srcset if one is ever added */
+      img.src = source.currentSrc || source.src;
+      img.alt = source.alt || "";
+
+      show(captionFor(source));
+    }
+
+    function openVideo(frame) {
+      const source = frame.querySelector("video");
+      if (!source) return;
+
+      img.hidden = true;
+      video.hidden = false;
+
+      video.src = source.currentSrc || source.querySelector("source")?.src || "";
+      video.poster = source.poster || "";
+
+      /* controls are appropriate here: this is deliberate,
+         full-attention viewing rather than an ambient loop */
+      video.play().catch(() => {});
+
+      show(captionFor(frame));
+    }
+
+    function openFrom(target) {
+      const image = target.closest(".figure img");
+      if (image) return openImage(image);
+
+      const frame = target.closest(".video-frame");
+      if (frame) return openVideo(frame);
+    }
+
+    document.addEventListener("click", (e) => {
+      /* don't hijack clicks on the animation's pause button */
+      if (e.target.closest(".video-toggle")) return;
+      if (e.target.closest(".lightbox")) return;
+
+      openFrom(e.target);
+    });
+
+    /* keyboard equivalent, since these are now buttons */
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      if (e.target.closest?.(".video-toggle")) return;
+      if (e.target.closest?.(".lightbox")) return;
+
+      const hit =
+        e.target.closest?.(".figure img") || e.target.closest?.(".video-frame");
+      if (!hit) return;
+
+      e.preventDefault();
+      openFrom(e.target);
+    });
+
+    closeBtn.addEventListener("click", () => dialog.close());
+
+    /* clicking the backdrop or the padding around the media
+       closes; clicking the media itself does not */
+    dialog.addEventListener("click", (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+
+    dialog.addEventListener("close", () => {
+      /* drop references so large media isn't retained */
+      img.src = "";
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+
+      lastFocused?.focus?.();
+    });
+  }
+</script>
+
+<style is:global>
+  /* ---- the page-side affordance ---- */
+
+  .figure img.zoomable {
+    cursor: zoom-in;
+  }
+
+  /* ---- the dialog ---- */
+
+  .lightbox {
+    max-width: 100vw;
+    max-height: 100vh;
+
+    padding: 0;
+    border: none;
+    background: transparent;
+    overflow: visible;
+  }
+
+  .lightbox::backdrop {
+    background: rgba(0, 0, 0, 0.82);
+  }
+
+  .lightbox-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.7rem;
+
+    padding: 1rem;
+  }
+
+  .lightbox-img,
+  .lightbox-video {
+    display: block;
+
+    max-width: 92vw;
+    max-height: 82vh;
+    width: auto;
+    height: auto;
+
+    border-radius: 8px;
+
+    /* the figures are plotted on transparent backgrounds and
+       would be illegible against the dark backdrop; off-white
+       to match the inline figures */
+    background: #fafafa;
+  }
+
+  /* dim the plate in dark mode, as the inline figures do */
+  html.dark .lightbox-img,
+  html.dark .lightbox-video {
+    filter: brightness(0.9);
+  }
+
+  /* `display: block` above outranks the `hidden` attribute,
+     which is only `display: none` from the user-agent sheet.
+     Without this, the unused element — an empty <video> when
+     showing an image — still rendered as a blank box. */
+  .lightbox-img[hidden],
+  .lightbox-video[hidden] {
+    display: none;
+  }
+
+  .lightbox-caption {
+    margin: 0;
+    max-width: min(70ch, 92vw);
+
+    /* always on the dark backdrop, so not theme-dependent */
+    color: #f0f0f0;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    text-align: center;
+  }
+
+  .lightbox-close {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 1;
+
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 1.6rem;
+    line-height: 1;
+
+    color: #f0f0f0;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 50%;
+
+    cursor: pointer;
+  }
+
+  .lightbox-close:hover {
+    background: rgba(0, 0, 0, 0.7);
+    border-color: #ffffff;
+  }
+
+  @media (max-width: 600px) {
+    .lightbox-img,
+    .lightbox-video {
+      max-width: 96vw;
+      max-height: 76vh;
+    }
+
+    .lightbox-inner {
+      padding: 0.5rem;
+    }
+  }
+</style>

@@ -1,43 +1,25 @@
-<nav class="cv-nav">
+---
+/* =========================================================
+   CV SECTION NAV
 
-  <a href="#summary">Summary</a>
-  <a href="#work">Experience</a>
-  <a href="#education">Education</a>
-  <a href="#teaching">Teaching</a>
-  <a href="#supervision">Supervision</a>
-  <a href="#service">Service</a>
-  <a href="#development">Development</a>
-  <a href="#skills">Skills</a>
+   Just the list of sections; all behaviour and styling lives
+   in SectionNav, shared with the research subpages. The ids
+   must match the `id` props given to each <CVSection> in
+   cv.astro.
+========================================================= */
 
-</nav>
+import SectionNav from "../SectionNav.astro";
 
-<style>
-.cv-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  position: sticky;
-  top: 100px;
-}
+const sections = [
+  { label: "Summary",     id: "summary" },
+  { label: "Experience",  id: "work" },
+  { label: "Education",   id: "education" },
+  { label: "Teaching",    id: "teaching" },
+  { label: "Supervision", id: "supervision" },
+  { label: "Service",     id: "service" },
+  { label: "Development", id: "development" },
+  { label: "Skills",      id: "skills" }
+];
+---
 
-/* links */
-.cv-nav a {
-  text-decoration: none;
-  color: var(--text-muted);
-  font-weight: 500;
-  font-size: 0.95rem;
-  transition: color 0.15s ease, transform 0.15s ease;
-}
-
-/* hover state */
-.cv-nav a:hover {
-  color: var(--accent);
-  transform: translateX(2px);
-}
-
-/* optional: active section styling (future-proofing) */
-.cv-nav a.active {
-  color: var(--text);
-  font-weight: 600;
-}
-</style>
+<SectionNav items={sections} />

@@ -1,41 +1,101 @@
 ---
+/* =========================================================
+   CV ENTRY
+
+   Handles both work experience and education entries.
+   Work data uses `title` + `company`; education data uses
+   `degree` + `field` + `institution`, plus the optional
+   `thesis` and `supervisors` fields. Both shapes can be
+   spread straight from their JSON file.
+
+   Shared styling lives in src/styles/cv.css.
+========================================================= */
+
 const {
+  /* work */
   title,
   company,
+  description,
+
+  /* education */
+  degree,
+  field,
+  institution,
+  thesis,
+  supervisors,
+
+  /* shared */
   location,
   start,
   end,
-  description,
   bullets,
   logo
 } = Astro.props;
 
-const isLogoObject = logo && typeof logo === "object";
+/* heading */
+const heading =
+  title ?? [degree, field].filter(Boolean).join(", ");
 
-const lightLogo = isLogoObject ? logo.light : logo;
-const darkLogo = isLogoObject ? logo.dark : null;
+/* organisation */
+const org = company ?? institution;
+
+/* =========================
+   LOGO NORMALISATION
+
+   `logo` may be a bare string or an object. Backfill the
+   missing variant so dark mode never ends up with no logo
+   at all — .cv-logo-light is hidden in dark mode, so a
+   light-only entry would otherwise render nothing.
+========================= */
+
+function normalizeLogo(value) {
+  if (!value) return null;
+
+  if (typeof value === "string") {
+    return { light: value, dark: value };
+  }
+
+  return {
+    light: value.light ?? value.fallback ?? value.dark,
+    dark: value.dark ?? value.light ?? value.fallback
+  };
+}
+
+const normalizedLogo = normalizeLogo(logo);
+
+/* =========================
+   EXTRA DETAIL ROWS
+   (education only, in practice)
+========================= */
+
+const supervisorText = Array.isArray(supervisors)
+  ? supervisors.join(", ")
+  : supervisors;
+
+const extras = [
+  { label: "Thesis", value: thesis },
+  { label: "Supervisors", value: supervisorText }
+].filter((row) => row.value);
 ---
 
-<div class="cv-item">
+<div class:list={["cv-item", normalizedLogo && "cv-item--logo"]}>
 
-  {lightLogo && (
+  {normalizedLogo && (
     <div class="cv-logo-wrapper">
 
       <!-- LIGHT LOGO -->
       <img
-        src={`/icons/${lightLogo}`}
-        alt={`${company} logo`}
+        src={`/icons/${normalizedLogo.light}`}
+        alt={`${org} logo`}
         class="cv-logo cv-logo-light"
       />
 
       <!-- DARK LOGO -->
-      {darkLogo && (
-        <img
-          src={`/icons/${darkLogo}`}
-          alt={`${company} logo`}
-          class="cv-logo cv-logo-dark"
-        />
-      )}
+      <img
+        src={`/icons/${normalizedLogo.dark}`}
+        alt={`${org} logo`}
+        class="cv-logo cv-logo-dark"
+      />
 
     </div>
   )}
@@ -43,98 +103,44 @@ const darkLogo = isLogoObject ? logo.dark : null;
   <div class="cv-content">
 
     <div class="cv-item-header">
-      <strong>{title}</strong>
+      <strong>{heading}</strong>
+
       <span class="cv-dates">
         {start} – {end ?? "Present"}
       </span>
     </div>
 
     <div class="cv-sub">
-      {company} · {location}
+      {org}{location ? ` · ${location}` : ""}
     </div>
+
+    {extras.map((row) => (
+      <div class="cv-extra">
+        <em>{row.label}:</em> {row.value}
+      </div>
+    ))}
 
     {bullets ? (
       <ul class="cv-bullets">
         {bullets.map((b) => <li>{b}</li>)}
       </ul>
-    ) : (
+    ) : description ? (
       <p class="cv-description">{description}</p>
-    )}
+    ) : null}
 
   </div>
 
 </div>
 
 <style>
-.cv-item {
-  display: grid;
-  grid-template-columns: 42px 1fr;
-  gap: 1rem;
-  border-left: 2px solid var(--accent);
-  padding-left: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-/* LOGO */
-.cv-logo-wrapper {
-  width: 36px;
-  height: 36px;
-  position: relative;
-}
-
-.cv-logo {
-  width: 36px;
-  height: 36px;
-  object-fit: contain;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-/* DEFAULT: light mode */
-.cv-logo-dark {
-  display: none;
-}
-
-/* DARK MODE (IMPORTANT FIX) */
-:global(html.dark) .cv-logo-light {
-  display: none;
-}
-
-:global(html.dark) .cv-logo-dark {
-  display: block;
-}
-
-/* CONTENT */
-.cv-content {
-  display: flex;
-  flex-direction: column;
-}
-
-.cv-item-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.cv-dates {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  white-space: nowrap;
-}
+/* only what differs from src/styles/cv.css */
 
 .cv-sub {
-  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.cv-extra {
   font-size: 0.9rem;
-  margin-bottom: 0.4rem;
-}
-
-.cv-bullets {
-  margin: 0;
-  padding-left: 1.2rem;
-}
-
-.cv-bullets li {
   margin-bottom: 0.3rem;
 }
 

@@ -1,8 +1,22 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import ProfileIcons from "../components/ProfileIcons.astro";
+import profile from "../data/cvheader.json";
+
+const { email, affiliation, office } = profile;
+
+/* A plain link rather than an embedded map: an iframe would
+   add weight and set third-party cookies on a site that
+   currently needs no consent banner. */
+const mapUrl =
+  "https://www.openstreetmap.org/search?query=" +
+  encodeURIComponent(`${office.street}, ${office.postcode}`);
 ---
 
-<Layout title="Contact">
+<Layout
+  title="Contact"
+  description="Get in touch with Eirik Myrvoll-Nilsen about research collaborations, statistical methodology, or Bayesian inference applied to real-world problems."
+>
 
   <article class="page">
 
@@ -10,134 +24,115 @@ import Layout from "../layouts/Layout.astro";
 
     <p class="intro">
       I am happy to discuss research collaborations, statistical methodology,
-      and applications of Bayesian inference to complex real-world problems.
+      and applications of Bayesian inference to complex real-world problems —
+      including supervision of student projects.
     </p>
 
-
+    <!-- PRIMARY ACTION -->
     <div class="contact-card">
-
-      <h2>Interested in collaborating?</h2>
-
-      <p>
-        If you are interested in research collaborations, discussing ideas,
-        or learning more about my work, please feel free to get in touch.
-      </p>
-
-      <a class="contact-button" href="mailto:eirik.myrvoll-nilsen@uit.no">
+      <a class="contact-button" href={`mailto:${email}`}>
         Send me an email →
       </a>
 
+      <p class="contact-address">
+        or write to <a href={`mailto:${email}`}>{email}</a>
+      </p>
     </div>
 
+    <!-- DETAILS -->
+    <h2>Where to find me</h2>
 
-    <h2>Email</h2>
+    <dl class="details">
+
+      <dt>Group</dt>
+      <dd>
+        <a href={affiliation.groupUrl} target="_blank" rel="noopener noreferrer">
+          {affiliation.group}
+        </a>
+      </dd>
+
+      <dt>Department</dt>
+      <dd>{affiliation.department}</dd>
+
+      <dt>Institution</dt>
+      <dd>
+        <a href={affiliation.institutionUrl} target="_blank" rel="noopener noreferrer">
+          {affiliation.institution}
+        </a>
+      </dd>
+
+      <dt>Office</dt>
+      <dd>
+        {office.building}<br />
+        {office.street}<br />
+        {office.postcode}
+        <br />
+        <a class="map-link" href={mapUrl} target="_blank" rel="noopener noreferrer">
+          View on map →
+        </a>
+      </dd>
+
+    </dl>
+
+    <!-- PROFILES -->
+    <h2>Elsewhere</h2>
 
     <p>
-      <a href="mailto:mailto:eirik.myrvoll-nilsen@uit.no">
-        eirik.myrvoll-nilsen@uit.no
-      </a>
+      Profiles, code and a downloadable copy of my CV.
     </p>
 
-
-    <h2>Affiliation</h2>
-
-    <p>
-      Department of Mathematics and Statistics<br>
-      UiT The Arctic University of Norway<br>
-      Tromsø, Norway  
-    </p>
-
-
-    <h2>Other links</h2>
-
-    <ul>
-      <li>
-        <a href="https://scholar.google.com/citations?user=FHoe1FQAAAAJ&hl=no&oi=sra">
-          Google Scholar
-        </a>
-      </li>
-
-      <li>
-        <a href="https://github.com/eirikmn">
-          GitHub
-        </a>
-      </li>
-
-      <li>
-        <a href="https://orcid.org/0000-0002-1643-5661">
-          ORCID
-        </a>
-      </li>
-    </ul>
-
+    <ProfileIcons />
 
   </article>
 
-
 </Layout>
 
-
 <style>
+/* Width, gutters and body typography come from .container
+   and Layout.astro. Headings are styled here because the
+   element rules in Layout are scoped to Layout's own markup
+   and never reach page content. */
 
-.page {
-  max-width: 750px;
-  margin: 0 auto;
-  padding: 3rem 1.5rem;
-  line-height: 1.7;
-  font-size: 1.05rem;
-}
-
-
-h1 {
-  margin-bottom: 1rem;
-}
-
-
+/* matches .software-intro on the Software page */
 .intro {
-  font-size: 1.1rem;
-  opacity: 0.85;
+  color: var(--text-muted);
+  max-width: 70ch;
+  line-height: 1.5;
   margin-bottom: 2rem;
 }
 
+/* =========================
+   SECTION SEPARATORS
+   (same treatment as the home page)
+========================= */
 
-h2 {
-  margin-top: 2.5rem;
+.page > h2 {
+  font-size: 1.45rem;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+
+  margin: 3.25rem 0 0.5rem;
+  padding-top: 2.25rem;
+
+  border-top: 1px solid var(--border);
 }
 
-
-/* Collaboration panel */
+/* =========================
+   PRIMARY ACTION
+========================= */
 
 .contact-card {
   margin: 2rem 0;
   padding: 1.5rem;
+
   border: 1px solid var(--border);
   border-radius: 12px;
 
-  background: color-mix(
-    in srgb,
-    var(--bg) 92%,
-    var(--accent)
-  );
+  background: color-mix(in srgb, var(--bg) 92%, var(--accent));
 }
-
-
-.contact-card h2 {
-  margin-top: 0;
-  border: none;
-  padding-bottom: 0;
-}
-
-
-.contact-card p {
-  margin-bottom: 1.25rem;
-}
-
-
-/* Email/action link */
 
 .contact-button {
   display: inline-block;
-
   padding: 0.6rem 1rem;
 
   border-radius: 8px;
@@ -146,21 +141,77 @@ h2 {
   color: var(--text);
   text-decoration: none;
 
-  transition:
-    border-color 0.2s ease,
-    color 0.2s ease;
+  transition: border-color 0.2s ease, color 0.2s ease;
 }
-
 
 .contact-button:hover {
   border-color: var(--accent);
   color: var(--accent);
 }
 
-
-ul {
-  padding-left: 1.2rem;
+/* the address in plain text, for copying */
+.contact-address {
+  margin: 0.9rem 0 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
 }
 
+/* =========================
+   DETAILS
 
+   Same label/value grid as the CV header, so the two pages
+   present the same kind of information the same way.
+========================= */
+
+.details {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  column-gap: 1rem;
+  row-gap: 0.5rem;
+
+  margin: 1.25rem 0 0;
+  font-size: 0.95rem;
+}
+
+.details dt {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.details dd {
+  margin: 0;
+  color: var(--text-muted);
+  min-width: 0;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.map-link {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+  .details {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0.15rem;
+  }
+
+  .details dt {
+    margin-top: 0.7rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .details dt:first-of-type {
+    margin-top: 0;
+  }
+
+  .details dd {
+    color: var(--text);
+  }
+}
 </style>

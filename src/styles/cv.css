@@ -1,0 +1,127 @@
+/* =========================================================
+   SHARED CV ITEM STYLES
+
+   Imported once from src/pages/cv.astro.
+
+   Every CV entry component used to redeclare these rules.
+   They now live here, so responsive tweaks to the spine,
+   the logo column or the title row happen in one place.
+
+   Component <style> blocks are scoped by Astro, which gives
+   them higher specificity than this file. Per-component
+   overrides therefore still win — see the bottom of each
+   component for what it customises.
+========================================================= */
+
+/* ---------------------------------------------------------
+   THE ACCENT SPINE SHARED BY EVERY ENTRY
+
+   Spacing between entries is owned by
+   .cv-section-content { gap } in CVSection.astro,
+   so items carry no margin of their own.
+--------------------------------------------------------- */
+
+.cv-item {
+  border-left: 2px solid var(--accent);
+  padding-left: 1rem;
+  margin: 0;
+  min-width: 0;
+}
+
+/* ---------------------------------------------------------
+   ENTRIES THAT SHOW AN INSTITUTION LOGO
+
+   minmax(0, 1fr) rather than 1fr so a long unbreakable
+   string in the content column cannot widen the page.
+--------------------------------------------------------- */
+
+.cv-item--logo {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.cv-logo-wrapper {
+  width: 36px;
+  height: 36px;
+  position: relative;
+}
+
+.cv-logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* light/dark logo swap */
+.cv-logo-dark {
+  display: none;
+}
+
+html.dark .cv-logo-light {
+  display: none;
+}
+
+html.dark .cv-logo-dark {
+  display: block;
+}
+
+/* ---------------------------------------------------------
+   INNER COLUMN
+--------------------------------------------------------- */
+
+.cv-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* ---------------------------------------------------------
+   TITLE ROW
+
+   Heading on the left, dates or an action button on the
+   right. CVTeachingItem overrides align-items to centre
+   because its right-hand slot holds a button rather
+   than text; CVDevelopmentItem uses a grid instead.
+--------------------------------------------------------- */
+
+.cv-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.cv-dates {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------
+   SECONDARY LINE: ORGANISATION, LOCATION
+
+   Bottom margin is left to each component, since the
+   entry types space this differently.
+--------------------------------------------------------- */
+
+.cv-sub {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* ---------------------------------------------------------
+   BULLET LISTS
+--------------------------------------------------------- */
+
+.cv-bullets {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.cv-bullets li {
+  margin-bottom: 0.3rem;
+}

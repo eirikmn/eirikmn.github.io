@@ -1,5 +1,9 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import Lightbox from "../../components/Lightbox.astro";
+import SectionNav from "../../components/SectionNav.astro";
+import { slugify } from "../../lib/slug.js";
+import ResearchVideo from "../../components/ResearchVideo.astro";
 import "katex/dist/katex.min.css";
 import katex from "katex";
 import topics from "../../data/research.json";
@@ -27,7 +31,7 @@ const renderMath = (expr = "") =>
 /* -------------------------
    Select this topic
 ------------------------- */
-const topic = topics.find((t) => t.id === "agemodeling");
+const topic = topics.find((t) => t.id === "earlywarning");
 
 /* -------------------------
    CONTENT
@@ -81,6 +85,8 @@ const demoContent = [
   {
   type: "video",
   src: "/images/research/earlywarning/alltipping.mp4",
+  poster: "/images/research/earlywarning/alltipping-poster.webp",
+  aspect: "4 / 3",
   caption: "Potential (a) and bifurcation diagram (c) of a noise-induced tipping process with constant control parameter μ=1, against the potential (b) and bifurcation diagram (d) of a bifurcation-induced tipping process where the control parameter μ increases linearly from -3 to 3."
 },
   {
@@ -229,9 +235,18 @@ const demoContent = [
     value: "References"
   },
 ];
+
+/* contents list, derived from the headings below so the two
+   can never fall out of step */
+const sections = demoContent
+  .filter((b) => b.type === "heading" && (b.level ?? 3) === 2)
+  .map((b) => ({ label: b.value, id: slugify(b.value) }));
 ---
 
-<Layout title={topic?.title ?? "Early warning signals"}>
+<Layout
+  title={topic?.title ?? "Early warning signals"}
+  description="A Bayesian hierarchical alternative to sliding-window estimation of early warning signals, for detecting critical slowing down ahead of climate tipping points such as an AMOC collapse."
+>
   <div class="research-page">
     <h1>{topic?.title ?? "Bayesian estimation of early warning signals"}</h1>
 
@@ -239,7 +254,9 @@ const demoContent = [
       <p class="intro">{topic.summary}</p>
     )}
 
-    <div class="research-grid">
+    <div class="research-layout">
+
+      <div class="research-grid">
       <section class="research-card">
         <div class="content">
 
@@ -253,7 +270,7 @@ const demoContent = [
             if (block.type === "heading") {
               const Tag = `h${block.level || 3}`;
               return (
-                <Tag class="subheading">
+                <Tag class="subheading" id={slugify(block.value)}>
                   {block.value}
                 </Tag>
               );
@@ -280,14 +297,14 @@ const demoContent = [
             }
 
             if (block.type === "video") {
-                return (
-                    <figure class="figure">
-                    <video autoplay loop muted playsinline controls class="media">
-                        <source src={block.src} type="video/mp4" />
-                    </video>
-                    {block.caption && <figcaption>{block.caption}</figcaption>}
-                    </figure>
-                );
+              return (
+                <ResearchVideo
+                  src={block.src}
+                  poster={block.poster}
+                  caption={block.caption}
+                  aspect={block.aspect}
+                />
+              );
             }
 
             return null;
@@ -295,26 +312,30 @@ const demoContent = [
 
         </div>
       </section>
+
+      </div>
+
+      <aside class="section-nav-col">
+        <SectionNav items={sections} />
+      </aside>
+
     </div>
   </div>
+  <Lightbox />
+
 </Layout>
 
 <style>
-.research-page {
-  max-width: 850px;
-  margin: 0 auto;
-  padding: 3rem 1.5rem;
-  line-height: 1.7;
-  font-size: 1.05rem;
-}
-
-h1 {
-  margin-bottom: 1rem;
-}
+/* Width, gutters, body typography and heading styles all
+   come from .container and the global rules in
+   Layout.astro — the same as every other page.
+   Only this page's own components are styled here. */
 
 .intro {
+  color: var(--text-muted);
+  max-width: 70ch;
+  line-height: 1.5;
   margin-bottom: 2rem;
-  opacity: 0.85;
 }
 
 .research-grid {
@@ -323,10 +344,9 @@ h1 {
   gap: 1.5rem;
 }
 
-.research-card {
-  border-left: 2px solid var(--accent);
-  padding-left: 1rem;
-}
+/* .research-card intentionally unstyled: the accent spine
+   and its 1rem indent were eating horizontal space on a
+   full-width prose page. Spacing comes from .research-grid. */
 
 .text {
   margin: 0.5rem 0;
@@ -338,35 +358,151 @@ h1 {
   margin-bottom: 0.5rem;
 }
 
+/* `overflow-x: auto` made every equation a scroll container.
+   KaTeX overflows its box by a pixel or two even when the
+   formula visibly fits, which is enough for the wheel to be
+   captured instead of scrolling the page. Equations fit the
+   column on desktop, so the guard is only kept for narrow
+   viewports where a wide formula really could overflow. */
 .equation {
   margin: 1rem 0;
-  overflow-x: auto;
+  overflow-x: visible;
+}
+
+@media (max-width: 700px) {
+  .equation {
+    overflow-x: auto;
+  }
+}
+
+/* Browsers default <figure> to `margin: 1em 40px`, costing
+   80px of width. Invisible on desktop, where the image is
+   capped at 600px well inside the column, but severe on a
+   phone. Keep the vertical rhythm, drop the side margins. */
+.figure {
+  margin: 1em 0;
 }
 
 .figure img {
-  max-width: 600px;
-  width: 100%;
+  max-width: 600px;   /* prevents huge images */
+  width: 100%;        /* responsive */
   height: auto;
   display: block;
-  margin: 1rem auto;
+  margin: 1rem auto;  /* centers image */
   border-radius: 8px;
   border: 1px solid var(--border-ui);
+
+  /* These plots are exported with transparent backgrounds and
+     black axes, so on the dark theme they were drawing
+     black-on-black. Give every figure a light plate — off-
+     white rather than pure white, which is gentler beside
+     body text. */
+  background: #fafafa;
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+/* In dark mode a full-brightness plate glares against the
+   #111 page. brightness() scales channel values, so black
+   line art stays black while the light areas come down —
+   contrast is preserved, glare is not. Applying it to the
+   element dims the CSS plate and the SVG's own pale fills
+   together, so they cannot drift apart. */
+html.dark .figure img {
+  filter: brightness(0.9);
+}
+
+/* ---------------------------------------------------------
+   FIGURE NUMBERING
+
+   A CSS counter, so numbers stay correct when figures are
+   added, removed or reordered — nothing to maintain by hand.
+   The counter is reset on the article wrapper so each page
+   starts at Figure 1.
+--------------------------------------------------------- */
+
+.content {
+  counter-reset: figure;
+}
+
+.figure {
+  counter-increment: figure;
 }
 
 .figure figcaption {
   font-size: 0.85rem;
-  opacity: 0.7;
-  margin-top: 0.25rem;
+  color: var(--text-muted);
+  margin-top: 0.4rem;
+  line-height: 1.45;
 }
 
-.figure .media {
-  max-width: 600px;
-  width: 100%;
-  height: auto;
-  display: block;
-  margin: 1rem auto;
-  border-radius: 8px;
-  border: 1px solid var(--border-ui);
+.figure figcaption::before {
+  content: "Figure " counter(figure) ". ";
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* videos now come from <ResearchVideo />, which carries its
+   own styling — the old .figure .media rule lived here and
+   could not have reached the component anyway */
+
+
+/* ---------------------------------------------------------
+   READING MEASURE
+
+   The shared column is 850px, which is about 106 characters
+   per line at the body size — well past the 60-75 that is
+   comfortable to read. Cap the running text, but leave
+   figures and equations free to use the full width, so they
+   read as deliberately wide rather than the prose looking
+   stretched.
+--------------------------------------------------------- */
+
+.text,
+.subheading,
+.research-card > h2,
+.research-card > h3 {
+  max-width: 68ch;
+}
+
+
+/* ---------------------------------------------------------
+   ARTICLE + TABLE OF CONTENTS
+
+   The prose is capped at 68ch, so the right-hand slack in
+   the 850px column was going unused. The contents list sits
+   there and sticks while you read.
+--------------------------------------------------------- */
+
+.research-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 190px;
+  gap: 2rem;
+  align-items: start;
+}
+
+.section-nav-col {
+  position: sticky;
+  top: 96px;
+  min-width: 0;
+}
+
+/* clear the sticky site header when jumping to a section */
+.subheading {
+  scroll-margin-top: 96px;
+}
+
+@media (max-width: 900px) {
+  .research-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  /* contents above the article on narrow screens */
+  .section-nav-col {
+    position: static;
+    order: -1;
+  }
 }
 
 </style>
