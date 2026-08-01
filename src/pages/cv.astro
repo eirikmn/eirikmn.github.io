@@ -4,6 +4,12 @@ import Layout from "../layouts/Layout.astro";
 /* shared styling for every CV entry type */
 import "../styles/cv.css";
 
+/* print rules live in their own file so they are only sent
+   to browsers on the page that needs them */
+import "../styles/cv-print.css";
+
+import { loadBib } from "../lib/bib";
+
 import profile from "../data/cvheader.json";
 
 import work from "../data/work.json";
@@ -29,6 +35,42 @@ import CVHeaderItem from "../components/cv/CVHeaderItem.astro";
 
 const phdSupervision = supervision?.filter((s) => s.degree === "PhD") ?? [];
 const mscSupervision = supervision?.filter((s) => s.degree === "MSc") ?? [];
+
+/* =========================
+   PUBLICATIONS SUMMARY
+
+   The full list lives on /publications; duplicating it here
+   would mean two places to update. Counting from the same
+   .bib file the publications page reads means this line can
+   never disagree with it, and never goes stale.
+
+   The thesis is excluded from the count and the span — it is
+   already in the Education section.
+========================= */
+
+const papers = loadBib("./src/data/papers.bib");
+
+const articles = papers.filter((p) => p.entryType !== "phdthesis");
+
+const years = articles
+  .map((p) => Number(p.year))
+  .filter((y) => Number.isFinite(y));
+
+const firstYear = years.length ? Math.min(...years) : null;
+const lastYear = years.length ? Math.max(...years) : null;
+
+const yearSpan =
+  firstYear && lastYear
+    ? firstYear === lastYear
+      ? `${firstYear}`
+      : `${firstYear}–${lastYear}`
+    : null;
+
+/* The PDF used to be a "here." link inside the note at the
+   end of the summary block. It is a button now, so the note
+   no longer carries cv_pdf — CVHeaderItem's conditional
+   simply stops firing, and nothing there needed changing. */
+const cvPdf = profile?.cvPdf ?? "/CV.pdf";
 ---
 
 <Layout
@@ -42,8 +84,23 @@ const mscSupervision = supervision?.filter((s) => s.degree === "MSc") ?? [];
     <main class="cv-content">
 
       <!-- SUMMARY -->
-      <CVSection id="summary" title="Eirik Myrvoll-Nilsen">
+
+      <!-- The h1 below names the page, not the person, so on
+           paper — where the print stylesheet strips the site
+           header — nothing would identify whose CV this is.
+           CVHeaderItem renders position, affiliation, email
+           and ORCID but never the name. This line fills that
+           gap and is hidden on screen. -->
+      <p class="cv-print-name">{profile.name}</p>
+
+      <CVSection id="summary" title="Curriculum Vitae" as="h1">
         <CVHeaderItem />
+
+        <p class="cv-download-row">
+          <a class="cv-download" href={cvPdf} download>
+            Download CV (PDF)
+          </a>
+        </p>
       </CVSection>
 
       <!-- WORK -->
@@ -60,14 +117,25 @@ const mscSupervision = supervision?.filter((s) => s.degree === "MSc") ?? [];
         ))}
       </CVSection>
 
+      <!-- PUBLICATIONS -->
+      <CVSection id="publications" title="Publications">
+        <div class="cv-item">
+          <p class="cv-pubs-summary">
+            {articles.length} articles and preprints{yearSpan ? `, ${yearSpan}` : ""}.
+          </p>
+
+          <a class="cv-pubs-link" href="/publications">
+            <span>Full list with abstracts, DOIs and PDFs</span>
+          </a>
+        </div>
+      </CVSection>
+
       <!-- TEACHING -->
       <CVSection id="teaching" title="Teaching Experience">
         {teaching.map((item) => (
           <CVTeachingItem {...item} />
         ))}
       </CVSection>
-
-      
 
       <!-- SUPERVISION -->
       <CVSection id="supervision" title="Supervision">
@@ -179,6 +247,106 @@ const mscSupervision = supervision?.filter((s) => s.degree === "MSc") ?? [];
   font-weight: 600;
   margin: 0.6rem 0 0.2rem;
   color: var(--text);
+}
+
+/* =========================
+   PRINT-ONLY NAME
+
+   Hidden on screen, where the site header and the homepage
+   already carry the name. cv-print.css reveals it.
+========================= */
+
+.cv-print-name {
+  display: none;
+}
+
+/* =========================
+   CV DOWNLOAD
+
+   "Downloadable as PDF" is in this page's meta description,
+   so it is a reason people arrive. It was previously only a
+   word in the note at the end of the summary block.
+========================= */
+
+.cv-download-row {
+  margin: 0.25rem 0 0;
+}
+
+.cv-download {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 999px;
+
+  background: var(--accent);
+
+  /* fixed rather than var(--bg): the accent is a mid blue in
+     both themes, so the label has to stay light or it drops
+     below the contrast floor in dark mode */
+  color: #ffffff;
+
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.cv-download:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+/* =========================
+   PUBLICATIONS SUMMARY
+========================= */
+
+.cv-pubs-summary {
+  margin: 0 0 0.5rem;
+  color: var(--text);
+}
+
+/* Same visual language as the "All publications" link on the
+   front page, one step down in size because the CV is a
+   denser page. That style is scoped to index.astro, so it
+   cannot be imported — only matched. */
+.cv-pubs-link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.3;
+
+  /* The plain accent is only 2.8:1 on white. Pulling it 30%
+     toward the text colour reaches 4.95:1 while staying
+     recognisably the same blue; dark mode already sits at
+     7.2:1, so it keeps the accent as-is below. */
+  color: color-mix(in srgb, var(--accent) 70%, var(--text));
+  text-decoration: none;
+
+  /* reserve the underline so nothing shifts on hover */
+  border-bottom: 2px solid transparent;
+  padding-bottom: 2px;
+
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+html.dark .cv-pubs-link {
+  color: var(--accent);
+}
+
+.cv-pubs-link::after {
+  content: "→";
+  transition: transform 0.2s ease;
+}
+
+.cv-pubs-link:hover {
+  border-bottom-color: currentColor;
+}
+
+.cv-pubs-link:hover::after {
+  transform: translateX(4px);
 }
 
 @media (max-width: 900px) {

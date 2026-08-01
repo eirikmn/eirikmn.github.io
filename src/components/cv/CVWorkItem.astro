@@ -11,6 +11,8 @@
    Shared styling lives in src/styles/cv.css.
 ========================================================= */
 
+import { formatRange } from "../../lib/dates.js";
+
 const {
   /* work */
   title,
@@ -76,6 +78,8 @@ const extras = [
   { label: "Thesis", value: thesis },
   { label: "Supervisors", value: supervisorText }
 ].filter((row) => row.value);
+
+const dateRange = formatRange(start, end);
 ---
 
 <div class:list={["cv-item", normalizedLogo && "cv-item--logo"]}>
@@ -105,9 +109,9 @@ const extras = [
     <div class="cv-item-header">
       <strong>{heading}</strong>
 
-      <span class="cv-dates">
-        {start} – {end ?? "Present"}
-      </span>
+      {dateRange && (
+        <span class="cv-dates">{dateRange}</span>
+      )}
     </div>
 
     <div class="cv-sub">

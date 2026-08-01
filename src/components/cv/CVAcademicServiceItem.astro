@@ -1,4 +1,6 @@
 ---
+import { formatDate, formatRange } from "../../lib/dates.js";
+
 const {
   title,
   organization,
@@ -8,10 +10,12 @@ const {
   period
 } = Astro.props;
 
-const formattedTime =
-  period ?? (start || end
-    ? `${start ?? "—"} – ${end ?? "Present"}`
-    : null);
+/* `period` is a single stored value ("2022", "Spring 2024",
+   "2025-03"); start/end is a range. formatDate and
+   formatRange both pass non-ISO values through untouched. */
+const formattedTime = period
+  ? formatDate(period)
+  : formatRange(start, end);
 ---
 
 <div class="cv-item">

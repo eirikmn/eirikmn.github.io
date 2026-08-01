@@ -42,10 +42,10 @@
       "dark": "unc-dark.svg",
       "fallback": "unc-dark.svg"
     },
-    "link": "https://www.uit.no",
+    "link": "https://www.unc.edu",
     "type": "academic",
-    "city": "Tromsø",
-    "country": "Norway",
+    "city": "Chapel Hill",
+    "country": "USA",
     "start": "2022-01",
     "end": "2023-01",
     "bullets": [

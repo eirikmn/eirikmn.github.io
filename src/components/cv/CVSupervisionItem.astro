@@ -1,4 +1,6 @@
 ---
+import { formatRange } from "../../lib/dates.js";
+
 const {
   candidate,
   institution,
@@ -10,14 +12,13 @@ const {
   roleTimeline
 } = Astro.props;
 
+const dateRange = formatRange(start, end);
+
 const formatRole = (roles) => {
   if (!roles || roles.length === 0) return null;
 
   return roles
-    .map((r) => {
-      const endText = r.end ?? "present";
-      return `${r.role} (${r.start}–${endText})`;
-    })
+    .map((r) => `${r.role} (${formatRange(r.start, r.end)})`)
     .join(" → ");
 };
 ---
@@ -30,9 +31,9 @@ const formatRole = (roles) => {
     <div class="cv-item-header">
       <strong>{candidate}</strong>
 
-      <span class="cv-dates">
-        {start} – {end ?? "Present"}
-      </span>
+      {dateRange && (
+        <span class="cv-dates">{dateRange}</span>
+      )}
     </div>
 
     <!-- ROLE (primary signal) -->

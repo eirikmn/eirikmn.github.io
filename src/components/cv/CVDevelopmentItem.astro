@@ -1,4 +1,6 @@
 ---
+import { formatDate, formatRange } from "../../lib/dates.js";
+
 const {
   title,
   organization,
@@ -8,10 +10,9 @@ const {
   period
 } = Astro.props;
 
-const time =
-  start && end
-    ? `${start} – ${end}`
-    : period ?? "";
+const time = (start || end)
+  ? formatRange(start, end)
+  : formatDate(period) ?? "";
 ---
 
 <div class="cv-item">

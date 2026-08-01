@@ -21,8 +21,14 @@ const id = `${role}-${institution}`
       <strong>{role}</strong>
 
       {responsibilities && (
-        <button class="toggle-btn" data-toggle={id}>
-          Details
+        <button
+          class="toggle-btn"
+          data-toggle={id}
+          aria-expanded="false"
+          aria-controls={id}
+        >
+          <span class="toggle-label toggle-label--show">Details</span>
+          <span class="toggle-label toggle-label--hide">Hide</span>
         </button>
       )}
     </div>
@@ -51,7 +57,7 @@ const id = `${role}-${institution}`
 
     <!-- RESPONSIBILITIES -->
     {responsibilities && (
-      <div class="cv-collapse" data-panel={id}>
+      <div class="cv-collapse" id={id} data-panel={id}>
         <ul class="cv-bullets">
           {responsibilities.map((b) => (
             <li>{b}</li>
@@ -78,11 +84,11 @@ const id = `${role}-${institution}`
     if (isOpen) {
       panel.classList.remove("open");
       panel.style.maxHeight = null;
-      btn.textContent = "Details";
+      btn.setAttribute("aria-expanded", "false");
     } else {
       panel.classList.add("open");
       panel.style.maxHeight = panel.scrollHeight + "px";
-      btn.textContent = "Hide";
+      btn.setAttribute("aria-expanded", "true");
     }
   });
 </script>
@@ -102,6 +108,19 @@ const id = `${role}-${institution}`
 .toggle-btn {
   font-size: 0.8rem;
 
+  /* The label alternates between "Details" and "Hide", which
+     are different widths. If the button were free to resize,
+     it would shift on every click, and a role title long
+     enough to wrap would re-flow against the new free space.
+
+     Both labels therefore share one grid cell: the button is
+     permanently as wide as the wider of the two, and only
+     visibility changes. flex: none keeps a long title from
+     squeezing it either. */
+  display: inline-grid;
+  text-align: center;
+  flex: none;
+
   /* slightly stronger base border */
   border: 1px solid color-mix(in srgb, var(--border) 85%, var(--text));
 
@@ -114,6 +133,20 @@ const id = `${role}-${institution}`
 
   transition: border-color 0.15s ease, color 0.15s ease,
               background 0.15s ease;
+}
+
+/* stack, don't sit side by side */
+.toggle-label {
+  grid-area: 1 / 1;
+}
+
+/* visibility rather than display, so the hidden label still
+   contributes its width — and is still hidden from screen
+   readers, which display: none would also do but at the cost
+   of the reserved space */
+.toggle-btn[aria-expanded="false"] .toggle-label--hide,
+.toggle-btn[aria-expanded="true"] .toggle-label--show {
+  visibility: hidden;
 }
 
 /* hover works in BOTH themes */
@@ -137,13 +170,22 @@ const id = `${role}-${institution}`
 /* =========================
    COURSES
 ========================= */
+/* Column with a gap rather than margins on the rows: the
+   spacing then belongs to the list, so the first and last
+   course can't pick up a stray edge margin that fights
+   .cv-courses' own margin-bottom. */
 .cv-courses {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
   margin-bottom: 0.5rem;
 }
 
 .cv-course {
   display: flex;
   justify-content: space-between;
+  gap: 1rem;
   font-size: 0.9rem;
 }
 

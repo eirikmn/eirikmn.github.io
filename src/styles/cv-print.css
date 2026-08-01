@@ -1,0 +1,244 @@
+/* =========================================================
+   CV PRINT STYLES
+
+   Imported only from src/pages/cv.astro, so no other page
+   pays for these bytes.
+
+   The CV is the one page a visitor is likely to print or
+   Ctrl-P into a PDF. Without these rules that output carries
+   the site header, the sticky section nav, the footer, and —
+   if the reader happens to be in dark mode — a black page
+   that eats a printer cartridge.
+
+   Selectors deliberately use `body > header` and
+   `body > footer` rather than bare element names: the header
+   markup lives in Layout.astro, whose <style> block is
+   scoped, so there is no class here to hook onto.
+========================================================= */
+
+@media print {
+
+  /* ---------------------------------------------------------
+     PAGE
+
+     Slightly wider than a typical browser default so long
+     entry titles have room, and the date column does not
+     wrap.
+  --------------------------------------------------------- */
+
+  @page {
+    margin: 16mm 14mm;
+  }
+
+  /* ---------------------------------------------------------
+     FORCE THE LIGHT PALETTE
+
+     The theme is a set of custom properties on the root
+     element, so overriding them here re-colours everything
+     downstream in one place — including html.dark, which
+     would otherwise print white text on nothing.
+
+     !important is warranted: html.dark is more specific than
+     :root, so a plain declaration would lose to it.
+  --------------------------------------------------------- */
+
+  :root,
+  html.dark {
+    --bg: #ffffff !important;
+    --text: #000000 !important;
+    --text-muted: #444444 !important;
+    --border: #cccccc !important;
+    --border-ui: #999999 !important;
+    --accent: #000000 !important;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* ---------------------------------------------------------
+     STRIP THE FURNITURE
+
+     Everything that exists to navigate a website and means
+     nothing on paper.
+  --------------------------------------------------------- */
+
+  body > header,
+  body > footer,
+  .site-footer,
+  .skip-link,
+  .cv-sidebar,
+  .section-nav,
+  #themeToggle,
+  .cv-download-row {
+    display: none !important;
+  }
+
+  /* ---------------------------------------------------------
+     IDENTIFY THE SHEET
+
+     On screen the h1 reads "Curriculum Vitae" and the name
+     lives in the site header. The header is gone here, so the
+     name has to come back — and on paper it, not the words
+     "Curriculum Vitae", is what should lead.
+
+     !important because the screen rule that hides this is
+     scoped by Astro and matches at the same specificity.
+  --------------------------------------------------------- */
+
+  .cv-print-name {
+    display: block !important;
+
+    margin: 0 0 0.1rem;
+
+    font-size: 1.9rem;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  /* demoted to a label beneath the name */
+  .cv-section h1 {
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #444444 !important;
+    margin-bottom: 0.9rem !important;
+  }
+
+  /* ---------------------------------------------------------
+     LAYOUT
+
+     Drop the two-column grid and any container padding, so
+     the content uses the full printable width rather than
+     sitting in a narrow strip.
+  --------------------------------------------------------- */
+
+  .cv-grid {
+    display: block !important;
+  }
+
+  main,
+  .container {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+
+  .cv-content {
+    display: block !important;
+  }
+
+  /* ---------------------------------------------------------
+     EXPAND WHAT THE SCREEN HIDES
+
+     The teaching entries collapse their responsibilities
+     behind a Details button. On paper there is nothing to
+     click, so the content has to be open — and the button
+     itself is meaningless.
+
+     max-height is set inline by the toggle script, hence
+     !important here.
+  --------------------------------------------------------- */
+
+  .cv-collapse {
+    max-height: none !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+  }
+
+  .toggle-btn {
+    display: none !important;
+  }
+
+  /* ---------------------------------------------------------
+     PAGE BREAKS
+
+     Keep each entry whole, and never leave a section heading
+     stranded at the foot of a page.
+  --------------------------------------------------------- */
+
+  .cv-item,
+  .cv-course {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .cv-section h1,
+  .cv-section h2,
+  .cv-subsection {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /* `break-after: avoid` on the heading alone is not enough
+     in practice. When the first entry underneath is tall —
+     the first work entry is a title, an organisation line and
+     three bullets — and the remaining space on the page
+     cannot hold it, browsers move the entry to the next page
+     and, in several engines, leave the heading stranded at
+     the foot of the previous one.
+
+     Engines honour `break-before: avoid` on the *following*
+     box far more consistently than `break-after: avoid` on
+     the preceding one. Setting it on the content wrapper and
+     on its first child pushes the break above the heading
+     instead of between the heading and its first entry, so
+     the two travel together.
+
+     `avoid` is a hint, not a guarantee: if a section's first
+     entry is taller than a whole page the browser will break
+     anyway. Nothing here is that tall. */
+  .cv-section-content,
+  .cv-section-content > :first-child {
+    break-before: avoid;
+    page-break-before: avoid;
+  }
+
+  /* Never split a heading across pages either. */
+  .cv-section h1,
+  .cv-section h2,
+  .cv-subsection {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .cv-section {
+    break-before: auto;
+  }
+
+  /* ---------------------------------------------------------
+     INK
+
+     The accent spine beside every entry is a thin coloured
+     rule that prints as a grey smudge on most printers. Keep
+     it as structure, but in black.
+  --------------------------------------------------------- */
+
+  .cv-item {
+    border-left-color: #000000 !important;
+  }
+
+  a {
+    color: #000000 !important;
+    text-decoration: none !important;
+  }
+
+  /* The email, website and ORCID rows in the summary block
+     are links whose visible text is already the address, so
+     they survive printing intact. Other links do not get a
+     URL appended — on a CV that produces more noise than it
+     resolves. */
+
+  /* Logos are decorative here and print poorly at 36px. */
+  .cv-logo-wrapper {
+    display: none !important;
+  }
+
+  .cv-item--logo {
+    display: block !important;
+  }
+}

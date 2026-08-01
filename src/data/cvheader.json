@@ -20,8 +20,8 @@
   "website": "https://eirikmyrvollnilsen.com",
   "orcid": "0000-0002-1643-5661",
   "research": "Bayesian statistician working with climate, age-depth modeling and data integration.",
+  "cvPdf": "/CV.pdf",
   "note": {
-    "text": "This is a web version of my CV. A downloadable PDF version is available",
-    "cv_pdf": "/CV.pdf"
+    "text": "This is a web version of my CV."
   }
 }

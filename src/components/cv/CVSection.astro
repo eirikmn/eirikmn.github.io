@@ -1,10 +1,28 @@
 ---
-const { id, title } = Astro.props;
+/* =========================================================
+   CV SECTION
+
+   Props:
+     id    - anchor target; must match the ids in CVSidebar
+     title - section heading
+     as    - heading level, "h1" or "h2". The Summary section
+             passes "h1" so the page has a real top-level
+             heading; every other section stays at h2.
+     class - extra class on the <section>
+
+   `as` is written as two explicit branches rather than a
+   dynamic <Tag>, because Astro adds its scope class while
+   statically analysing the template. A tag name held in a
+   variable is not visible to that pass, so the heading would
+   silently lose its styling.
+========================================================= */
+
+const { id, title, as = "h2", class: className } = Astro.props;
 ---
 
-<section id={id} class="cv-section">
+<section id={id} class:list={["cv-section", className]}>
 
-  <h2>{title}</h2>
+  {as === "h1" ? <h1>{title}</h1> : <h2>{title}</h2>}
 
   <div class="cv-section-content">
     <slot />
@@ -31,6 +49,19 @@ const { id, title } = Astro.props;
 .cv-section h2 {
   margin-bottom: 1rem;
   font-size: 1.5rem;
+}
+
+/* The page title. 2rem matches the browser default the h1 on
+   every other page falls back to, so the CV no longer has a
+   smaller top heading than Publications or Software. It also
+   has to out-rank the section headings visually, or the
+   distinction is invisible and the markup is the only thing
+   that knows about it. */
+.cv-section h1 {
+  margin-bottom: 1rem;
+  font-size: 2rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
 }
 
 .cv-section-content {
