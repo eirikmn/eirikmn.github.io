@@ -31,23 +31,58 @@ const { id, title, as = "h2", class: className } = Astro.props;
 </section>
 
 <style>
+/* ---------------------------------------------------------
+   THE SECTION CARD
+
+   Same treatment as the research theme cards and the contact
+   card: hairline border, 12px radius, and the page
+   background nudged towards the accent so the tint follows
+   whichever theme is active.
+
+   No hover state, unlike the theme cards — these are not
+   links, and lifting them on hover would suggest they are.
+
+   Sections used to be divided by a rule between them; a card
+   defines its own edges, so that rule is gone and the gap in
+   .cv-content does the separating.
+--------------------------------------------------------- */
+
 .cv-section {
-  scroll-margin-top: 120px;
   position: relative;
-  padding-top: 0;
+
+  /* --border-ui, not --border. The layout token is tuned for
+     hairlines on the page background; against the card's own
+     tinted fill it lands at 1.25:1, which is not an edge you
+     can see. The UI token — the one the publication action
+     buttons use — reaches 1.83:1 in light mode and 4.92:1 in
+     dark, so nine stacked sections read as nine cards rather
+     than one continuous wash. */
+  border: 1px solid var(--border-ui);
+  border-radius: 12px;
+
+  /* 1.5rem rather than 1.75rem horizontally: the teaching
+     entries need every pixel of column width to keep a
+     course and its terms on one line, and 8px of padding is
+     invisible next to a line that would otherwise wrap. */
+  padding: 1.5rem;
+
+  background: color-mix(in srgb, var(--bg) 92%, var(--accent));
+
+  /* clear the sticky header, plus the card's own padding, so
+     a jumped-to section lands with its border visible rather
+     than tight under the header */
+  scroll-margin-top: 108px;
 }
 
-/* spacing BETWEEN sections */
-.cv-section + .cv-section {
-  margin-top: 1rem;
-  padding-top: 0.0rem;
-
-  /* divider sits exactly on the boundary */
-  border-top: 1px solid color-mix(in srgb, var(--text) 20%, transparent);
-}
-
+/* margin-top: 0 is load-bearing. Browsers give h1 and h2 a
+   default top margin (0.67em and 0.83em), and it cannot
+   collapse into the card because the card has padding and a
+   border — so it stacked on top of the padding and left the
+   heading floating well below the card's top edge while
+   sitting close to the content underneath. */
 .cv-section h2 {
-  margin-bottom: 1rem;
+  margin-top: 0;
+  margin-bottom: 1.25rem;
   font-size: 1.5rem;
 }
 
@@ -58,7 +93,8 @@ const { id, title, as = "h2", class: className } = Astro.props;
    distinction is invisible and the markup is the only thing
    that knows about it. */
 .cv-section h1 {
-  margin-bottom: 1rem;
+  margin-top: 0;
+  margin-bottom: 1.25rem;
   font-size: 2rem;
   line-height: 1.2;
   letter-spacing: -0.01em;
@@ -68,5 +104,56 @@ const { id, title, as = "h2", class: className } = Astro.props;
   display: flex;
   flex-direction: column;
   gap: 1.0rem;
+}
+
+/* ---------------------------------------------------------
+   PHONES: NO BOX
+
+   A card's job is to show where one section ends and the
+   next begins. On a wide screen you can see two or three at
+   once, so that boundary is doing work. On a phone you can
+   only ever see one, so it has nothing to disambiguate — and
+   the heading already says what you are looking at.
+
+   Meanwhile the horizontal cost is real: 35px of padding out
+   of a 342px column, 10%, on a measure already down at ~37
+   characters. That is a poor trade for a signal nobody needs
+   at that width.
+
+   So below 560px the box goes and a hairline takes over.
+   .cv-content drops its gap to 0 at the same breakpoint (see
+   cv.astro), because spacing between sections now belongs to
+   the sections themselves rather than to the parent.
+--------------------------------------------------------- */
+
+@media (max-width: 560px) {
+  .cv-section {
+    border: none;
+    border-radius: 0;
+    background: none;
+    padding: 0;
+
+    /* no card padding left to clear, so this only has to
+       clear the sticky site header */
+    scroll-margin-top: 96px;
+  }
+
+  /* Two kinds of boundary exist inside this page: between
+     entries, and between sections. Without the card edge
+     they were both 1px hairlines at 1.24:1 and 1.36:1
+     against the background — indistinguishable, so a new
+     section read exactly like the next job in the same one.
+
+     The section rule is therefore 2px in --border-ui, which
+     is 1.98:1 in light mode and 5.47:1 in dark: double the
+     thickness and, in dark mode, four times the contrast of
+     the entry line. The whitespace either side is widened to
+     1.75rem too, so the rhythm differs as well as the rule —
+     3.5rem between sections against 2rem between entries. */
+  .cv-section + .cv-section {
+    margin-top: 1.75rem;
+    padding-top: 1.75rem;
+    border-top: 2px solid var(--border-ui);
+  }
 }
 </style>

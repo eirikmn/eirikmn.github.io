@@ -3,6 +3,7 @@ import "katex/dist/katex.min.css";
 import Footer from "../components/Footer.astro";
 import profiles from "../data/profiles.json";
 import cv from "../data/cvheader.json";
+import education from "../data/education.json";
 
 /* =========================================================
    Props
@@ -46,7 +47,23 @@ const fullTitle =
 /* Structured data. Tells Google that this site and the
    person behind the ORCID / Scholar / GitHub profiles are
    the same entity, which is what connects the site to an
-   existing scholarly identity. */
+   existing scholarly identity.
+
+   alumniOf comes from education.json rather than being
+   retyped, so it stays in step with the CV page. Degrees are
+   deduplicated by institution: two degrees from NTNU is one
+   alumniOf relationship, not two. */
+const alumniOf = [
+  ...new Map(
+    (education ?? [])
+      .filter((e) => e.institution)
+      .map((e) => [
+        e.institution,
+        { "@type": "CollegeOrUniversity", name: e.institution }
+      ])
+  ).values()
+];
+
 const personSchema = {
   "@context": "https://schema.org",
   "@type": "Person",
@@ -86,6 +103,10 @@ const personSchema = {
       addressCountry: "NO"
     }
   },
+  /* where the degrees came from — the relationship a search
+     for the name is most likely to be trying to establish */
+  ...(alumniOf.length ? { alumniOf } : {}),
+
   knowsAbout: [
     "Bayesian statistics",
     "Long-range dependence",

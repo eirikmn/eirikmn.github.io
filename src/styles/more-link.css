@@ -1,0 +1,89 @@
+/* =========================================================
+   "MORE" LINK
+
+   The pill that ends a section and sends the reader on:
+   "All publications", "All research themes".
+
+   This lived in three places — index.astro, cv.astro and
+   research/longmemory.astro — each a hand-copied near-match
+   of the others, because Astro scopes component styles and
+   they cannot be imported. They had already started to
+   diverge in size and colour. One global file instead, so
+   the three agree by construction.
+
+   Global on purpose: the CV and research pages inject their
+   copy through set:html, where a scoped class never lands on
+   the element.
+
+   Shape and hover tint are deliberately the same as the
+   action buttons on the publication cards (.action-btn in
+   Publication-list.astro). A section that ends in the same
+   pill it is full of reads as one unit.
+
+   Usage:
+     <a class="more-link" href="/publications">All publications</a>
+     <a class="more-link more-link--lg" …>   on the homepage
+========================================================= */
+
+.more-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border-ui);
+
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.2;
+
+  color: var(--text);
+  text-decoration: none;
+
+  /* enumerated rather than `all`, which would animate layout
+     properties too and can cause jank */
+  transition: border-color 0.2s ease, color 0.2s ease,
+              background 0.2s ease;
+}
+
+/* The arrow is a pseudo-element rather than a character in
+   the markup, so it can slide independently of the label. */
+.more-link::after {
+  content: "→";
+  transition: transform 0.2s ease;
+}
+
+.more-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.more-link:hover::after {
+  transform: translateX(3px);
+}
+
+/* ---------------------------------------------------------
+   HOMEPAGE SIZE
+
+   The homepage links were 1.2rem plain text. A pill carries
+   more weight than bare text at the same size, so 1rem here
+   lands at roughly the presence 1.2rem text had, without the
+   chunkiness of a 1.2rem pill.
+--------------------------------------------------------- */
+
+.more-link--lg {
+  font-size: 1rem;
+  padding: 9px 20px;
+  gap: 0.55rem;
+}
+
+/* The global content-link rule in Layout.astro puts a
+   hairline under bare <a> elements inside .container. The
+   class keeps this clear of it, but be explicit in case that
+   rule is ever loosened. */
+.more-link,
+.more-link:hover {
+  border-bottom-style: solid;
+}

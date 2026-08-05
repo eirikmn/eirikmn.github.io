@@ -1,0 +1,102 @@
+/* =========================================================
+   CITATIONS AND REFERENCE LIST
+
+   Used by every research subpage. Global rather than scoped
+   because both halves are injected through set:html, where
+   Astro's scope class never lands on the element.
+
+   The two halves are generated together by
+   src/lib/references.js: cite() emits
+   <a class="cite-link" href="#ref-KEY">, bibliography()
+   emits <li id="ref-KEY">. Neither is written by hand, so
+   the anchors cannot rot.
+========================================================= */
+
+/* ---------------------------------------------------------
+   INLINE CITATION
+
+   The problem with styling these is volume: a paragraph can
+   hold six of them, and the site's normal link treatment —
+   a hairline underline — would stripe the prose.
+
+   So: no underline at rest, and a colour only slightly off
+   the body text, enough to read as interactive without
+   pulling the eye away from the sentence. The full accent
+   and the underline arrive on hover.
+--------------------------------------------------------- */
+
+.cite-link {
+  color: color-mix(in srgb, var(--accent) 45%, var(--text));
+  text-decoration: none;
+
+  /* the global content-link rule in Layout.astro adds a
+     bottom hairline to bare <a> inside .container; this
+     keeps citations clear of it */
+  border-bottom: none;
+
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.cite-link:hover {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---------------------------------------------------------
+   REFERENCE LIST
+
+   Hanging indent, the convention for bibliographies: the
+   author-year the reader is scanning for sits proud of the
+   wrapped lines, so the list can be searched by eye. Set a
+   little smaller and looser than body text, because it is
+   looked up rather than read straight through.
+--------------------------------------------------------- */
+
+.reflist {
+  max-width: 68ch;
+  margin: 0.5rem 0;
+  padding: 0;
+  list-style: none;
+
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.reflist li {
+  /* hanging indent, plus room for the :target highlight to
+     sit around the text rather than crop it */
+  padding: 4px 8px 4px calc(1.6rem + 8px);
+  text-indent: -1.6rem;
+  margin: 0 0 0.35rem -8px;
+
+  border-radius: 6px;
+
+  /* DOIs and long journal names must not widen the column */
+  overflow-wrap: anywhere;
+
+  /* clear the sticky site header when jumped to */
+  scroll-margin-top: 96px;
+
+  transition: background 0.4s ease;
+}
+
+/* ---------------------------------------------------------
+   LANDING HIGHLIGHT
+
+   Following a citation drops you into a dense alphabetical
+   list. Without a marker you have to re-find the entry you
+   just asked for, which defeats the point of the link.
+   :target costs no JavaScript and clears itself the moment
+   another citation is followed.
+--------------------------------------------------------- */
+
+.reflist li:target {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reflist li {
+    transition: none;
+  }
+}

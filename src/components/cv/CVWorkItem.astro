@@ -24,6 +24,7 @@ const {
   field,
   institution,
   thesis,
+  thesisUrl,
   supervisors,
 
   /* shared */
@@ -74,8 +75,11 @@ const supervisorText = Array.isArray(supervisors)
   ? supervisors.join(", ")
   : supervisors;
 
+/* `href` is optional: the PhD thesis is deposited and has a
+   permanent handle, so its title links to it. The MSc thesis
+   has no such record and simply renders as text. */
 const extras = [
-  { label: "Thesis", value: thesis },
+  { label: "Thesis", value: thesis, href: thesisUrl },
   { label: "Supervisors", value: supervisorText }
 ].filter((row) => row.value);
 
@@ -120,7 +124,15 @@ const dateRange = formatRange(start, end);
 
     {extras.map((row) => (
       <div class="cv-extra">
-        <em>{row.label}:</em> {row.value}
+        <em>{row.label}:</em>{" "}
+        {row.href ? (
+          <a
+            class="link"
+            href={row.href}
+            target="_blank"
+            rel="noopener noreferrer"
+          >{row.value}</a>
+        ) : row.value}
       </div>
     ))}
 

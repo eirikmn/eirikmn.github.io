@@ -7,7 +7,7 @@
     "projectnumber": "332901",
     "projectwebsite": "https://en.uit.no/project/tranocs",
     "projectshort": "tranocs",
-    "funder": "Norwegian Research Council",
+    "funder": "The Research Council of Norway",
     "funderprogram": "IKTPLUSS-IKT og digital innovasjon",
     "logo": {
       "light": "uit-black.svg",
@@ -34,9 +34,12 @@
     "project": "Transforming Ocean surveying by the power of DL and statistical methods",
     "projectnumber": "350036",
     "projectwebsite": "https://en.uit.no/project/tranocs",
-    "projectshort": "TiPES",
+    "projectshort": "tranocs",
     "funder": "The Research Council of Norway",
     "funderprogram": "Funding for Research Stays Abroad for Doctoral and Postdoctoral Fellows",
+    "personalGrant": true,
+    "grantAwarded": "2023-11",
+    "grantAmount": "NOK 1,853,000",
 "logo": {
       "light": "unc-dark.svg",
       "dark": "unc-dark.svg",
@@ -46,8 +49,8 @@
     "type": "academic",
     "city": "Chapel Hill",
     "country": "USA",
-    "start": "2022-01",
-    "end": "2023-01",
+    "start": "2024-04",
+    "end": "2025-04",
     "bullets": [
       "Data integration"
     ]

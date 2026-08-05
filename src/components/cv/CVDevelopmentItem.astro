@@ -92,21 +92,37 @@ const time = (start || end)
   margin-top: 0.25rem;
 }
 
+/* Matches .toggle-btn in CVTeachingItem — the two are the
+   same object in different sections and had drifted apart.
+
+   --border-ui, not --border: against the card's tinted fill
+   the layout token lands at 1.25:1, which is not an edge.
+   The UI token reaches 1.83:1 in light mode and 4.92:1 in
+   dark.
+
+   The background is the page colour rather than transparent,
+   so the pill sits a step above the tinted card instead of
+   dissolving into it. */
 .cv-button {
   display: inline-block;
-  font-size: 0.85rem;
-  padding: 2px 10px;
+  font-size: 0.8rem;
+  padding: 3px 10px;
   border-radius: 999px;
 
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-ui);
+  background: var(--bg);
   color: var(--text);
   text-decoration: none;
 
-  transition: 0.15s ease;
+  /* enumerated, not `all`: the shorthand animates layout
+     properties too and can cause jank */
+  transition: border-color 0.15s ease, color 0.15s ease,
+              background 0.15s ease;
 }
 
 .cv-button:hover {
   border-color: var(--accent);
   color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg));
 }
 </style>

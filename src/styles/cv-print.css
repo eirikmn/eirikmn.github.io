@@ -72,7 +72,11 @@
   .cv-sidebar,
   .section-nav,
   #themeToggle,
-  .cv-download-row {
+
+  /* the button, not the row that holds it — the row also
+     carries "Last updated", and a printed CV has no other
+     indication of how current it is */
+  .cv-download {
     display: none !important;
   }
 
@@ -211,15 +215,33 @@
   }
 
   /* ---------------------------------------------------------
-     INK
+     FLATTEN THE CARDS
 
-     The accent spine beside every entry is a thin coloured
-     rule that prints as a grey smudge on most printers. Keep
-     it as structure, but in black.
+     On screen each section is a bordered, tinted card. On
+     paper that is a box drawn around every block of a CV —
+     it wastes the margin, and browsers drop background
+     colours by default anyway, so the tint would vanish and
+     leave a stray outline behind.
+
+     The heading and the whitespace do the work instead.
   --------------------------------------------------------- */
 
-  .cv-item {
-    border-left-color: #000000 !important;
+  .cv-section {
+    border: none !important;
+    border-radius: 0 !important;
+    background: none !important;
+    padding: 0 !important;
+  }
+
+  /* A section per page-worth of space is too loose in print;
+     the heading is separation enough. */
+  .cv-section + .cv-section {
+    margin-top: 0.6rem;
+  }
+
+  /* Keep the entry separators, but as plain hairlines. */
+  .cv-section-content > .cv-item + .cv-item {
+    border-top: 1px solid #cccccc !important;
   }
 
   a {

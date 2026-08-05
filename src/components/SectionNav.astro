@@ -62,8 +62,21 @@ const { items = [], label = "Sections" } = Astro.props;
 
     const setActive = (id) => {
       if (id === active) return;
-      byId.get(active)?.classList.remove("active");
-      byId.get(id)?.classList.add("active");
+
+      const previous = byId.get(active);
+      previous?.classList.remove("active");
+      previous?.removeAttribute("aria-current");
+
+      const next = byId.get(id);
+      next?.classList.add("active");
+
+      /* The class only changes colour and adds a rule, which
+         says nothing to a screen reader. aria-current="location"
+         is the value for "this is where you are in a set of
+         links", as opposed to "page" which would claim the
+         link points at the current page. */
+      next?.setAttribute("aria-current", "location");
+
       active = id;
     };
 
@@ -153,10 +166,23 @@ const { items = [], label = "Sections" } = Astro.props;
     margin-bottom: 0.55rem;
   }
 
+  /* Centred, because how many pills land on the last row is
+     a property of the handset, not of the page: the CV's
+     nine sections wrap 3+3+3 at 390px but 4+4+1 at 430px and
+     3+2+3+1 at 320px. Left-aligned, that last lone pill
+     reads as an accident; centred, every shape reads as
+     deliberate — and it stays right if a section is ever
+     added or removed. */
   .section-nav-list {
     flex-direction: row;
     flex-wrap: wrap;
+    justify-content: center;
     gap: 0.4rem;
+  }
+
+  /* the label above it belongs to the centred group */
+  .section-nav-label {
+    text-align: center;
   }
 
   .section-nav-link {

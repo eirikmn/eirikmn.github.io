@@ -3,9 +3,50 @@ import Layout from "../../layouts/Layout.astro";
 import Lightbox from "../../components/Lightbox.astro";
 import SectionNav from "../../components/SectionNav.astro";
 import { slugify } from "../../lib/slug.js";
+import { createCitations } from "../../lib/references.js";
+import { loadBib } from "../../lib/bib.js";
+import Publication from "../../components/Publication-list.astro";
+import "../../styles/more-link.css";
+import "../../styles/citations.css";
 import "katex/dist/katex.min.css";
 import katex from "katex";
 import topics from "../../data/research.json";
+
+/* -------------------------
+   SELECTED PUBLICATIONS
+------------------------- */
+const papersByKey = new Map(
+  loadBib("./src/data/papers.bib").map((p) => [p.key, p])
+);
+
+const selectPapers = (keys = []) =>
+  keys.map((key) => {
+    const paper = papersByKey.get(key);
+    if (!paper) {
+      throw new Error(
+        `Unknown publication key "${key}". Check src/data/papers.bib. ` +
+          `Known keys: ${[...papersByKey.keys()].join(", ")}`
+      );
+    }
+    return paper;
+  });
+
+/* -------------------------
+   CITATIONS
+
+   [[key]] -> (Author, Year), [[t:key]] -> Author (Year),
+   [[b:key]] -> Author, Year for use inside brackets already
+   open. Several keys in one marker share one bracket group.
+
+   Both bibliographies are listed under References; only what
+   the page cites appears there.
+------------------------- */
+const { expandCitations, bibliography } = createCitations({
+  sources: [
+    { path: "./src/data/references.bib", anchor: "ref" },
+    { path: "./src/data/papers.bib", anchor: "ref" }
+  ]
+});
 
 /* -------------------------
    SAFE text renderer (NO math)
@@ -23,7 +64,16 @@ const renderText = (text = "") => {
 ------------------------- */
 const renderMath = (expr = "") =>
   katex.renderToString(expr, {
-    throwOnError: false
+    throwOnError: false,
+
+    /* Without this KaTeX renders in text style, the same as
+       an inline $x$: sums and integrals keep their limits
+       tucked beside the operator instead of above and below
+       it, and fractions are set at the smaller script size.
+       Display style is what these blocks were always meant
+       to be. It also wraps the output in .katex-display,
+       which centres it as its own block. */
+    displayMode: true
   });
 
 /* -------------------------
@@ -38,7 +88,7 @@ const demoContent = [
 {
     type: "heading",
     level: 2,
-    value: "Background"
+    value: "1. Background"
   },
   
     {
@@ -50,25 +100,25 @@ const demoContent = [
   {
     type: "heading",
     level: 2,
-    value: "1. Introduction"
+    value: "2. Introduction"
   },
   
   {
     type: "text",
     value:
-      "To understand the climate of the past paleoclimate proxy records are essential. These are indirect measurements of climate variables such as temperature, precipitation, or atmospheric composition, obtained from natural archives like ice cores, tree rings, sediment layers, and corals. However, these records are measured against core depth rather than time. As a result, time is therefore to be treated as an unknown latent variable and inferred from available dating information. This information is typically incorporated into <em>age-depth models</em>, which describes the probabilistic relationship between sediment depth and age. Proper treatment of this uncertainty is essential because it propagates through subsequent analyses and can substantially influence scientific conclusions. To account for this uncertainty, McKay et al. (CITE) recommend generating an ensemble of plausible chronologies from the age-depth model and repeating analyses across all sampled chronologies. This approach allows chronology uncertainty to be carried forward into downstream inference."
+      "To understand the climate of the past paleoclimate proxy records are essential. These are indirect measurements of climate variables such as temperature, precipitation, or atmospheric composition, obtained from natural archives like ice cores, tree rings, sediment layers, and corals. However, these records are measured against core depth rather than time. Time must therefore be treated as an unknown latent variable and inferred from available dating information. This information is typically incorporated into <em>age-depth models</em>, which describe the probabilistic relationship between sediment depth and age. Proper treatment of this uncertainty is essential because it propagates through subsequent analyses and can substantially influence scientific conclusions. To account for this uncertainty, [[t:mckay2021]] recommend generating an ensemble of plausible chronologies from the age-depth model and repeating analyses across all sampled chronologies. This approach allows chronology uncertainty to be carried forward into downstream inference."
   },
   {
     type: "figure",
     src: "/images/research/agemodeling/ngripdata.svg",
     caption:
-      "NGRIP ice core record of the oxygen isotope ratios, used as a proxy for temperature. Cold (stadial) periods are shown in blue, while warm (interstadial) periods are shown in red."
+      "NGRIP ice core record of the oxygen isotope ratios, used as a proxy for temperature. Cold (stadial) periods are shown in blue, while warm (interstadial) periods are shown in red, following the event stratigraphy of [[t:rasmussen2014]]."
   },
   {
     type: "text",
     value:
-      "There are typically two main sources of information regarding the age-depth relationship, tie-points and layer-counts. If the archive contains dateable material at some depths, like organic matter or radioactive particles, then methods such as radiometric dating can be used to find an absolute age estimate at these depths. Using age-depth models we can interpolate these so-called <em>tie points</em> and obtain age-estimates of the entire core. The most simplistic age-depth models include linear or polynomial interpolation, available in packages such as CLAM (CITECITECITE). "+
-      "While such models are easy to use they can often provide unrealistic uncertainties. For example, we should expect the uncertainties to increase in-between observed tie-points since these depths are more uncertain. The age-depth modeling community has therefore moved towards using Bayesian age-depth models, with Bacon (CITE), BChron (CITE) and OxCal (CITE) being the most popular. These models provide robust uncertainties and can incorporate physical assumptions such as monotonicity."
+      "There are typically two main sources of information regarding the age-depth relationship, tie-points and layer-counts. If the archive contains dateable material at some depths, like organic matter or radioactive particles, then methods such as radiometric dating can be used to find an absolute age estimate at these depths. Using age-depth models we can interpolate these so-called <em>tie points</em> and obtain age-estimates of the entire core. The most simplistic age-depth models include linear or polynomial interpolation, available in packages such as CLAM [[blaauw2010]]. "+
+      "While such models are easy to use they can often provide unrealistic uncertainties. For example, we should expect the uncertainties to increase in-between observed tie-points since these depths are more uncertain. The age-depth modeling community has therefore moved towards using Bayesian age-depth models, with Bacon [[blaauw2011]], BChron [[haslett2008]] and OxCal [[ramsey1995; ramsey2008]] being the most popular. These models provide robust uncertainties and can incorporate physical assumptions such as monotonicity."
   },
   {
     type: "figure",
@@ -79,7 +129,7 @@ const demoContent = [
    {
     type: "text",
     value:
-      "If the proxy archive is deposited in layers, for example due to seasonal variations like ice-cores and tree rings, then it is possible to obtain an age estimate by simply counting the number of layers. The number of layers counted corresponds to the number of years since 'present'. While tie-points provide an <em>absolute</em> age estimate, the layer-counts are instead <em>relative</em> to the present age. An error in the layer-count will affect every subsequent layer meaning that the uncertainties are expected to increase the further we go down in the core. Since the dating uncertainty for layer-counted records is fundamentally different from tie-point dated records we cannot adopt the same age-depth models, and there are fewer age models available for layer-counted archives. The Banded Age Model (Comboul et al., YEAR) offers a computationally efficient method, but require assumption about the underlying parameters. Boers (2018, CHECK) presents a fully Bayesian approach, but is impractical for long time series since producing chronologies from the joint posterior which respects the inferred correlation, is computationally expensive. In Myrvoll-Nilsen et al. (2022) we propose using a Bayesian regression model to describe the increments of the counted layers. By exploiting a Gaussian Markov random field structure we are able to fit the model and generate chronologies from the joint posterior in linear time."
+      "If the proxy archive is deposited in layers, for example due to seasonal variations like ice-cores and tree rings, then it is possible to obtain an age estimate by simply counting the number of layers. The number of layers counted corresponds to the number of years since 'present'. While tie-points provide an <em>absolute</em> age estimate, the layer-counts are instead <em>relative</em> to the present age. An error in the layer-count will affect every subsequent layer meaning that the uncertainties are expected to increase the further we go down in the core. Since the dating uncertainty for layer-counted records is fundamentally different from tie-point dated records we cannot adopt the same age-depth models, and there are fewer age models available for layer-counted archives. The Banded Age Model [[comboul2014]] offers a computationally efficient method, but requires assumptions about the underlying parameters. [[t:boers2017]] presents a fully Bayesian approach, but is impractical for long time series since producing chronologies from the joint posterior which respects the inferred correlation, is computationally expensive. In [[t:MyrvollNilsen2022]] we propose using a Bayesian regression model to describe the increments of the counted layers. By exploiting a Gaussian Markov random field structure we are able to fit the model and generate chronologies from the joint posterior in linear time."
   },
 
 
@@ -87,7 +137,7 @@ const demoContent = [
     type: "figure",
     src: "/images/research/agemodeling/gicc05both.svg",
     caption:
-      "Panel (a) shows the layer-counted chronology associated with the NGRIP ice core record, GICC05. Panel (b) shows the number of counted layers per 5cm increment."
+      "Panel (a) shows the layer-counted chronology associated with the NGRIP ice core record, GICC05 [[rasmussen2006; andersen2006; svensson2008]]. Panel (b) shows the number of counted layers per 5cm increment."
   },
 
 
@@ -100,35 +150,35 @@ const demoContent = [
   {
     type: "heading",
     level: 2,
-    value: "2. Bayesian regression model"
+    value: "3. Bayesian regression model"
   },
   {
     type: "text",
     value:
-    "We assume that for each depth $z_k$ in the core we have a corresponding counted age $y_k$, along with various proxies or other covariates $\\bm w_k = (w_{k1},...,w_{kn_w})$. We assume that the number of incremental layers $\\Delta y_k = y_k - y_{k-1}$ in a given depth increment $\\Delta z_k = z_k - <_{k-1}$ can be expressed as the sum of two components"
+    "We assume that for each depth $z_k$ in the core we have a corresponding counted age $y_k$, along with various proxies or other covariates $\\bm w_k = (w_{k1},...,w_{kn_w})$. We assume that the number of incremental layers $\\Delta y_k = y_k - y_{k-1}$ in a given depth increment $\\Delta z_k = z_k - z_{k-1}$ can be expressed as the sum of two components"
   },
   {
     type: "math",
-    value: "\\Delta y_k = a(\\bm w_k \\mid \\bm \\beta) + \\varepsilon(z_k \\mid \\bm \\theta) ."
+    value: "\\Delta y_k = a(\\bm w_k \\mid \\bm \\beta) + \\varepsilon(z_k \\mid \\bm \\theta) ,"
   },
   {
     type: "text",
     value:
-    "Here, "
+    "where the structured component is"
   },
   {
     type: "math",
-    value: "a(\\bm w_k \\mid \\bm \\beta) = \\beta_0 + \\sum_{i=1}^{n_w}\\beta_i w_{ki}"
+    value: "a(\\bm w_k \\mid \\bm \\beta) = \\beta_0 + \\sum_{i=1}^{n_w}\\beta_i w_{ki},"
   },
   {
     type: "text",
     value:
-    "denotes the structured component where the variability is explained by the measured covariates through unknown parameters $\\bm \\beta = (\\beta_0,...,\\beta_{n_w})$, and $\\varepsilon(z_k\\mid \\bm \\theta)$ is a random effect which depend on parameters $\\bm \\theta = (\\theta_1,...,\\theta_{n_\\theta})$. In Myrvoll-Nilsen et al. (2022) we assumed $\\varepsilon$ to follow an AR(1) process with parameters $\\bm \\theta = (\\phi, \\sigma)$. The model is formulated as a latent Gaussian model and fitted using R-INLA. "
+    "where the variability is explained by the measured covariates through unknown parameters $\\bm \\beta = (\\beta_0,...,\\beta_{n_w})$, and $\\varepsilon(z_k\\mid \\bm \\theta)$ is a random effect which depend on parameters $\\bm \\theta = (\\theta_1,...,\\theta_{n_\\theta})$. In [[t:MyrvollNilsen2022]] we assumed $\\varepsilon$ to follow an AR(1) process with parameters $\\bm \\theta = (\\phi, \\sigma)$. The model is formulated as a latent Gaussian model and fitted using R-INLA [[rue2009; rue2017]]. "
   },
   {
     type: "text",
     value:
-    "The $\\bm \\beta$ are assigned independent vague Gaussian priors and the hyperparameters $\\phi$ and $\\kappa=1/\\sigma^2$ are assigned the default R-INLA priors. A strong benefit with fitting the model with INLA is apparent when working with large proxy records like the NGRIP (CITECITECITE) which include over 18000 points in the pre-Holocene era. While typical simulation-based inferential methods like Markov chain Monte Carlo (MCMC) will struggle to converge, INLA is able to produce accurate approximations of the posterior marginal distributions in linear time. We can then efficiently produce samples from the fitted layer-increment model"
+    "The $\\bm \\beta$ are assigned independent vague Gaussian priors and the hyperparameters $\\phi$ and $\\kappa=1/\\sigma^2$ are assigned the default R-INLA priors. A strong benefit with fitting the model with INLA is apparent when working with large proxy records like the NGRIP [[ngrip2004]] which include over 18000 points in the pre-Holocene era. While typical simulation-based inferential methods like Markov chain Monte Carlo (MCMC) will struggle to converge, INLA is able to produce accurate approximations of the posterior marginal distributions in linear time. We can then efficiently produce samples from the fitted layer-increment model"
   },
   {
     type: "math",
@@ -143,7 +193,7 @@ const demoContent = [
     type: "figure",
     src: "/images/research/agemodeling/unsyncboth.svg",
     caption:
-      "Panel (a) shows the fitted layer-increment model with posterior mean (blue) and 95% credible intervals (red) against observed layer-increments (gray). Panel (b) shows the resulting age uncertainties obtained by taking the cumulative sums of samples from the fitted layer-increment model. The observed layer-counts for each depth has been subtracted for visibility."
+      "Panel (a) shows the fitted layer-increment model with posterior mean (blue) and 95% credible intervals (red) against observed layer-increments (gray). Panel (b) shows the resulting age uncertainties obtained by taking the cumulative sums of samples from the fitted layer-increment model. The observed layer-counts for each depth have been subtracted for visibility."
   },
 
 
@@ -160,19 +210,19 @@ const demoContent = [
  {
     type: "heading",
     level: 2,
-    value: "3. Synchronization"
+    value: "4. Synchronization"
   },
 
 {
     type: "text",
     value:
-    "If the dating uncertainty estimates are solely based on the number of counted layers, without incorporating any external information, the estimates are susceptible to potential unknown structural biases in the layer counting or accumulation process. Such biases can be revealed when comparing the estimated time scale to tie points which can be obtained by, for example, by comparing the age of known events to those of other records. This additional information could help constrain or correct age estimates, leading to improved chronologies. How to incorporate tie-points in order to meaningfully adjust the probabilistic relationship between age and core depth expressed as a joint probability distribution was an important, unsolved problem in layer-counted chronology. "
+    "If the dating uncertainty estimates are solely based on the number of counted layers, without incorporating any external information, the estimates are susceptible to potential unknown structural biases in the layer counting or accumulation process. Such biases can be revealed when comparing the estimated time scale to tie points which can be obtained by, for example, comparing the age of known events to those of other records. This additional information could help constrain or correct age estimates, leading to improved chronologies. How to incorporate tie-points in order to meaningfully adjust the probabilistic relationship between age and core depth expressed as a joint probability distribution was an important, unsolved problem in layer-counted chronology. "
   },
   {
     type: "figure",
     src: "/images/research/agemodeling/adolphi.svg",
     caption:
-    "Panels (a)-(d) show tie-points obtained by Adolphi et al. (2018) and Muscheler et al. (2020). These are located at NGRIP core depths corresponding to the GICC05 ages 12050, 13050, 22050, 42050 yr b2k, respectively, illustrated by the vertical blue lines. Panel (e) shows the inferred layer-counted chronology with uncertainties, with the observed layer-counts subtracted, along with the tie-points we wish to update the chronology with."
+    "Panels (a)-(d) show tie-points obtained by [[t:adolphi2018]] and [[t:muscheler2020]]. These are located at NGRIP core depths corresponding to the GICC05 ages 12050, 13050, 22050, 42050 yr b2k, respectively, illustrated by the vertical blue lines. Panel (e) shows the inferred layer-counted chronology with uncertainties, with the observed layer-counts subtracted, along with the tie-points we wish to update the chronology with."
   },
 
 {
@@ -184,7 +234,7 @@ const demoContent = [
 {
     type: "text",
     value:
-    "While I described in the previous section how to infer an age-model for the layer-counts we still need to define how this relates to the new information expressed as tie-points. If there are indeed any structural biases at play which causes a discrepancy between the layer-counted age model and the true age (represented by the tie-points), then this difference needs to be accounted for as well. In Myrvoll-Nilsen et al. (2025) we add an age-discrepancy model component"
+    "While I described in the previous section how to infer an age-model for the layer-counts we still need to define how this relates to the new information expressed as tie-points. If there are indeed any structural biases at play which causes a discrepancy between the layer-counted age model and the true age (represented by the tie-points), then this difference needs to be accounted for as well. In [[t:myrvoll2025synchronization]] we add an age-discrepancy model component"
   },
 {
     type: "math",
@@ -194,7 +244,7 @@ const demoContent = [
 {
     type: "text",
     value:
-    "which defines an appropriate model for the bias $\\bm \\xi = \\xi(\\bm z\\mid \\bm \\theta)$ between the layer-counted chronology and the observed tie-points. In Myrvoll-Nilsen et al. (2025) we use an intrinsic second order random walk model. The layer-increment and age-discrepancy models can be fitted jointly using the linear predictor"
+    "which defines an appropriate model for the bias $\\bm \\xi = \\xi(\\bm z\\mid \\bm \\theta)$ between the layer-counted chronology and the observed tie-points. In [[t:myrvoll2025synchronization]] we use an intrinsic second order random walk model [[lindgren2008]]. The layer-increment and age-discrepancy models can be fitted jointly using the linear predictor"
   },
 
 {
@@ -213,7 +263,7 @@ const demoContent = [
 {
     type: "text",
     value:
-    "such that $\\bm y_1 = \\bm R \\Delta \\bm y_1$. Since $\\bm R$ is not sparse this leads to a computational bottleneck. However, if we can assume that the tie-points do not affect the estimation of the layer-increments we can instead fit this model in two stages. First we fit the layer-increment model to obtain an ensemble of layer-counted chronologies $\\bm y_1^*$, then, we fit the age-discrepancy model to the differences between the tie-points and each sampled chronology. By fitting the age-discrepancy model using INLA we are able to fit each age-discrepancy model efficiently, allowing for both larger and a high number of chronology samples. "
+    "such that $\\bm y_1 = \\bm R \\Delta \\bm y_1$. Since $\\bm R$ is not sparse this leads to a computational bottleneck. However, if we can assume that the tie-points do not affect the estimation of the layer-increments we can instead fit this model in two stages. First we fit the layer-increment model to obtain an ensemble of layer-counted chronologies $\\bm y_1^*$, then, we fit the age-discrepancy model to the differences between the tie-points and each sampled chronology. By fitting the age-discrepancy model using INLA we are able to fit each age-discrepancy model efficiently, allowing for both longer records and a larger number of chronology samples. "
   },
   {
     type: "text",
@@ -225,7 +275,7 @@ const demoContent = [
     type: "figure",
     src: "/images/research/agemodeling/syncboth.svg",
     caption:
-    "Panel (a) shows a single synchronized simulation obtained by fitting an age-discrepancy model to the difference between a single unsynchronized chronology sample and tie-points taken from the probability distribution. Panel (b) shows the synchronized age uncertainties (with the layer-counted chronology subtracted) obtained by producing an ensemble of synchronized chronology samples."
+    "Panel (a) shows a single synchronized simulation obtained by fitting an RW1 age-discrepancy model to the difference between a single unsynchronized chronology sample and tie-points taken from the probability distribution. Panel (b) shows the synchronized age uncertainties (with the layer-counted chronology subtracted) obtained by producing an ensemble of synchronized chronology samples."
   },
 
 
@@ -237,24 +287,67 @@ const demoContent = [
  {
     type: "heading",
     level: 2,
-    value: "4. R-package: Bremla"
+    value: "5. R-package: Bremla"
   },
 
     {
     type: "text",
     value:
-    "The Bayesian regression modeling modeling approach to quantifying the dating uncertainties of layer-counted records, as well as the method for synchronizing chronologies to tie-points, is implemented in the 'Bremla' R-package. For more information about this package, see the <a href=\"/software\">Software</a> page."
+    "The Bayesian regression modeling approach to quantifying the dating uncertainties of layer-counted records, as well as the method for synchronizing chronologies to tie-points, is implemented in the 'Bremla' R-package. For more information about this package, see the <a href=\"/software\">Software</a> page."
   },
-
+  {
+    type: "heading",
+    level: 2,
+    value: "6. Relevant publications in this field"
+  },
+  {
+    /* Pulled from papers.bib by key and rendered with the
+       same card /publications uses, so abstracts, DOIs and
+       PDFs come along and nothing can fall out of step. */
+    type: "publications",
+    keys: [
+      "MyrvollNilsen2022",
+      "myrvoll2025synchronization"
+    ]
+  },
+  {
+    type: "html",
+    value:
+      `<p class="pub-selection-more"><a class="more-link" href="/publications"><span>All publications</span></a></p>`
+  },
+  {
+    type: "heading",
+    level: 2,
+    value: "References"
+  },
 
 ];
 
 
 
 
+const stripTags = (html = "") => String(html).replace(/<[^>]+>/g, "");
+
+/* Expand every marker before bibliography() is called — that
+   call is what records which works the page used. */
+const content = demoContent.map((block) => {
+  if (block.type === "text" || block.type === "html") {
+    return { ...block, value: expandCitations(block.value) };
+  }
+  if (block.type === "figure" && block.caption) {
+    const caption = expandCitations(block.caption);
+    return { ...block, caption, captionText: stripTags(caption) };
+  }
+  return block;
+});
+
+/* "html", not "text": the list is a <ul>, which cannot live
+   inside a <p>. */
+content.push({ type: "html", value: bibliography() });
+
 /* contents list, derived from the headings below so the two
    can never fall out of step */
-const sections = demoContent
+const sections = content
   .filter((b) => b.type === "heading" && (b.level ?? 3) === 2)
   .map((b) => ({ label: b.value, id: slugify(b.value) }));
 ---
@@ -279,11 +372,21 @@ const sections = demoContent
       <section class="research-card">
 
         <div class="content">
-          {demoContent.map((block) => {
+          {content.map((block) => {
 
             if (block.type === "text") {
               return (
                 <p class="text" set:html={renderText(block.value)} />
+              );
+            }
+
+            /* Block-level HTML needs a <div>: a <p> is
+               auto-closed the moment the parser meets a <p>
+               or <ul> inside it, which moves the content out
+               of .text and breaks every rule aimed at it. */
+            if (block.type === "html") {
+              return (
+                <div class="text" set:html={renderText(block.value)} />
               );
             }
 
@@ -306,15 +409,38 @@ const sections = demoContent
               );
             }
 
+            if (block.type === "publications") {
+              return (
+                <div class="pub-selection">
+                  {selectPapers(block.keys).map((paper) => (
+                    <Publication
+                      title={paper.title}
+                      type={paper.type}
+                      authors={paper.authors}
+                      venue={paper.journal || paper.school}
+                      year={paper.year}
+                      abstract={paper.abstract}
+                      doi={paper.doi}
+                      pdf={paper.pdf}
+                      url={paper.url}
+                      volume={paper.volume}
+                      number={paper.number}
+                      pages={paper.pages}
+                    />
+                  ))}
+                </div>
+              );
+            }
+
             if (block.type === "figure") {
               return (
                 <figure class="figure">
                   <img
                     src={block.src}
-                    alt={block.caption ?? ""}
+                    alt={block.captionText ?? block.caption ?? ""}
                   />
                   {block.caption && (
-                    <figcaption>{block.caption}</figcaption>
+                    <figcaption set:html={block.caption} />
                   )}
                 </figure>
               );
@@ -384,8 +510,15 @@ const sections = demoContent
    column on desktop, so the guard is only kept for narrow
    viewports where a wide formula really could overflow. */
 .equation {
-  margin: 1rem 0;
+  margin: 1.4rem 0;
   overflow-x: visible;
+}
+
+/* KaTeX's own .katex-display carries margin: 1em 0. Left
+   alone it stacks with .equation's margin and the spacing
+   around every formula doubles. Let the wrapper own it. */
+.equation :global(.katex-display) {
+  margin: 0;
 }
 
 @media (max-width: 700px) {
@@ -460,6 +593,28 @@ html.dark .figure img {
   content: "Figure " counter(figure) ". ";
   font-weight: 600;
   color: var(--text);
+}
+
+/* ---------------------------------------------------------
+   SELECTED PUBLICATIONS
+
+   Left uncapped rather than held to the 68ch prose measure:
+   the cards carry a right-hand column of badge and action
+   buttons that collides with the title when squeezed.
+--------------------------------------------------------- */
+
+.pub-selection {
+  margin: 1rem 0 0.5rem;
+}
+
+.pub-selection :global(.pub:last-child) {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.text :global(.pub-selection-more) {
+  margin: 1rem 0 0;
 }
 
 /* ---------------------------------------------------------

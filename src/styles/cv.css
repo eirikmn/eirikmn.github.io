@@ -14,7 +14,12 @@
 ========================================================= */
 
 /* ---------------------------------------------------------
-   THE ACCENT SPINE SHARED BY EVERY ENTRY
+   ENTRIES
+
+   Each entry used to carry an accent spine down its left
+   edge. The section itself is now a card (see CVSection),
+   which frames the content, so a second vertical rule inside
+   it was one border too many.
 
    Spacing between entries is owned by
    .cv-section-content { gap } in CVSection.astro,
@@ -22,10 +27,27 @@
 --------------------------------------------------------- */
 
 .cv-item {
-  border-left: 2px solid var(--accent);
-  padding-left: 1rem;
   margin: 0;
   min-width: 0;
+}
+
+/* ---------------------------------------------------------
+   SEPARATING ENTRIES INSIDE A CARD
+
+   Without the spine, six work entries stacked in one card
+   run together. A hairline between consecutive entries keeps
+   them scannable.
+
+   Direct children only, so the grouped items inside
+   CVSkills — which sit in their own .cv-skills wrapper —
+   are left alone. The adjacent-sibling selector also means
+   no rule appears directly under an <h3> subsection heading,
+   which is where a divider would look wrong.
+--------------------------------------------------------- */
+
+.cv-section-content > .cv-item + .cv-item {
+  border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  padding-top: 1rem;
 }
 
 /* ---------------------------------------------------------

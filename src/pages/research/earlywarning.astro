@@ -25,7 +25,16 @@ const renderText = (text = "") => {
 ------------------------- */
 const renderMath = (expr = "") =>
   katex.renderToString(expr, {
-    throwOnError: false
+    throwOnError: false,
+
+    /* Without this KaTeX renders in text style, the same as
+       an inline $x$: sums and integrals keep their limits
+       tucked beside the operator instead of above and below
+       it, and fractions are set at the smaller script size.
+       Display style is what these blocks were always meant
+       to be. It also wraps the output in .katex-display,
+       which centres it as its own block. */
+    displayMode: true
   });
 
 /* -------------------------
@@ -40,7 +49,7 @@ const demoContent = [
   {
     type: "heading",
     level: 2,
-    value: "Background"
+    value: "1. Background"
   },
   {
     type: "text",
@@ -50,7 +59,7 @@ const demoContent = [
   {
     type: "heading",
     level: 2,
-    value: "1. Introduction"
+    value: "2. Introduction"
   },
   {
     type: "text",
@@ -145,7 +154,12 @@ const demoContent = [
   {
     type: "heading",
     level: 2,
-    value: "2. Model-based early warning signal detection"
+    value: "3. Extensions and modifications"
+  },
+  {
+    type: "heading",
+    level: 2,
+    value: "4. Model-based early warning signal detection"
   },
   {
     type: "text",
@@ -200,7 +214,7 @@ const demoContent = [
   {
     type: "heading",
     level: 2,
-    value: "3. Applications"
+    value: "5. Applications"
   },
   {
     type: "text",
@@ -210,7 +224,7 @@ const demoContent = [
 {
     type: "heading",
     level: 2,
-    value: "4. Relevant publications"
+    value: "6. Relevant publications"
   },
   {
     type: "text",
@@ -234,6 +248,41 @@ const demoContent = [
     type: "heading",
     level: 2,
     value: "References"
+  },
+  {
+    type: "text",
+    value:
+      ""
+  },
+  {
+    type: "text",
+    value:
+      ""
+  },
+  {
+    type: "text",
+    value:
+      ""
+  },
+  {
+    type: "text",
+    value:
+      ""
+  },
+  {
+    type: "text",
+    value:
+      ""
+  },
+  {
+    type: "text",
+    value:
+      ""
+  },
+  {
+    type: "text",
+    value:
+      ""
   },
 ];
 
@@ -366,8 +415,15 @@ const sections = demoContent
    column on desktop, so the guard is only kept for narrow
    viewports where a wide formula really could overflow. */
 .equation {
-  margin: 1rem 0;
+  margin: 1.4rem 0;
   overflow-x: visible;
+}
+
+/* KaTeX's own .katex-display carries margin: 1em 0. Left
+   alone it stacks with .equation's margin and the spacing
+   around every formula doubles. Let the wrapper own it. */
+.equation :global(.katex-display) {
+  margin: 0;
 }
 
 @media (max-width: 700px) {

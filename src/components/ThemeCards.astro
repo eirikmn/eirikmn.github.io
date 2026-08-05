@@ -5,6 +5,23 @@
    Used on both the home page and the research index, so the
    wording and the styling live in one place.
 
+   The themes come from src/data/research.json, which each
+   research subpage also reads for its own <h1> and intro.
+   This component used to carry its own hardcoded copy, and
+   the two had already drifted — the card said "Long-range
+   dependence" while the page it linked to was headed
+   "Long-range dependence, with climate applications".
+
+   Fields used here:
+     title    also the page's <h1>, so a card and the page it
+              opens always agree
+     blurb    a short teaser; deliberately NOT `summary`,
+              which is the longer intro paragraph under the
+              page heading. Different jobs, different lengths.
+     href     where the card points
+     featured whether it appears on the home page
+     id       also the thumbnail filename in src/assets/themes
+
    Props:
      featured - render only the themes marked featured. The
                 home page uses this so new themes can be added
@@ -17,39 +34,13 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import themes from "../data/research.json";
 
 const dir = path.join(process.cwd(), "src/assets/themes");
 const figure = (name) =>
   fs.readFileSync(path.join(dir, `${name}.svg`), "utf-8");
 
 const { featured = false } = Astro.props;
-
-const themes = [
-  {
-    id: "longmemory",
-    href: "/research/longmemory",
-    title: "Long-range dependence",
-    blurb:
-      "Efficient Bayesian analysis of long-memory processes, with applications to climate data.",
-    featured: true
-  },
-  {
-    id: "agemodeling",
-    href: "/research/agemodeling",
-    title: "Bayesian age-depth modeling",
-    blurb:
-      "Dating uncertainty and synchronization of layer-counted paleoclimate proxy records.",
-    featured: true
-  },
-  {
-    id: "earlywarning",
-    href: "/research/earlywarning",
-    title: "Early warning signals",
-    blurb:
-      "A Bayesian model-based approach for identifying early warning signals preceding tipping points.",
-    featured: true
-  }
-];
 
 const shown = featured ? themes.filter((t) => t.featured) : themes;
 ---

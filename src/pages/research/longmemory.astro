@@ -3,9 +3,79 @@ import Layout from "../../layouts/Layout.astro";
 import Lightbox from "../../components/Lightbox.astro";
 import SectionNav from "../../components/SectionNav.astro";
 import { slugify } from "../../lib/slug.js";
+import { createCitations } from "../../lib/references.js";
+import { loadBib } from "../../lib/bib.js";
+import Publication from "../../components/Publication-list.astro";
+import "../../styles/more-link.css";
+import "../../styles/citations.css";
 import "katex/dist/katex.min.css";
 import katex from "katex";
 import topics from "../../data/research.json";
+
+/* -------------------------
+   SELECTED PUBLICATIONS
+
+   Section 7 lists a few of my own papers. They come from
+   papers.bib — the same file /publications reads — so the
+   two can never disagree about a title or a page range.
+
+   An unknown key throws rather than silently rendering an
+   empty card.
+------------------------- */
+const papersByKey = new Map(
+  loadBib("./src/data/papers.bib").map((p) => [p.key, p])
+);
+
+const selectPapers = (keys = []) =>
+  keys.map((key) => {
+    const paper = papersByKey.get(key);
+    if (!paper) {
+      throw new Error(
+        `Unknown publication key "${key}". ` +
+          `Check src/data/papers.bib. Known keys: ` +
+          [...papersByKey.keys()].join(", ")
+      );
+    }
+    return paper;
+  });
+
+/* -------------------------
+   CITATIONS
+
+   Three forms, mirroring natbib, because the difference is
+   grammatical rather than decorative:
+
+     [[hurst1951]]      → (Hurst, 1951)      \citep
+                          an aside; the sentence stands without it
+
+     [[t:granger1980]]  → Granger (1980)     \citet
+                          the author is a noun in the sentence
+
+     [[b:rue2009]]      → Rue et al., 2009   \citealp
+                          no brackets of its own, for use inside
+                          brackets already open: "(INLA, …)"
+
+   Several keys in one marker share one bracket group:
+     [[gistemp2018; lenssen2019]]
+       → (GISTEMP Team, 2018; Lenssen et al., 2019)
+
+   Two bibliographies, both listed under References:
+   references.bib for other people's work, papers.bib for my
+   own. Only what the page actually cites is listed, so the
+   other entries in papers.bib stay out of it.
+
+   An unknown key in either fails the build.
+
+   Each page makes its own recorder, so the reference list
+   below contains exactly the works this page cites — no
+   orphans, and nothing missing.
+------------------------- */
+const { expandCitations, bibliography } = createCitations({
+  sources: [
+    { path: "./src/data/references.bib", anchor: "ref" },
+    { path: "./src/data/papers.bib", anchor: "ref" }
+  ]
+});
 
 /* -------------------------
    SAFE text renderer (NO math)
@@ -23,7 +93,16 @@ const renderText = (text = "") => {
 ------------------------- */
 const renderMath = (expr = "") =>
   katex.renderToString(expr, {
-    throwOnError: false
+    throwOnError: false,
+
+    /* Without this KaTeX renders in text style, the same as
+       an inline $x$: sums and integrals keep their limits
+       tucked beside the operator instead of above and below
+       it, and fractions are set at the smaller script size.
+       Display style is what these blocks were always meant
+       to be. It also wraps the output in .katex-display,
+       which centres it as its own block. */
+    displayMode: true
   });
 
 /* -------------------------
@@ -38,27 +117,22 @@ const demoContent = [
 {
     type: "heading",
     level: 2,
-    value: "Summary"
+    value: "1. Background"
   },
     {
     type: "text",
     value:
-      "Long-memory processes are stochastic processes where correlations decay slowly over time. " +
-      "Unlike short-memory models such as autoregressive (AR) processes, long memory processes retain statistical dependence across long time horizons."+
-      " Long memory properties have been observed in many environmental and geophysical time series, including global mean surface temperature records. "+
-      "However, Bayesian inference for long-memory processes is computationally expensive "+
-      "The main aim of my PhD thesis was to develop an efficient approximation of long-memory processes that allows for fast Bayesian inference, and to use this methodology to analyze global mean surface temperature records. "
+    "After finishing my master's thesis at NTNU in September 2016, I started my PhD at UiT The Arctic University of Norway, under the supervision of Sigrunn Holbek Sørbye (UiT), and co-supervision of Håvard Rue (KAUST) and Martin Rypdal (UiT). The main aim of my PhD thesis was to develop an efficient approximation of long-memory processes that allows for fast Bayesian inference, and to use this methodology to analyze global mean surface temperature records. In addition to my supervisors, I also collaborated with Hege-Beate Fredriksen (UiT) and Kristoffer Rypdal (UiT)."
   },
   {
     type: "heading",
     level: 2,
-    value: "1. Introduction"
+    value: "2. Introduction"
   },
   {
     type: "text",
     value:
-    "Long-range dependence (LRD) or long memory is a property relating to the rate of decay of statistical dependence of two observations as the distance between them increases."+
-      "A common formulation for long-memory behavior is given by a hyperbolic (as opposed to an exponential) decay of the autocovariance function."
+    "Long-range dependence (LRD) or long memory is a property relating to the rate of decay of statistical dependence of two observations as the distance between them increases. A common definition for long-memory behavior is given by a hyperbolic (as opposed to an exponential) decay of the autocovariance function."
   },
 
   {
@@ -68,17 +142,13 @@ const demoContent = [
   {
     type: "text",
     value:
-    "Here, $H$ measures the degree of long-range dependence and is commonly referred to as the Hurst exponent. "+
-    "The exponent is named after H.E. Hurst, who, while studying the storage requirements of reservoirs on the Nile River, "+
-    "observed that the rescaled range statistic of hydrological records followed a power-law (Hurst, 1951), which could not be explained using contemporary short memory models. "+
-    "Hurst's results lead to increased interest in the topic, and both hydrologists and mathematicians tried to find theoretical explanations of the so-called <em>Hurst phenomenon</em>. "
+    "Here, $H$ measures the degree of long-range dependence and is commonly referred to as the Hurst exponent. The exponent is named after H.E. Hurst, who, while studying the storage requirements of reservoirs on the Nile River, observed that the rescaled range statistic of hydrological records followed a power-law [[hurst1951]], which could not be explained using contemporary short memory models. Hurst's results led to increased interest in the topic, and both hydrologists and mathematicians tried to find theoretical explanations of the so-called <em>Hurst phenomenon</em>. "
     
   },
   {
     type: "text",
     value:
-      "A major breakthrough came with the introduction of fractional Brownian motion and its increment process, fractional Gaussian noise (fGn), by Mandelbrot and van Ness (1968)"+
-      "This is a process with an autocovariance function that decays hyperbolically "
+      "A major breakthrough came with the introduction of fractional Brownian motion and its increment process, fractional Gaussian noise (fGn), by [[t:mandelbrot1968]]. This is a process with an autocovariance function that decays hyperbolically "
   },
   {
     type: "math",
@@ -88,48 +158,34 @@ const demoContent = [
 {
     type: "text",
     value:
-      "The fractional Gaussian noise has since become a widely used model for long-memory behaviour, with applications in fields such as hydrology, dendrochronologyn, finance, among others. "+
-      "For my thesis I focused on applications in climate science, specifically on global mean surface temperature records, where long memory has been observed. (CITECITECITE)" +
-      "However, long memory processes are difficult to work with due to "
+      "The fractional Gaussian noise has since become a widely used model for long-memory behaviour, with applications in fields such as hydrology, dendrochronology, finance, among others. For my thesis I focused on applications in climate science, specifically on global mean surface temperature records, where long memory has been observed [[rypdal2016; rybski2006; lovejoy2013; huybers2006; franzke2010; fredriksen2016]]. "
   },
-
-
-
-
 {
     type: "heading",
     level: 2,
-    value: "2. Efficient Bayesian inference"
+    value: "3. Efficient Bayesian inference"
   },
 
   {
     type: "text",
     value:
-      "It can be shown (Theorem XXX, Rue and Held, 2005) that if two variables $x_i$ and $x_j$, in a Gaussian random field $\\bm x$, are conditionally independent given the other variables in the field, $\\bm{x}_{-ij}$, the corresponding term in the precision matrix is zero, i.e. $Q_{ij}=0$. "+
-      "Thus, if a $\\bm x$ has a high degree of conditional independence we say that it is a Gaussian Markov random field (GMRF) and the precision matrix (inverse covariance matrix) will then be sparse. "+
-      "For example, since each node of an AR(1) process only depends on its immediate predecessor it is a GMRF with a tridiagonal precision matrix." 
+      "It can be shown (see e.g. Theorem 2.2 in [[b:rue2005]]) that if two variables $x_i$ and $x_j$, in a Gaussian random field $\\bm x$, are conditionally independent given the other variables in the field, $\\bm{x}_{-ij}$, the corresponding term in the precision matrix is zero, i.e. $Q_{ij}=0$. Thus, if $\\bm x$ has a high degree of conditional independence we say that it is a Gaussian Markov random field (GMRF) and the precision matrix (inverse covariance matrix) will then be sparse. For example, since each node of an AR(1) process is only conditionally dependent on its immediate predecessor it is a GMRF with a tridiagonal precision matrix." 
   },
 
   {
     type: "figure",
     src: "/images/research/longmemory/ar1graph.svg",
     caption:
-      "Conditional dependence structure for an AR(1) process. Each node only depends on its immediate predecessor. This Markov property ensures a sparse precision matrix which allows for the use of computationally efficient algorithms."
+      "Conditional dependence structure for an AR(1) process. Each node only depends (directly) on its immediate predecessor. This Markov property ensures a sparse precision matrix which allows for the use of computationally efficient algorithms."
   },
 {
     type: "text",
-    value: "The sparse precision matrix associated with the Markov property allows for many efficient algorithms for key operations to be utilized. This includes computing the log-likelihood (Rue, 2001), performing Cholesky factorization and producing samples. "+
-    "This is particularly important for Bayesian inference, where the the posterior distributions are typically evaluated using time-consuming sampling-based methods such as Markov chain Monte Carlo (MCMC). "+
-    "The Markov property allows for the use of more efficient algorithms such as integrated nested Laplace approximations (INLA, Rue et al., 2009), which utilizes the sparse structure of the precision matrix to compute the posterior marginal distributions numerically. "+
-    ""
+    value: "The sparse precision matrix associated with the Markov property allows for many efficient algorithms for key operations to be utilized. This includes computing the log-likelihood [[rue2001]], performing Cholesky factorization and producing samples. This is particularly important for Bayesian inference, where the posterior distributions are typically evaluated using time-consuming sampling-based methods such as Markov chain Monte Carlo (MCMC). The Markov property allows for these methods to be implemented more efficiently, but also allows for more efficient alternatives such as integrated nested Laplace approximations (INLA, [[b:rue2009]]). INLA utilizes the sparse structure of the precision matrix to compute the posterior marginal distributions numerically, foregoing the need for sampling. "
 },
    {
     type: "text",
     value:
-      "Unlike Markov processes like the AR(1), long-memory processes exhibit persistent correlations over extended time periods, where each variable is conditionally dependent on all other variables.  "+
-      "This means that the precision matrix is dense, and key inference algorithms have a computational cost that scales cubically with the number of observations, making them impractical for large datasets. "+ 
-      "In simple cases it is possible to exploit the Toeplitz structure of the covariance matrix to achieve $\\mathcal{O}(n^2)$ cost, but in many situations, such as when we have inhomogeneous variance, the Toeplitz structure breaks and the cost increases to $\\mathcal{O}(n^3)$. "+
-      "This motivates the need for an approximate model that can capture the long range dependence of the fGn process while retaining the Markov property, allowing for efficient inference algorithms to be utilized."
+      "Unlike Markov processes like the AR(1), long-memory processes exhibit persistent correlations over extended time periods, where each variable is conditionally dependent on all other variables. This means that the precision matrix is dense, and key inference algorithms have a computational cost that scales cubically with the number of observations, making them impractical for large datasets. In simple cases it is possible to exploit the Toeplitz structure of the covariance matrix to achieve $\\mathcal{O}(n^2)$ cost, but in many situations, such as when we have inhomogeneous variance, the Toeplitz structure breaks and the cost increases to $\\mathcal{O}(n^3)$. This motivates the need for an approximate model that can capture the long range dependence of the fGn process while retaining the Markov property, allowing for efficient inference algorithms to be utilized."
   },
   {
     type: "figure",
@@ -141,8 +197,7 @@ const demoContent = [
   {
     type: "text",
     value:
-      "Granger (1980) showed that if the lag-one autocorrelation parameter $\\phi$ of an AR(1) process is sampled from a beta distribution the aggregation of AR(1) processes would exhibit long-range dependence according to a fractionally integrated process. "+
-      "It should therefore be possible to express an fGn process through a mixture of short memory processes, which would grant the Markov property and possibly reducing computational cost. "
+      "[[t:granger1980]] showed that if the lag-one autocorrelation parameter $\\phi$ of an AR(1) process is sampled from a beta distribution the aggregation of AR(1) processes would exhibit long-range dependence according to a fractionally integrated process. It should therefore, in theory, be possible to express an fGn process through a mixture of short memory processes, which would grant the Markov property and possibly reduce computational cost. "
   },
 
 {
@@ -154,7 +209,7 @@ const demoContent = [
 {
     type: "text",
     value:
-      "Unfortunately, as pointed out by Haldrup and Valdés (2017), the number of AR(1) processes (with $\\phi$ drawn from a beta distribution) required to exhibit long-range dependence is so large that any gains in the Markov property would be lost to the increase in variables associated with the AR(1) processes. Making a sampling-based approach impractical for inference. "
+      "Unfortunately, as pointed out by [[t:haldrup2017]], the number of AR(1) processes (with $\\phi$ drawn from a beta distribution) required to exhibit long-range dependence is so large that any gains in the Markov property would be lost to the increase in variables associated with the high number of AR(1) processes, making a sampling-based approach impractical for inference. "
   },
 
 {
@@ -182,14 +237,14 @@ const demoContent = [
   {
     type: "heading",
     level: 2,
-    value: "3. AR(1) mixture approximation"
+    value: "4. AR(1) mixture approximation"
   },
 
   
   {
     type: "text",
     value:
-      "In Sørbye et al. (2019) we propose a numerical approach to approximating long-range dependence by aggregating AR(1) process. "+
+      "In [[t:Sorbye2019]] we propose a numerical approach to approximating long-range dependence by aggregating AR(1) processes. "+
       "Specifically, we approximate the fGn process $\\bm z$ by: "
   },
   {
@@ -219,10 +274,7 @@ const demoContent = [
   {
     type: "text",
     value:
-      "and is repeated for all $H$ in a grid covering the persistent range $H \\in (0.5, 1)$. "+
-      "The weighting term $1/k$ is used to give more importance to the fit of the acf at small lags, which improves estimation accuracy. "+
-      "The optimization yields a mapping from $H$ to a corresponding set of weights $\\bm w$ and lag-one autocorrelation parameters $\\bm \\phi$, which in turn gives us an approximate fGn process expressed as a mixture of $m$ AR(1) processes. "+
-      "We find that only using $m=4$ AR(1) processes in the aggregation provides excellent approximation of the autocorrelation function. We also find good estimation accuracy even for time series exceeding $k_{\\text{max}}=1000$. See Sørbye et al. (2019) or Myrvoll-Nilsen (2020) for more details."
+      "and is repeated for all $H$ in a grid covering the persistent range, $H \\in (0.5, 1)$. The weighting term $1/k$ is used to give more importance to small lags in the optimization procedure, which are more important for estimation accuracy. The optimization yields a mapping from $H$ to a corresponding set of weights $\\bm w$ and lag-one autocorrelation parameters $\\bm \\phi$, which in turn gives us an approximate fGn process expressed as a mixture of $m$ AR(1) processes. We find that only using $m=4$ AR(1) processes in the aggregation provides excellent approximation of the autocorrelation function. We also find good estimation accuracy even for time series exceeding $k_{\\text{max}}=1000$. See [[t:Sorbye2019]] or [[t:myrvoll2020efficient]] for more details."
   },
 
 
@@ -230,16 +282,17 @@ const demoContent = [
     type: "figure",
     src: "/images/research/longmemory/fgnmap.svg",
     caption:
-      "Panel (c) shows the autocorrelation function of an approximate fGn process, using 4 AR(1) processes, against the correlation function of a target fGn process with H = 0.8. "+
-      "The mapping from each H in the persistent range of (0.5, 1) to the corresponding weights and lag-one autocorrelation parameters are shown in panels (b) and (c), respectively."
+      "Panel (a) shows the autocorrelation function of an approximate fGn process, using 4 AR(1) processes, against the correlation function of a target fGn process with H = 0.8. The mapping from each H in the persistent range of (0.5, 1) to the corresponding weights and lag-one autocorrelation parameters are shown in panels (b) and (c), respectively."
   },
 {
     type: "text",
     value:
-    "To fully exploit the computational advantages of a GMRF approximation of an fGn we formulate a latent Gaussian model, and perform full Bayesian inference using integrated nested Laplace approximations (INLA, Rue et al., 2009). "+
-    "Being able to incorporate the model into the R-INLA framework allows us to easily add other model components such as linear or seasonal trends. "+
-      "The model has since been incorporated into R-INLA as a standard model." +
-      "The approximate fGn model laid the foundation for my PhD thesis, and was subsequently applied to a number of real-world problems in climate science. "
+    "To fully exploit the computational advantages of a GMRF approximation of an fGn we formulate a latent Gaussian model, and perform full Bayesian inference using INLA through its implementation in R (<a href='https://www.r-inla.org' target='_blank' rel='noopener noreferrer'>r-inla.org</a>). Being able to incorporate the model into the R-INLA framework allows us to easily add other model components such as seasonal trends and random effects. The model has since been incorporated into R-INLA as a standard model.  "
+  },
+{
+    type: "text",
+    value:
+    "The approximate fGn model laid the foundation for my PhD thesis, and was subsequently applied to a number of real-world problems in climate science. "
   },
 
 
@@ -261,7 +314,7 @@ const demoContent = [
   {
     type: "heading",
     level: 2,
-    value: "4. Incorporating radiative forcing"
+    value: "5. Incorporating radiative forcing"
   },
 
 
@@ -269,13 +322,13 @@ const demoContent = [
 {
     type: "text",
     value:
-    "Reliable quantification of the global mean surface temperature (GMST) response to radiative forcing is essential for assessing the risk of dangerous anthropogenic climate change. For time scales ranging from months to centuries this response can be expressed as scale-invariant (Rypdal and Rypdal, 2016; Rybski et al., 2006; Lovejoy and Schertzer, 2013; Huybers and Curry, 2006; Franzke, 2010; Fredriksen and Rypdal, 2016)" +
+    "Reliable quantification of the global mean surface temperature (GMST) response to radiative forcing is essential for assessing the risk of dangerous anthropogenic climate change. For time scales ranging from months to centuries this response can be expressed as scale-invariant [[rypdal2016; rybski2006; lovejoy2013; huybers2006; franzke2010; fredriksen2016]]" +
     ", implying long memory properties."
   },
 {
     type: "text",
     value:
-    "To understand how "
+    "To understand how radiative forcing affects the GMST we can use a simple energy balance model, which describes the change in heat content of the climate system as a function of the radiative forcing $F$ and the heat loss to space. This can be expressed as "
   },
 {
     type: "math",
@@ -284,21 +337,25 @@ const demoContent = [
   {
     type: "text",
     value:
-    "where $\\Delta Q = C\\Delta T$."+
-    " The forcing can be decomposed into a known component $F_{\\text{known}}$, and an unknown, stochastic component $dB(t)$."+
-    " Solving the energy balance model yields solution: "
+    "and $\\Delta Q = C\\Delta T$, where $\\Delta Q$ is the change in the system's heat content, $C$ is the heat capacity, $\\Delta T$ is the temperature anomaly and $\\lambda$ is the feedback parameter. The forcing can be decomposed into a known component $F_{\\text{known}}$, and an unknown, stochastic component $dB(t)$. By solving the energy balance model we find that the GMST can be expressed as the sum of two components. First, the response to known forcing "
   },
   {
     type: "math",
-    value: "\\Delta T(t) = "
+    value: "\\mu (t) = \\frac{1}{C} \\int_0^t g(t-s) F_{\\text{known}}(s) ds"
   },
   {
     type: "text",
     value:
-    "Where $\\Delta T_{\\text{known}}$ is the GMST reponse to the known forcing component and $\\bm \\varepsilon$ is an Ornstein-Uhlenbeck process."+
-    " When discretized, the stochastic component results in an AR(1) process."+
-    " This model is, however, not consistent with observations (Rypdal and Rypdal, 2014) due to the slow climate response associated with the energy exchange with the deep ocean."+
-    " This simple energy balance model can be extended to an $m$-box model where heat is exchanged between $m$ 'boxes', representing different layers of the deep ocean. Mathematically, the $m$-box model can be express as"
+    "where $g(t-s) = e^{-(t-s)\\lambda/C}$ is the Green's function. And second, an Ornstein-Uhlenbeck process $\\bm \\varepsilon$ which describes the response to the stochastic forcing component "
+  },
+  {
+    type: "math",
+    value: "\\varepsilon(t) = \\frac{\\sigma}{C} \\int_0^t g(t-s) dB(s) ."
+  },
+  {
+    type: "text",
+    value:
+    "When discretized, the stochastic component results in an AR(1) process. This model is, however, not consistent with observations [[rypdal2014]] due to the slow climate response associated with the energy exchange with the deep ocean. This simple energy balance model can be extended to an $m$-box model where heat is exchanged between $m$ 'boxes', representing different layers of the deep ocean. Mathematically, the $m$-box model can be expressed as"
   },
   {
     type: "math",
@@ -307,8 +364,7 @@ const demoContent = [
   {
     type: "text",
     value:
-    "Here, dawdawdawdawdawdawd"+
-    "As the number of boxes increase towards infinity, $g$ can be expressed as a scale invariant response function (Fredriksen and Rypdal, 2017)"
+    "Here, $\\bm K$ is a matrix representing the heat exchange between the boxes. As the number of boxes increases towards infinity, the Green's function can be expressed as a scale invariant response function [[fredriksen2017]]"
   },
   {
     type: "math",
@@ -317,7 +373,7 @@ const demoContent = [
   {
     type: "text",
     value:
-    "which means that the response to the stochastic component can be expressed as a fractional Gaussian noise process with Hurst exponent $H$. "
+    "which means that the response to the stochastic component can be expressed as a fractional Gaussian noise process with Hurst exponent $H$. Moreover, letting $F_0$ denote an unknown shift parameter in the known forcing, and $\\sigma$ and $\\sigma_f$ be scaling parameters for the stochastic and known forcing, respectively, we can express the GMST as "
   },
   {
     type: "math",
@@ -326,23 +382,20 @@ const demoContent = [
   {
     type: "text",
     value:
-    "Since none of the default R-INLA models support this specific formulation we need to construct the latent model component using the custom modeling framework of R-INLA called <em>rgeneric</em>."+
-    " To make the temperature response model easily accessible to other researchers we have developed a user-friendly R-package called <em>INLA.climate</em>, which takes care of the technical implementation of the model and allows users to easily fit the model to their data using R-INLA."+
-    " This package is available at my GitHub repository: <a href='https://github.com/eirikmn/INLA.climate' target='_blank'>INLA.climate</a>. A description and tutorial of this package can be found in Appendix A in my PhD thesis (Myrvoll-Nilsen, 2020)."+
-    " A demonstration and short description is also available under the 'Software' section of this website."
+    "Since none of the default R-INLA models support this specific formulation we need to construct the latent model component using the custom modeling framework of R-INLA called <em>rgeneric</em>. To make the temperature response model easily accessible to other researchers we have developed a user-friendly R-package called <em>INLA.climate</em>, which takes care of the technical implementation of the model and allows users to easily fit the model to their data using R-INLA. This package is available at my GitHub repository: <a href='https://github.com/eirikmn/INLA.climate' target='_blank' rel='noopener noreferrer'>INLA.climate</a>, and a demonstration and short description is also available under the 'Software' section of this website. A more detailed description and tutorial of this package can be found in Appendix A in my PhD thesis [[myrvoll2020efficient]]. "
   },
 
   {
     type: "heading",
     level: 2,
-    value: "5. Climate applications"
+    value: "6. Climate applications"
   },
 
 {
     type: "text",
     value:
     "There are several benefits of having the model specified through the R-INLA framework. For example, any missing values in the GMST will be imputed automatically using the posterior predictive distribution (but the known forcing has to be provided as input for all points)."+
-    " This also means that we can very easily use the model for prediction. In Myrvoll-Nilsen et al. (2020) we predict the GMST under the four Representation Concentration Pathways (RCP) provided by the Coupled Model Intercomparison Project (CMIP) for the period 2006-2100, and find that the model provides good predictive performance even for long-term predictions up to 100 years into the future."
+    " This also means that we can very easily use the model for prediction. In [[t:myrvoll2020statistical]] we predict the GMST under the four Representation Concentration Pathways (RCP) provided by the Coupled Model Intercomparison Project (CMIP) for the period 2006-2100, and find that the model provides good predictive performance even for long-term predictions up to 100 years into the future."
   },
   {
     type: "figure",
@@ -353,34 +406,49 @@ const demoContent = [
 {
     type: "text",
     value:
-    "In other applications we use the model to estimate both the transient climate sensitivity (Myrvoll-Nilsen et al., 2020) and the equilibrium climate sensitivity (Rypdal et al., 2018), which are key metrics for understanding the risk of dangerous anthropogenic climate change. "+
-    "In Myrvoll-Nilsen et al. (2019) we exploit the reduced computational cost in order to fit the model to all local temperature records in the spatio-tepmoral dataset, GISS Surface Temperature Analysis version 4 (GISTEMP v) (GISTEMP Team, 2018; Lenssen et al., 2019)."
+    "In other applications we use the model to estimate both the transient climate sensitivity [[myrvoll2020statistical]] and the equilibrium climate sensitivity [[rypdal2018emergent]], which are key metrics for understanding the risk of dangerous anthropogenic climate change. "+
+    "In [[t:myrvoll2019warming]] we exploit the reduced computational cost in order to fit the model to all local temperature records in the spatio-temporal dataset, GISS Surface Temperature Analysis version 4 (GISTEMP v4) [[gistemp2018; lenssen2019]]."
   },
 {
 
     type: "figure",
     src: "/images/research/longmemory/Hmap.png",
     caption:
-      "Image taken from Myrvoll-Nilsen et al. (2019). The posterior marginal mean estimate of the Hurst exponent obtained from fitting an fGn model using global radiative forcing to local time series data from the GISTEMP v4 spatio-temporal temperature dataset, for the years 1900–2015."
+      "Image taken from [[t:myrvoll2019warming]]. The posterior marginal mean estimate of the Hurst exponent obtained from fitting an fGn model using global radiative forcing to local time series data from the GISTEMP v4 spatio-temporal temperature dataset, for the years 1900–2015."
   },
   {
     type: "heading",
     level: 2,
-    value: "6. Relevant publications in this field"
+    value: "7. Relevant publications in this field"
   },
   {
-    type: "text",
-    value:
-    `
-    <ul>
-  <li>Sørbye, S. H., Myrvoll-Nilsen, E., & Rue, H. (2019). A computationally efficient approximation of the fractional Gaussian noise process. Statistics and Computing, 29(6), 1221–1233.</li>
-  <li>Myrvoll-Nilsen, E., ...</li>
-  <li>Myrvoll-Nilsen, E. (2020). Efficient Bayesian inference for long-memory processes applied to climate. PhD thesis, UiT The Arctic University of Norway.</li>
-</ul>
-<p>The full list, with abstracts and PDFs, is under <a href="/publications">Publications</a>.</p>
-`
+    /* Pulled from papers.bib by citation key, and rendered
+       with the same card the /publications page uses — so
+       the abstracts, DOIs and PDFs come along, and nothing
+       here can fall out of step with that page.
+
+       Order is chronological and deliberate; it is whatever
+       this array says, not whatever the .bib happens to
+       contain. */
+    type: "publications",
+    keys: [
+      "rypdal2018emergent",
+      "Sorbye2019",
+      "myrvoll2019warming",
+      "myrvoll2020statistical",
+      "myrvoll2020efficient"
+    ]
   },
-  
+  {
+    /* The five above are a selection, not the whole record —
+       this is the route to the rest. Same treatment as the
+       homepage's "All publications", so the two read as one
+       site rather than two. */
+    type: "html",
+    value:
+      `<p class="pub-selection-more"><a class="more-link" href="/publications"><span>All publications</span></a></p>`
+  },
+
   {
     type: "heading",
     level: 2,
@@ -391,9 +459,41 @@ const demoContent = [
 
 
 
+/* -------------------------
+   EXPAND CITATIONS, THEN BUILD THE LIST
+
+   Order matters: every [[key]] has to be expanded before
+   bibliography() is called, because that is what records
+   which works the page used. Doing it here rather than in
+   the template also means an unknown key fails the build
+   instead of half-rendering a page.
+------------------------- */
+const stripTags = (html = "") => String(html).replace(/<[^>]+>/g, "");
+
+const content = demoContent.map((block) => {
+  if (block.type === "text" || block.type === "html") {
+    return { ...block, value: expandCitations(block.value) };
+  }
+
+  /* Captions can cite too — "Image taken from …". The caption
+     becomes HTML once a citation is expanded, so it needs
+     set:html in the template; captionText keeps a plain copy
+     for the img alt, which must not contain markup. */
+  if (block.type === "figure" && block.caption) {
+    const caption = expandCitations(block.caption);
+    return { ...block, caption, captionText: stripTags(caption) };
+  }
+
+  return block;
+});
+
+/* "html", not "text": the list is a <ul>, which cannot live
+   inside a <p> — see the render branch below. */
+content.push({ type: "html", value: bibliography() });
+
 /* contents list, derived from the headings below so the two
    can never fall out of step */
-const sections = demoContent
+const sections = content
   .filter((b) => b.type === "heading" && (b.level ?? 3) === 2)
   .map((b) => ({ label: b.value, id: slugify(b.value) }));
 ---
@@ -418,11 +518,24 @@ const sections = demoContent
       <section class="research-card">
 
         <div class="content">
-          {demoContent.map((block) => {
+          {content.map((block) => {
 
             if (block.type === "text") {
               return (
                 <p class="text" set:html={renderText(block.value)} />
+              );
+            }
+
+            /* Block-level HTML — lists, paragraphs — has to go
+               in a <div>, not a <p>. A <p> is auto-closed the
+               moment the parser meets a <p> or <ul> inside it,
+               which silently moves the content out of .text and
+               breaks every descendant style rule aimed at it.
+               Keeps class="text" so the prose measure, line
+               height and colour still apply. */
+            if (block.type === "html") {
+              return (
+                <div class="text" set:html={renderText(block.value)} />
               );
             }
 
@@ -445,15 +558,38 @@ const sections = demoContent
               );
             }
 
+            if (block.type === "publications") {
+              return (
+                <div class="pub-selection">
+                  {selectPapers(block.keys).map((paper) => (
+                    <Publication
+                      title={paper.title}
+                      type={paper.type}
+                      authors={paper.authors}
+                      venue={paper.journal || paper.school}
+                      year={paper.year}
+                      abstract={paper.abstract}
+                      doi={paper.doi}
+                      pdf={paper.pdf}
+                      url={paper.url}
+                      volume={paper.volume}
+                      number={paper.number}
+                      pages={paper.pages}
+                    />
+                  ))}
+                </div>
+              );
+            }
+
             if (block.type === "figure") {
               return (
                 <figure class="figure">
                   <img
                     src={block.src}
-                    alt={block.caption ?? ""}
+                    alt={block.captionText ?? block.caption ?? ""}
                   />
                   {block.caption && (
-                    <figcaption>{block.caption}</figcaption>
+                    <figcaption set:html={block.caption} />
                   )}
                 </figure>
               );
@@ -523,8 +659,15 @@ const sections = demoContent
    column on desktop, so the guard is only kept for narrow
    viewports where a wide formula really could overflow. */
 .equation {
-  margin: 1rem 0;
+  margin: 1.4rem 0;
   overflow-x: visible;
+}
+
+/* KaTeX's own .katex-display carries margin: 1em 0. Left
+   alone it stacks with .equation's margin and the spacing
+   around every formula doubles. Let the wrapper own it. */
+.equation :global(.katex-display) {
+  margin: 0;
 }
 
 @media (max-width: 700px) {
@@ -600,6 +743,34 @@ html.dark .figure img {
   font-weight: 600;
   color: var(--text);
 }
+
+/* ---------------------------------------------------------
+   SELECTED PUBLICATIONS
+
+   Left uncapped rather than held to the 68ch prose measure.
+   The cards carry a right-hand column of type badge and
+   action buttons; squeezed to 68ch that column collides with
+   the title. Like the figures, they read as deliberately
+   wider than the running text.
+--------------------------------------------------------- */
+
+.pub-selection {
+  margin: 1rem 0 0.5rem;
+}
+
+/* The last card's rule would otherwise sit immediately above
+   the "full list" link and read as a divider between the
+   link and the section that follows. */
+.pub-selection :global(.pub:last-child) {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.text :global(.pub-selection-more) {
+  margin: 1rem 0 0;
+}
+
 
 /* ---------------------------------------------------------
    READING MEASURE

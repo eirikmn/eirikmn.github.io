@@ -19,9 +19,11 @@
     "supervisors": [
       "Sigrunn Holbek Sørbye",
       "Martin Rypdal",
-      "Håvard Rue"]
+      "Håvard Rue"
+    ],
+    "thesisUrl": "https://hdl.handle.net/10037/18148"
   },
-    {
+  {
     "degree": "MSc",
     "programme": "Physics and Mathematics",
     "field": "Industrial Mathematics",
@@ -39,11 +41,11 @@
     "link": "https://www.ntnu.no",
     "thesis": "Computationally efficient Bayesian approximation of fractional Gaussian noise using AR1 processes",
     "supervisors": [
-      "Håvard Rue", 
-      "Sigrunn Holbek Sørbye"]
+      "Håvard Rue",
+      "Sigrunn Holbek Sørbye"
+    ]
   },
-
-{
+  {
     "degree": "BSc",
     "programme": "Mathematical Sciences",
     "field": "Mathematics",
