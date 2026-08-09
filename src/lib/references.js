@@ -52,7 +52,13 @@ function loadReferences(path = BIB_PATH) {
 
     entries.set(entry.citationKey.toLowerCase(), {
       key: entry.citationKey,
+
+      /* `type` is the BibTeX entry type — @article, @book,
+         @phdthesis. `kind` is the optional `type = {...}`
+         field papers.bib uses to mark a preprint or a
+         comment, which the entry type cannot express. */
       type: entry.entryType,
+      kind: clean(f.type)?.toLowerCase() ?? null,
       author: clean(f.author),
       title: clean(f.title),
       year: clean(f.year),
@@ -88,15 +94,37 @@ const LATEX = [
   [/\\&/g, "&"]
 ];
 
+/* Exported as cleanTex so bib.js can use the same one. The research pages
+   and /publications read the same .bib, and for a while only the research
+   pages decoded it - so the publication list showed "1--20" and
+   "Sch{\"o}tz" while the reference lists showed "1-20" and "Schötz". One
+   implementation means the two cannot diverge again.
+
+   NB this is for DISPLAY only. Anything the reader copies as BibTeX must
+   keep its original escapes, or it will not parse in their bibliography. */
+export function cleanTex(value) {
+  return clean(value);
+}
+
 function clean(value) {
   if (value == null) return null;
 
-  let text = String(value);
-  for (const [re, to] of LATEX) text = text.replace(re, to);
-
-  return text
-    .replace(/[{}]/g, "")
-    .replace(/--/g, "–")
+  /* Inline maths is passed through untouched. The rules below strip braces
+     and turn "--" into an en dash, both of which are right for BibTeX prose
+     and wrong inside $...$: "$x_{t}$" would lose the braces that bind the
+     subscript, and "$a--b$" would gain a character KaTeX cannot parse.
+     Splitting on the delimiters keeps the two regimes apart. */
+  return String(value)
+    .split(/(\$[^$]*\$)/)
+    .map((part) => {
+      if (part.startsWith("$") && part.endsWith("$") && part.length > 1) {
+        return part;
+      }
+      let text = part;
+      for (const [re, to] of LATEX) text = text.replace(re, to);
+      return text.replace(/[{}]/g, "").replace(/--/g, "–");
+    })
+    .join("")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -109,9 +137,24 @@ function clean(value) {
    "Surname", "A and B" or "A et al." form for inline use.
 ------------------------------------------------------- */
 
+/* BibTeX writes a truncated author list as "... and others".
+   Split it off rather than treating it as a person, or the
+   reference list renders an author surnamed "others". */
 function splitAuthors(author) {
-  if (!author) return [];
-  return author.split(/\s+and\s+/i).map((a) => a.trim()).filter(Boolean);
+  if (!author) return { names: [], truncated: false };
+
+  const parts = author
+    .split(/\s+and\s+/i)
+    .map((a) => a.trim())
+    .filter(Boolean);
+
+  const truncated =
+    parts.length > 0 && parts[parts.length - 1].toLowerCase() === "others";
+
+  return {
+    names: truncated ? parts.slice(0, -1) : parts,
+    truncated
+  };
 }
 
 function surnameOf(name) {
@@ -137,21 +180,34 @@ function initialsOf(name) {
 }
 
 function formatAuthorsFull(author) {
-  const names = splitAuthors(author).map((n) => {
+  const { names: raw, truncated } = splitAuthors(author);
+
+  const names = raw.map((n) => {
     const initials = initialsOf(n);
     return initials ? `${surnameOf(n)}, ${initials}` : surnameOf(n);
   });
 
   if (names.length === 0) return "";
+
+  /* A truncated list ends "et al." rather than "and X",
+     because X is not the last author — the list was cut. */
+  if (truncated) return names.join(", ") + " et al.";
+
   if (names.length === 1) return names[0];
 
   return names.slice(0, -1).join(", ") + " and " + names[names.length - 1];
 }
 
 function formatAuthorsInline(author) {
-  const names = splitAuthors(author).map(surnameOf);
+  const { names: parts, truncated } = splitAuthors(author);
+  const names = parts.map(surnameOf);
 
   if (names.length === 0) return "";
+
+  /* Any truncated list is "et al." inline, however many
+     names happen to have survived the truncation. */
+  if (truncated) return `${names[0]} et al.`;
+
   if (names.length === 1) return names[0];
   if (names.length === 2) return `${names[0]} and ${names[1]}`;
 

@@ -20,6 +20,123 @@ for (const paper of papers) {
 }
 
 const years = [...byYear.keys()];
+
+/* Themes, for the filter chips.
+
+   The labels live here rather than in the .bib because they are display
+   strings; the .bib carries only the machine ids. Order is deliberate -
+   it follows the research section, not the paper counts.
+
+   Only themes that actually occur are offered, so the row can never
+   advertise a filter that would return nothing. */
+const THEME_LABELS = {
+  longmemory: "Long-range dependence",
+  agemodeling: "Age-depth modelling",
+  earlywarning: "Early warning signals"
+};
+
+const themeCounts = new Map();
+for (const p of papers) {
+  for (const t of p.themes ?? []) {
+    themeCounts.set(t, (themeCounts.get(t) ?? 0) + 1);
+  }
+}
+
+const themes = Object.keys(THEME_LABELS)
+  .filter((t) => themeCounts.has(t))
+  .map((t) => ({ id: t, label: THEME_LABELS[t], count: themeCounts.get(t) }));
+
+/* Orientation line under the heading. Both numbers are already to hand,
+   and "15 publications, 2018-2026" tells a visitor the scale and the span
+   before they read a single entry. */
+const yearsNumeric = papers.map((p) => Number(p.year)).filter(Number.isFinite);
+const spanFrom = Math.min(...yearsNumeric);
+const spanTo = Math.max(...yearsNumeric);
+
+/* -------------------------------------------------------
+   STRUCTURED DATA
+
+   An ItemList of ScholarlyArticle, so reference managers and
+   search engines can read the publications without scraping
+   the rendered markup. Zotero's connector picks this up and
+   offers to save every item on the page at once, which is the
+   thing a second export format would only partly solve.
+
+   Deliberately NOT citation_title / citation_author meta tags:
+   those describe ONE article per page, and Google Scholar
+   reads them that way. Fifteen sets on a listing page is not
+   a supported arrangement. Proper Scholar indexing would need
+   a page per publication, which is a much larger change.
+
+   Layout.astro already emits a Person schema for the site
+   owner; this is a separate block on this page only.
+------------------------------------------------------- */
+
+/* BibTeX gives "Surname, Given and Surname, Given". Split into
+   the two name parts so consumers get structured people rather
+   than one opaque string. "and others" is a truncation marker,
+   not a person - drop it. */
+function toPerson(entry) {
+  const name = entry.trim();
+  if (!name || name.toLowerCase() === "others") return null;
+
+  const [family, given] = name.includes(",")
+    ? name.split(",").map((s) => s.trim())
+    : [name.split(" ").pop(), name.split(" ").slice(0, -1).join(" ")];
+
+  return {
+    "@type": "Person",
+    name: given ? `${given} ${family}` : family,
+    ...(given ? { givenName: given } : {}),
+    familyName: family
+  };
+}
+
+const SCHEMA_TYPE = {
+  phdthesis: "Thesis",
+  preprint: "ScholarlyArticle",
+  comment: "ScholarlyArticle"
+};
+
+const publicationsSchema = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "Publications by Eirik Myrvoll-Nilsen",
+  numberOfItems: papers.length,
+  itemListOrder: "https://schema.org/ItemListOrderDescending",
+  itemListElement: papers.map((p, i) => {
+    const authors = (p.authors ?? "")
+      .split(/\s+and\s+/i)
+      .map(toPerson)
+      .filter(Boolean);
+
+    const doiUrl = p.doi
+      ? (p.doi.startsWith("http") ? p.doi : `https://doi.org/${p.doi}`)
+      : null;
+
+    const item = {
+      "@type": SCHEMA_TYPE[(p.type ?? p.entryType ?? "").toLowerCase()] ?? "ScholarlyArticle",
+      name: p.title,
+      author: authors,
+      datePublished: String(p.year),
+      /* abstracts are left out on purpose: they are 19.6 of the 33 KB this
+         block would otherwise weigh, they are already in the page body in
+         the collapsible panels, and any consumer that wants one can fetch
+         it from the DOI. Everything a reference manager actually needs to
+         build an entry - title, authors, year, DOI, journal, pages - is
+         here. */
+      ...(doiUrl ? { url: doiUrl, sameAs: doiUrl } : {}),
+      ...(p.journal ? { isPartOf: { "@type": "Periodical", name: p.journal } } : {}),
+      ...(p.volume ? { volumeNumber: String(p.volume) } : {}),
+      ...(p.pages ? { pagination: String(p.pages) } : {}),
+      /* the hosted copy, so a reader arriving from a search engine can
+         reach the full text rather than only the landing page */
+      ...(p.pdf ? { encoding: { "@type": "MediaObject", contentUrl: p.pdf, encodingFormat: "application/pdf" } } : {})
+    };
+
+    return { "@type": "ListItem", position: i + 1, item };
+  })
+};
 ---
 
 <Layout
@@ -27,13 +144,30 @@ const years = [...byYear.keys()];
   description="Journal articles and PhD thesis by Eirik Myrvoll-Nilsen on Bayesian statistics, long-memory processes, paleoclimate age-depth modeling and early warning signals."
 >
 
+  <script type="application/ld+json" set:html={JSON.stringify(publicationsSchema)} />
+
   <section>
 
     <h1>Publications</h1>
 
     <p>
       Journal articles and my PhD thesis, newest first.
+      <span class="pub-count">
+        {papers.length} publications, {spanFrom}&ndash;{spanTo}.
+      </span>
     </p>
+
+    <!-- THEME FILTERS -->
+    <div class="pub-themes" role="group" aria-label="Filter by research theme">
+      <button type="button" class="theme-chip is-active" data-theme="all" aria-pressed="true">
+        All
+      </button>
+      {themes.map((t) => (
+        <button type="button" class="theme-chip" data-theme={t.id} aria-pressed="false">
+          {t.label} <span class="theme-count">{t.count}</span>
+        </button>
+      ))}
+    </div>
 
     <!-- SEARCH -->
     <div class="pub-search">
@@ -55,6 +189,15 @@ const years = [...byYear.keys()];
 
     </div>
 
+    <div class="pub-bulk">
+      <button id="pub-copy-all" type="button" class="bulk-btn">
+        Copy BibTeX for all shown
+      </button>
+      <a href="/publications.bib" class="bulk-btn" download>
+        Download .bib
+      </a>
+    </div>
+
     <p id="pub-search-status" class="pub-search-status" role="status" hidden></p>
 
     <div id="pub-list">
@@ -66,6 +209,8 @@ const years = [...byYear.keys()];
           {byYear.get(year).map((paper) => (
             <Publication
               title={paper.title}
+              themes={paper.themes}
+              bibtex={paper.bibtex}
               type={paper.type}
               authors={paper.authors}
               venue={paper.journal || paper.school}
@@ -89,22 +234,36 @@ const years = [...byYear.keys()];
 </Layout>
 
 <script>
+  /* Same folding as the haystack baked into each entry at build time -
+     imported rather than reimplemented, because if the two ever disagreed
+     the search would miss silently. */
+  import { fold } from "../lib/fold.js";
+
   const input = document.getElementById("pub-search-input");
   const clear = document.getElementById("pub-search-clear");
   const status = document.getElementById("pub-search-status");
   const papers = Array.from(document.querySelectorAll("#pub-list .pub"));
   const groups = Array.from(document.querySelectorAll(".pub-year-group"));
 
+  const chips = Array.from(document.querySelectorAll(".theme-chip"));
+  let activeTheme = "all";
+
   function apply() {
     /* every term must appear somewhere in the entry, so
        "myrvoll 2023" narrows rather than widens */
-    const terms = input.value.toLowerCase().split(/\s+/).filter(Boolean);
+    const terms = fold(input.value).split(/\s+/).filter(Boolean);
 
     let shown = 0;
 
     papers.forEach((paper) => {
       const haystack = paper.dataset.search || "";
-      const match = terms.every((t) => haystack.includes(t));
+      /* the two filters compose: a paper must satisfy the search AND the
+         theme, so switching theme with a query typed does not silently
+         discard the query */
+      const themeOk =
+        activeTheme === "all" ||
+        (paper.dataset.themes || "").split(" ").includes(activeTheme);
+      const match = themeOk && terms.every((t) => haystack.includes(t));
 
       paper.hidden = !match;
       if (match) shown++;
@@ -120,16 +279,71 @@ const years = [...byYear.keys()];
 
     clear.hidden = terms.length === 0;
 
-    if (terms.length === 0) {
+    /* the status line now has to cover a theme filter with no query, so it
+       keys off "is anything filtering" rather than off the query alone */
+    const filtering = terms.length > 0 || activeTheme !== "all";
+
+    if (!filtering) {
       status.hidden = true;
     } else {
       status.hidden = false;
       status.textContent =
         shown === 0
-          ? "No publications match that search."
+          ? "No publications match."
           : `${shown} of ${papers.length} publications`;
     }
   }
+
+  /* ---- copy the BibTeX of everything currently shown ----
+
+     Reads the hidden [data-bib] block each entry already carries for its
+     own Cite button, so there is no second copy of the records to keep in
+     step. Because it walks only the visible entries, it follows whatever
+     the theme chips and the search box have narrowed to.
+
+     Feedback goes to the existing status line rather than into the button
+     label: rewriting the label would resize the button, which is the
+     problem the per-entry Cite button had. */
+  const copyAll = document.getElementById("pub-copy-all");
+
+  function shownBibtex() {
+    return papers
+      .filter((p) => !p.hidden)
+      .map((p) => p.querySelector("[data-bib]")?.textContent?.trim())
+      .filter(Boolean)
+      .join("\n\n");
+  }
+
+  copyAll.addEventListener("click", () => {
+    const text = shownBibtex();
+    const n = text ? text.split(/\n\n/).length : 0;
+
+    const say = (msg) => {
+      status.hidden = false;
+      status.textContent = msg;
+      /* let the next filter change take the line back over */
+      setTimeout(apply, 2500);
+    };
+
+    if (!n) return say("Nothing to copy.");
+
+    navigator.clipboard?.writeText(text).then(
+      () => say(`Copied BibTeX for ${n} publication${n === 1 ? "" : "s"}.`),
+      () => say("Copy failed — use the .bib download instead.")
+    ) ?? say("Copy failed — use the .bib download instead.");
+  });
+
+  chips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      activeTheme = chip.dataset.theme;
+      chips.forEach((c) => {
+        const on = c === chip;
+        c.classList.toggle("is-active", on);
+        c.setAttribute("aria-pressed", String(on));
+      });
+      apply();
+    });
+  });
 
   input.addEventListener("input", apply);
 
@@ -151,9 +365,58 @@ const years = [...byYear.keys()];
 </script>
 
 <style>
+.pub-count {
+  color: var(--text-muted);
+}
+
+/* ---- theme filters ---- */
+
+.pub-themes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 1.25rem 0 0;
+}
+
+.theme-chip {
+  font: inherit;
+  font-size: 0.82rem;
+  line-height: 1;
+
+  padding: 7px 11px;
+
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border-ui);
+  border-radius: 999px;
+
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.theme-chip:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+/* The selected chip is carried by colour AND weight, not colour alone:
+   aria-pressed tells a screen reader, but a sighted reader who cannot
+   separate the two blues needs a second cue. */
+.theme-chip.is-active {
+  color: var(--accent);
+  font-weight: 600;
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.theme-count {
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
 .pub-search {
   position: relative;
-  margin: 1.25rem 0 0.75rem;
+  margin: 0.75rem 0 0.75rem;
 }
 
 .pub-search input {
@@ -228,6 +491,45 @@ const years = [...byYear.keys()];
    box empty. */
 #pub-search-clear[hidden] {
   display: none;
+}
+
+.pub-bulk {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 0.6rem;
+}
+
+.bulk-btn {
+  font: inherit;
+  font-size: 0.78rem;
+  line-height: 1;
+
+  padding: 7px 11px;
+
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border-ui);
+  border-radius: 8px;
+
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.bulk-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* the global content-link rule adds a hairline under bare <a> inside
+   .container; this is a button, so keep it off */
+.pub-bulk a.bulk-btn {
+  border-bottom: 1px solid var(--border-ui);
+}
+
+.pub-bulk a.bulk-btn:hover {
+  border-bottom-color: var(--accent);
 }
 
 .pub-search-status {

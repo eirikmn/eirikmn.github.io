@@ -1,4 +1,7 @@
 ---
+import { resolveCitations } from "../../lib/citable.js";
+import "../../styles/citations.css";
+
 const {
   name,
   tagline,
@@ -42,6 +45,20 @@ const formatCode = (input) => {
   }
   return null;
 };
+
+/* =========================================================
+   CITATIONS
+
+   Resolved from papers.bib and references.bib by key, rather
+   than stored as hand-written HTML in software.json. Two
+   things follow from that: the references render through the
+   same formatter the research pages use, so they match by
+   construction; and each one has a real BibTeX record behind
+   it, where the old `bibtex` field was the literal placeholder
+   "@article{...}".
+========================================================= */
+const primaryCitations = resolveCitations(cite?.keys, `${name} cite.keys`);
+const secondaryCitations = resolveCitations(cite?.more_keys, `${name} cite.more_keys`);
 
 const linkify = (text) => {
   if (!text) return text;
@@ -100,11 +117,18 @@ const linkify = (text) => {
   <!-- ACTIONS -->
   <div class="software-actions">
 
-    <button data-toggle={panels.details}>ℹ Details</button>
-    <button data-toggle={panels.install}>⬇ Install</button>
-    <button data-toggle={panels.demo}>▶ Demo</button>
+    <button data-toggle={panels.details} aria-expanded="false" aria-controls={panels.details}>ℹ Details</button>
+    <button data-toggle={panels.install} aria-expanded="false" aria-controls={panels.install}>⬇ Install</button>
+    <button data-toggle={panels.demo} aria-expanded="false" aria-controls={panels.demo}>
+      <span class="play-icon" aria-hidden="true">
+        <svg viewBox="0 0 10 10" focusable="false">
+          <path d="M3 1.5 L7 5 L3 8.5 Z" fill="currentColor" />
+        </svg>
+      </span>
+      Demo
+    </button>
 
-    <button data-toggle={panels.cite}>📚 Cite</button>
+    <button data-toggle={panels.cite} aria-expanded="false" aria-controls={panels.cite}>📚 Cite</button>
 
     {github && (
       <a class="github-btn" href={github} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
@@ -201,30 +225,60 @@ const linkify = (text) => {
 
   
 
-  {cite?.papers?.length > 0 && (
-    <>
-      <div class="panel-title"></div>
-      <ul>
-        {cite.papers.map((p) => <li set:html={p}></li>)}
-      </ul>
-    </>
+  {primaryCitations.length > 0 && (
+    <ul class="reflist cite-list">
+      {primaryCitations.map((c) => (
+        <li>
+          {c.note && <span class="cite-note">{c.note}</span>}
+          <span set:html={c.html}></span>
+          <button
+            class="cite-copy"
+            data-bibtex={`${idBase}-${c.key}`}
+            data-state="idle"
+            title="Copy BibTeX"
+          >
+            <span class="cite-label">
+              <span aria-hidden="true">BibTeX</span>
+              <span aria-hidden="true">Copied</span>
+              <span aria-hidden="true">Failed</span>
+            </span>
+            <span class="cite-live" aria-live="polite"></span>
+          </button>
+          <pre hidden data-bib={`${idBase}-${c.key}`}>{c.bibtex}</pre>
+        </li>
+      ))}
+    </ul>
   )}
 
-  {/* NEW SECTION: more_text */}
   {cite?.more_text && (
     <div class="cite-text">
       <p set:html={cite.more_text}></p>
     </div>
   )}
 
-  {/* NEW SECTION: more_papers */}
-  {cite?.more_papers?.length > 0 && (
-    <>
-      <div class="panel-title"></div>
-      <ul>
-        {cite.more_papers.map((p) => <li set:html={p}></li>)}
-      </ul>
-    </>
+  {secondaryCitations.length > 0 && (
+    <ul class="reflist cite-list">
+      {secondaryCitations.map((c) => (
+        <li>
+          {c.note && <span class="cite-note">{c.note}</span>}
+          <span set:html={c.html}></span>
+          <button
+            class="cite-copy"
+            data-bibtex={`${idBase}-${c.key}`}
+            data-state="idle"
+            title="Copy BibTeX"
+          >
+            <span class="cite-label">
+              <span aria-hidden="true">BibTeX</span>
+              <span aria-hidden="true">Copied</span>
+              <span aria-hidden="true">Failed</span>
+            </span>
+            <span class="cite-live" aria-live="polite"></span>
+          </button>
+          <pre hidden data-bib={`${idBase}-${c.key}`}>{c.bibtex}</pre>
+        </li>
+      ))}
+    </ul>
   )}
 
  
@@ -248,13 +302,49 @@ document.addEventListener("click", (e) => {
 
     // close everything
     allPanels.forEach(p => p.classList.remove("open"));
-    allButtons.forEach(b => b.classList.remove("active"));
+    allButtons.forEach(b => {
+      b.classList.remove("active");
+      /* the panels are mutually exclusive, so closing the others has to
+         reset their announced state too, not just their appearance */
+      b.setAttribute("aria-expanded", "false");
+    });
 
     // toggle selected one
     if (isOpening) {
       el.classList.add("open");
       btn.classList.add("active");
+      btn.setAttribute("aria-expanded", "true");
     }
+
+    return;
+  }
+
+  /* Per-citation BibTeX copy. Same mechanism as the publication pages:
+     read the hidden [data-bib] block, swap a data-attribute rather than
+     the label so the button cannot resize, and report failure instead of
+     claiming success when the clipboard refuses. */
+  const citeCopy = e.target.closest(".cite-copy");
+  if (citeCopy) {
+    const bib = document.querySelector(
+      `[data-bib="${citeCopy.getAttribute("data-bibtex")}"]`
+    );
+    if (!bib) return;
+
+    const live = citeCopy.querySelector("[aria-live]");
+    const done = (state, message) => {
+      citeCopy.dataset.state = state;
+      if (live) live.textContent = message;
+      clearTimeout(citeCopy._resetTimer);
+      citeCopy._resetTimer = setTimeout(() => {
+        citeCopy.dataset.state = "idle";
+        if (live) live.textContent = "";
+      }, 1500);
+    };
+
+    navigator.clipboard?.writeText(bib.textContent).then(
+      () => done("copied", "BibTeX copied to clipboard"),
+      () => done("failed", "Copy failed. Select the citation manually.")
+    ) ?? done("failed", "Copy failed. Select the citation manually.");
 
     return;
   }
@@ -445,6 +535,23 @@ html.dark {
   gap: 0.3rem;
   text-decoration: none;
   white-space: nowrap;
+
+  /* enumerated rather than `all`, so layout properties are never animated */
+  transition: border-color 0.15s ease, color 0.15s ease,
+              background 0.15s ease;
+}
+
+/* These had no hover response at all - the only pill buttons on the site
+   that didn't. Same treatment as the publication and research pages: a
+   10% accent wash, which stays lighter than the 18% pressed state so an
+   open panel is still distinguishable from one you are merely pointing
+   at. */
+.software-actions button:hover,
+.github-btn:hover,
+.research-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
 /* keep all five actions on one row on phones */
@@ -467,10 +574,164 @@ html.dark {
     display: none;
   }
 }
-.software-actions button.active {
+/* Both selectors carry the same look. .active is what the script has
+   always set; aria-expanded is the accessible disclosure state added
+   alongside it, and styling from both means neither can be the only
+   thing keeping the button looking right. */
+.software-actions button.active,
+.software-actions button[aria-expanded="true"] {
   border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
   color: var(--accent);
+  box-shadow: inset 0 1px 2px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+/* =========================================================
+   CITE LIST
+
+   .reflist comes from styles/citations.css - the same hanging-indent
+   list the research pages use for their references, imported rather
+   than restyled so the two cannot drift apart.
+========================================================= */
+
+.cite-list {
+  max-width: none;
+}
+
+.cite-list li {
+  /* room for the copy button to sit on the same line as the reference */
+  padding-right: 0;
+}
+
+/* The short label explaining WHY a work is cited - "INLA", "Nested AR(1)
+   model". Set apart from the reference itself so it does not read as part
+   of the citation. */
+/* On its own line above the reference rather than inline before it.
+   Sitting inline it read as a control butted against the text - the chip
+   shape does not help - and on a wrapped citation it was ambiguous where
+   the label stopped and the authors began.
+
+   width: fit-content so the block does not stretch the chip across the
+   column, and the negative margin pulls it out to meet the hanging
+   indent, so label and citation share a left edge. */
+.cite-note {
+  display: block;
+  width: fit-content;
+
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+
+  color: var(--text-muted);
+  border: 1px solid var(--border-ui);
+  border-radius: 999px;
+  padding: 1px 7px;
+  margin: 0 0 4px -1.6rem;
+
+  text-indent: 0;
+}
+
+.cite-copy {
+  display: inline-grid;
+  align-items: center;
+  vertical-align: baseline;
+
+  margin-left: 8px;
+  padding: 1px 8px;
+
+  font: inherit;
+  font-size: 0.7rem;
+
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border-ui);
+  border-radius: 999px;
+
+  text-indent: 0;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.cite-copy:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+/* the three labels share one grid cell, so the button reserves the width
+   of the widest and cannot resize mid-click */
+.cite-copy .cite-label > span {
+  grid-area: 1 / 1;
+  visibility: hidden;
+  white-space: nowrap;
+}
+
+.cite-copy .cite-label {
+  display: inline-grid;
+  justify-items: center;
+  align-items: center;
+}
+
+.cite-copy[data-state="idle"]   .cite-label > span:nth-child(1),
+.cite-copy[data-state="copied"] .cite-label > span:nth-child(2),
+.cite-copy[data-state="failed"] .cite-label > span:nth-child(3) {
+  visibility: visible;
+}
+
+.cite-copy[data-state="copied"] {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.cite-copy[data-state="failed"] {
+  opacity: 0.75;
+}
+
+/* clipped, not visibility:hidden - the latter removes it from the
+   accessibility tree and the announcement would never be read */
+.cite-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* An SVG rather than the ▶ character: a text glyph sits on the baseline
+   with its own side bearings, so it rides low and left of where it looks
+   like it should be. The path's bounding box is centred in the viewBox,
+   and inline-flex removes the baseline gap. */
+.play-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.play-icon svg {
+  display: block;
+  width: 0.9em;
+  height: 0.9em;
+}
+
+/* Rotates to point down while the Demo panel is open, the same way the
+   Abstract chevron does. Driven by aria-expanded on the parent button, so
+   it follows the panel automatically - including when another button
+   closes this one, since these panels are mutually exclusive. */
+.play-icon {
+  transition: transform 0.2s ease;
+  transform: rotate(0deg);
+}
+
+.software-actions button[aria-expanded="true"] .play-icon {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .play-icon {
+    transition: none;
+  }
 }
 
 /* FIXED GITHUB ICON */

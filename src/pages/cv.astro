@@ -59,7 +59,9 @@ const mscSupervision = supervision?.filter((s) => s.degree === "MSc") ?? [];
 
 const papers = loadBib("./src/data/papers.bib");
 
-const articles = papers.filter((p) => p.entryType !== "phdthesis");
+const articles = papers.filter(
+  (p) => p.entryType !== "phdthesis" && p.type !== "preprint"
+);
 
 const years = articles
   .map((p) => Number(p.year))
@@ -97,11 +99,20 @@ const bibliography = loadBibliography("./src/data/papers.bib");
    where its title links to the deposited copy — that is the
    place a reader looks for it, and listing it among the
    journal articles would inflate the count with something
-   that was never peer-reviewed. */
+   that was never peer-reviewed.
+
+   Preprints are listed, but in their own group at the end
+   and counted separately. A preprint is a status rather than
+   a separate publication: when this one is accepted its
+   entry in papers.bib gains a journal and loses `type =
+   {preprint}`, and it moves up into the year list by itself.
+   Nothing is ever listed twice. */
+const preprints = bibliography.filter((e) => e.kind === "preprint");
+
 const byYear = new Map();
 
 for (const entry of bibliography
-  .filter((e) => e.type !== "phdthesis")
+  .filter((e) => e.type !== "phdthesis" && e.kind !== "preprint")
   .sort((a, b) => String(b.year).localeCompare(String(a.year)))) {
   const key = entry.year ?? "Undated";
   if (!byYear.has(key)) byYear.set(key, []);
@@ -256,11 +267,23 @@ const lastUpdatedLabel = lastUpdated
       <!-- PUBLICATIONS -->
       <CVSection id="publications" title="Publications">
         <div class="cv-item">
-          {/* "journal articles", not "articles and preprints":
-              every entry in papers.bib has a journal and a
-              DOI, so there are no preprints to hedge about. */}
+          {/* Published and unpublished counted separately, so
+              the number of journal articles is never inflated
+              by work that is not yet through review.
+
+              "Preprint" is the only status tracked. Review
+              stage is not verifiable by a reader, does not
+              change what they can do with the paper, and ages
+              badly — a stale "under review" reads worse than
+              no claim. One label means one edit per paper, on
+              publication. */}
           <p class="cv-pubs-summary">
-            {articles.length} journal articles{yearSpan ? `, ${yearSpan}` : ""}.
+            {articles.length} journal articles{yearSpan ? `, ${yearSpan}` : ""}
+            {preprints.length === 1
+              ? ", and one preprint"
+              : preprints.length > 1
+                ? `, and ${preprints.length} preprints`
+                : ""}.
           </p>
 
           {publicationYears.map((year) => (
@@ -273,6 +296,17 @@ const lastUpdatedLabel = lastUpdated
               </ul>
             </>
           ))}
+
+          {preprints.length > 0 && (
+            <>
+              <h3 class="cv-pub-year">Preprints</h3>
+              <ul class="reflist">
+                {preprints.map((entry) => (
+                  <li set:html={reference(entry)} />
+                ))}
+              </ul>
+            </>
+          )}
 
           <a class="more-link" href="/publications">
             <span>Browse with abstracts and PDFs</span>
@@ -463,11 +497,64 @@ const lastUpdatedLabel = lastUpdated
   min-width: 0;
 }
 
+/* =========================
+   SUBSECTION HEADINGS
+
+   "PhD Candidates", "Peer Review" and so on. These were
+   1rem at weight 600 — the same size as the entry titles
+   beneath them and a weight lighter, so a heading was
+   outranked by its own content and read as body text.
+
+   The fix is a change of register rather than of size.
+   Uppercase with letter-spacing reads as structure because
+   it is a different kind of text, not a slightly bigger
+   version of the same one; making it larger instead would
+   put three near-identical bold sizes inside one card.
+
+   Same treatment as .cv-pub-year below and the sidebar's
+   label, but at full text colour rather than muted — those
+   are running labels, this is a real division.
+========================= */
+
 .cv-subsection {
-  font-size: 1rem;
+  /* The label sits left, a hairline fills the rest of the
+     width. Typography alone was not enough to mark the
+     boundary — a rule crossing the card is unmissable, and
+     an inline one delimits the group without adding a
+     free-standing third kind of divider. */
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+
+  font-size: 0.8rem;
   font-weight: 600;
-  margin: 0.6rem 0 0.2rem;
-  color: var(--text);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  /* Accent rather than body colour, which also puts some
+     blue back on a page that lost all of it when the entry
+     spines went. Pulled 30% toward the text colour: plain
+     accent is 2.6:1 on the card in light mode, well under
+     the 4.5:1 floor for text this size. This lands at
+     4.56:1 light and 8.50:1 dark. */
+  color: color-mix(in srgb, var(--accent) 70%, var(--text));
+
+  /* 1.75rem above against 0.6rem below, on top of the 1rem
+     flex gap either side, so a new group is separated by
+     noticeably more than two entries within one. */
+  margin: 1.75rem 0 0.6rem;
+}
+
+.cv-subsection::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: color-mix(in srgb, var(--border-ui) 80%, transparent);
+}
+
+/* nothing to separate from at the top of a section */
+.cv-subsection:first-child {
+  margin-top: 0;
 }
 
 /* =========================

@@ -3,11 +3,50 @@ import Layout from "../../layouts/Layout.astro";
 import Lightbox from "../../components/Lightbox.astro";
 import SectionNav from "../../components/SectionNav.astro";
 import { slugify } from "../../lib/slug.js";
+import { createCitations } from "../../lib/references.js";
+import { loadBib } from "../../lib/bib.js";
+import Publication from "../../components/Publication-list.astro";
+import "../../styles/more-link.css";
+import "../../styles/citations.css";
+import "../../styles/research-table.css";
 import ResearchVideo from "../../components/ResearchVideo.astro";
 import "katex/dist/katex.min.css";
 import katex from "katex";
 import topics from "../../data/research.json";
 
+
+/* -------------------------
+   SELECTED PUBLICATIONS
+------------------------- */
+const papersByKey = new Map(
+  loadBib("./src/data/papers.bib").map((p) => [p.key, p])
+);
+
+const selectPapers = (keys = []) =>
+  keys.map((key) => {
+    const paper = papersByKey.get(key);
+    if (!paper) {
+      throw new Error(
+        `Unknown publication key "${key}". Check src/data/papers.bib. ` +
+          `Known keys: ${[...papersByKey.keys()].join(", ")}`
+      );
+    }
+    return paper;
+  });
+
+/* -------------------------
+   CITATIONS
+
+   [[key]] -> (Author, Year), [[t:key]] -> Author (Year),
+   [[b:key]] -> Author, Year inside brackets already open.
+   Several keys in one marker share one bracket group.
+------------------------- */
+const { expandCitations, bibliography } = createCitations({
+  sources: [
+    { path: "./src/data/references.bib", anchor: "ref" },
+    { path: "./src/data/papers.bib", anchor: "ref" }
+  ]
+});
 
 /* -------------------------
    SAFE text renderer (NO math)
@@ -54,7 +93,7 @@ const demoContent = [
   {
     type: "text",
     value:
-      "After my postdoc position at PIK finished I returned to UiT for a 13 month position as a Researcher, funded by the TiPES project. During this time I started working on early warning signals, focusing on applications in climate. When a dynamical system approaches a bifurcation point, which can induce tipping points, the system will exhibit changes to statistical indicators, including increased variance and autocorrelation. Typically, these early warning signals are estimated using a sliding window approach, and my aim was to develop an alternative approach based on Bayesian hierarchical modeling. Through this work I have collaborated Luc Hallali (UiT), Martin Rypdal (UiT), Sigrunn Holbek Sørbye (UiT), Håvard Rue (KAUST), Christian Franzke (IBS), Clara Hummel (UiT), Alessandro Cotronei (UiT) and Niklas Boers (PIK/TUM)."
+      "After my postdoc position at PIK finished at the end of 2021 I returned to UiT for a 13 month position as a Researcher, funded by the TiPES project, where I worked primarily on early warning signals - statistical indicators that may precede tipping points. While the most common methods involve sliding windows we developed an alternative hierarchical Bayesian modeling approach. During this time I started supervising PhD candidate Luc Hallali whose work focused on applying these methods to Arctic climate data. Through this work I also worked with Martin Rypdal (UiT), Sigrunn Holbek Sørbye (UiT), Håvard Rue (KAUST), Christian Franzke (IBS), Clara Hummel (UiT), Alessandro Cotronei (UiT) and Niklas Boers (PIK/TUM)."
   },
   {
     type: "heading",
@@ -62,9 +101,14 @@ const demoContent = [
     value: "2. Introduction"
   },
   {
+    type: "heading",
+    level: 3,
+    value: "2.1. Tipping points and bifurcations"
+  },
+  {
     type: "text",
     value:
-    "Many systems can undergo abrupt and sometimes irreversible transitions when critical thresholds, known as <em>tipping points</em>, are crossed. In climate, anthropogenic forcing has put several important components of the Earth system at risk of crossing tipping points, with potentially severe consequences for life on the planet (McKay et al. 2022). Examples include a potential collapse of the Atlantic Meridional Overturning Circulation (AMOC; Boers 2021), destabilization of the Greenland Ice sheets (Boers and Rypdal YEAR) and dieback of the Amazon rainforest (CITE). In order to prevent possibly irreversible changes it is of crucial to know when a system is approaching a tipping point, before it is too late to course-correct."
+    "Many systems can undergo abrupt and sometimes irreversible transitions when critical thresholds, known as <em>tipping points</em>, are crossed. In climate, anthropogenic forcing has put several important components of the Earth system at risk of crossing tipping points, with potentially severe consequences for life on the planet [[armstrongmckay2022]]. Examples include a potential collapse of the Atlantic Meridional Overturning Circulation (AMOC; [[b:boers2021]]), destabilization of the Greenland Ice Sheet [[boersrypdal2021]] and dieback of the Amazon rainforest [[boulton2022]]. In order to prevent possibly irreversible changes it is crucial to know when a system is approaching a tipping point, before it is too late to course-correct."
   },
   {
     type: "text",
@@ -79,7 +123,19 @@ const demoContent = [
   {
     type: "text",
     value:
-      "One could think of this equation as describing the motion of a particle in the presence of a potential $V(x)$, with drift $F(x)=-V'(x)$ and diffusion term $\\sigma dB(t)$ describing its movement. Points where $dx(t)/dt=0$ are called fixed-points. These are considered stable if a small perturbation (in any direction) near the fixed point will decay over time, and unstable otherwise. The following figure shows the potential $V(x)$ for an example of a system with two stable fixed points (valleys), $x_1$ and $x_3$, separated by an unstable fixed point (peak), $x_2$. If the particle is located in the valley of an equilibrium any perturbation will be met with an opposing force pushing the particle back towards the equilibium. If the perturbation is so large that the particle crosses the unstable fixed point separating the two domains of attraction, the particle will then be pushed towards the other stable fixed point instead. This phenomenon, where the tipping point is crossed solely from perturbations caused by the internal variation of the system, is called <em>noise-induced tipping</em>."
+      "One could think of this equation as describing the motion of a particle in the presence of a potential $V(x)$, with drift $F(x)=-V'(x)$ and diffusion term $\\sigma dB(t)$ describing its movement. Points where $F(x)=0$ are called fixed-points. These are considered stable if a small perturbation (in any direction) near the fixed point will decay over time, and unstable otherwise. The animation below shows the potential $V(x)$ for a system with two stable fixed points (valleys), $x_1$ and $x_3$, separated by an unstable fixed point (peak), $x_2$. If the particle is located in the valley of an equilibrium any perturbation will be met with an opposing force pushing the particle back towards the equilibrium. If the perturbation is so large that the particle crosses the unstable fixed point separating the two domains of attraction, the particle will then be pushed towards the other stable fixed point instead. This phenomenon, where the tipping point is crossed solely from perturbations caused by the internal variation of the system, is called <em>noise-induced tipping</em>."
+  },
+  {
+    /* Placed here rather than after both mechanisms are
+       explained: a single-mechanism clip can sit with its own
+       paragraph, which the combined four-panel version could
+       not. It also gives each panel 342px on a phone instead
+       of 171px. */
+    type: "video",
+    src: "/images/research/earlywarning/noiseinduced.mp4",
+    poster: "/images/research/earlywarning/noiseinduced-poster.webp",
+    aspect: "8 / 9",
+    caption: "<b>Noise-induced tipping.</b> The dynamical system (and potential) remain unchanged. Random perturbations alone cause the system to cross the unstable fixed point (tipping point) and move into a different equilibrium."
   },
   {
     type: "text",
@@ -92,12 +148,20 @@ const demoContent = [
     caption: "The potential over the state variables before (a), at (b) and after (c) the control parameter μ has reached the bifurcation point. The stable fixed points are shown in blue, while the unstable fixed points (tipping point) are shown in red. In panel (b) the unstable and first stable fixed points coincide as a single unstable saddle point."
   },
   {
-  type: "video",
-  src: "/images/research/earlywarning/alltipping.mp4",
-  poster: "/images/research/earlywarning/alltipping-poster.webp",
-  aspect: "4 / 3",
-  caption: "Potential (a) and bifurcation diagram (c) of a noise-induced tipping process with constant control parameter μ=1, against the potential (b) and bifurcation diagram (d) of a bifurcation-induced tipping process where the control parameter μ increases linearly from -3 to 3."
-},
+    type: "video",
+    src: "/images/research/earlywarning/biftipping.mp4",
+    /* 1200x1350, matching noiseinduced.mp4 so the two animations
+       sit at the same size as the reader scrolls */
+    poster: "/images/research/earlywarning/biftipping-poster.webp",
+    aspect: "8 / 9",
+    caption: "<b>Bifurcation-induced tipping.</b> Gradual changes in the control parameter alter the dynamical system until a bifurcation is reached, where the left fixed point loses stability, causing the system to tip into a different equilibrium."
+  },
+
+  {
+    type: "heading",
+    level: 3,
+    value: "2.2. Critical slowing down"
+  },
   {
     type: "text",
     value:
@@ -116,7 +180,7 @@ const demoContent = [
   {
     type: "math",
     value:
-      "x(t) = x_0 +\\int_{0}^t e^{-\\lambda t}dB(t) ,"
+      "x(t) = x_0 +\\sigma\\int_{0}^t e^{-\\lambda t}dB(t) ,"
   },
   {
     type: "text",
@@ -133,14 +197,19 @@ const demoContent = [
   {
     type: "text",
     value:
-    "When a system approaches a bifurcation that induces destabilization, its restoring rate will decrease, causing it to recover more slowly from perturbations. This phenomenon is called <em>critical slowing down</em> and causes perturbations to persist for longer, leading to increased variance and autocorrelation that can serve as <em>early warning signals</em> of an impending critical transition (CITECITECITE)."
+    "When a system approaches a bifurcation that induces destabilization, its restoring rate will decrease, causing it to recover more slowly from perturbations. This phenomenon is called <em>critical slowing down</em> and causes perturbations to persist for longer, leading to increased variance and autocorrelation that can serve as <em>early warning signals</em> of an impending critical transition [[lenton2012; dakos2008]]. This phenomenon was first demonstrated by inspecting the power spectra of a simple physical model by [[t:wiesenfeld1985]]. The idea was later extended to a complex Earth system model by [[t:held2004]] and first applied to real data by [[t:dakos2008]]."
   },
-
+  {
+    type: "heading",
+    level: 3,
+    value: "2.3. Sliding-window estimation"
+  },
   {
     type: "text",
     value:
-      "The most common approach to estimating early warning signals is to estimate each indicator in a sliding window (CITECITECITE), and then to use statistics like Kendall's tau to perform a hypothesis test on whether or not a statistically significant increase in the early warning signal indicators has been detected. "
+      "The most common approach to estimating early warning signals is to estimate each indicator in a sliding window [[boettiger2012; chen2022; dakos2008; dakos2012; dakos2024; scheffer2009]], and then to use statistics like Kendall's tau to perform a hypothesis test on whether or not a statistically significant increase in the early warning signal indicators has been detected. "
   },
+  
   {
     type: "figure",
     src: "/images/research/earlywarning/slidingews.svg",
@@ -149,22 +218,27 @@ const demoContent = [
   {
     type: "text",
     value:
-      "While simple, sliding windows presents some limitations as methods for detecting early warning signals. First, it requires a choice on the window length. Large windows offer higher estimation accuracy, but will be less representative of the momentary state of the indicator as it essentially applies a high pass filter, while smaller windows better capture the changes of the indicators, but will provide less accurate estimates. A good trade-off can be difficult to achieve. Moreover, if the dataset contains trends sliding windows require a more careful approach to detrending."
+      "While simple, sliding windows present some limitations as methods for detecting early warning signals. First, it complicates detrending, as the trends in the data can confound the estimation of the warning signals.  Second, it requires a choice on the window length. Large windows offer improved stability and estimation accuracy, but assume that the underlying dynamics remain constant, which is questionable as the system approaches a bifurcation point. It will also smooth out changes, reducing the sensitivity to short-term dynamics. Smaller windows, on the other hand, will better capture the changes of the indicators, but will provide less reliable estimates, possibly leading to false positives or negatives. A good trade-off can be difficult to achieve, motivating the development of alternative methods for detecting early warning signals."
   },
   {
     type: "heading",
     level: 2,
-    value: "3. Extensions and modifications"
-  },
-  {
-    type: "heading",
-    level: 2,
-    value: "4. Model-based early warning signal detection"
+    value: "3. Model-based early warning signal detection"
   },
   {
     type: "text",
     value:
-      "In Myrvoll-Nilsen et al. (2025) we circumvent sliding windows by introducing a model-based approach to early warning signals. In short, we introduce a time-dependent AR(1) process where the lag-one autocorrelation parameter is a linear function of time"
+      "In [[t:myrvoll2025bayesian]] we circumvent sliding windows by introducing a model-based approach to early warning signals that is able to utilize the full dataset in a single, complete analysis. In short, we introduce a time-dependent AR(1) process"
+  },
+  {
+    type: "math",
+    value:
+      "x_{t+1} = \\phi(t) x_t + \\varepsilon_{t+1}"
+  },
+  {
+    type: "text",
+    value:
+      "where the lag-one autocorrelation parameter is a linear function of time"
   },
   {
     type: "math",
@@ -174,13 +248,19 @@ const demoContent = [
   {
     type: "text",
     value:
-      "We assign appropriate priors on $a$ and $b$ and incorporate this into a hierarchical Bayesian model and perform Bayesian inference using the R-INLA framework. This ensures efficient inference and gives us uncertainty quantification expressed through the posterior distributions. We say that early warning signals is detected if the posterior marginal probability of a positive slope exceeds some threshold, $1-\\alpha$, i.e."
+      "We assign appropriate priors on $a$ and $b$ and incorporate this into a hierarchical Bayesian model. The presence of early warning signals is then assessed by testing whether the slope parameter $b$ is positive, i.e. whether the lag-one autocorrelation is increasing over time. Being in a Bayesian framework, we are able to quantify the uncertainty of the slope parameter and assess whether it is significantly positive or not. Specifically, we say that early warning signals are detected if the posterior marginal probability of a positive slope exceeds some threshold, $1-\\alpha$, i.e."
   },
   {
     type: "math",
     value:
       "P(b>0\\mid \\bm y) \\geq 1-\\alpha ."
   },
+  {
+    type: "text",
+    value:
+      "For efficient inference we adopt the R-INLA framework ([[b:rue2009; rue2017]]; <a href='https://www.r-inla.org' target='_blank' rel='noopener noreferrer'>r-inla.org</a>). This ensures that the model can be fitted in a matter of seconds, even for large datasets. The following figure shows the results of applying this method to a simulated dataset with known early warning signals. The inferred evolution of the lag-one autocorrelation parameter is shown in panel (a), along with the fitted 2nd order polynomial trend in panel (b). The posterior marginal distribution of the slope parameter is shown in panel (c). In this case, we find that $P(b>0\\mid \\bm y) = 0.99$, indicating that early warning signals are detected."
+  },
+  
   {
     type: "figure",
     src: "/images/research/earlywarning/inlaews.svg",
@@ -189,7 +269,18 @@ const demoContent = [
   {
     type: "text",
     value:
-    "However, Boers (2021) showed that these indicators can be biased if the system is driven by external noise that itself has increasing autocorrelation or variance,leading to false positive alarms. To account for such bias, Boettner and Boers (2022) and Morr and Boers (2024) suggest that the OU process should be driven by correlated noise rather than white noise. Based on this idea, we assume in Hallali et al. (2025) that the internal noise term is itself a time-dependent AR(1) process."
+      "To make this method available to the wider community, we have implemented it in the R package <a href='https://github.com/eirikmn/INLA.ews' target='_blank' rel='noopener noreferrer'>INLA.ews</a>. Installation instructions and a worked example, with the code and the resulting plots, are on the <a href='/software'>software page</a>."
+  },
+
+  {
+    type: "heading",
+    level: 2,
+    value: "4. Extensions and modifications"
+  },
+  {
+    type: "text",
+    value:
+    "[[t:boers2021]] showed that using increased variance and autocorrelation as indicators for early warning signals can introduce bias, if the underlying system is driven by external noise that itself has increasing autocorrelation or variance, possibly leading to false alarms. To account for such bias, [[t:boettner2022]] and [[t:morr2024]] suggest that the OU process should be driven by correlated noise rather than white noise. Building upon this idea, we assume in [[t:hallali2025assessing]] that the internal noise term is itself a time-dependent AR(1) process, leading to a <em>nested time-dependent AR(1)</em> process."
   },
   {
     type: "math",
@@ -202,14 +293,34 @@ const demoContent = [
       "\\varepsilon_{t+1} = \\rho(t) \\varepsilon_t + \\xi_{t+1}"
   },
   {
-    type: "text",
-    value:
-      "where $x$ is the state variable, with time-dependent autocorrelation parameter $\\phi(t)$, and $\\varepsilon$ is the internal noise, with time-dependent autocorrelation parameter $\\rho(t)$."
+    type: "figure",
+    src: "/images/research/earlywarning/falsepositive.svg",
+    caption: "<b>Why the noise has to be modelled.</b> Left: a system genuinely approaching a bifurcation, where the restoring rate decays and the indicators rise as a result of stability loss. Right: a system whose restoring rate never changes, driven by noise whose own autocorrelation increases over time. There is no bifurcation to approach, yet the variance and lag-one autocorrelation climb just as convincingly. The two lower rows are not distinguishable by eye, which is the difficulty the nested model is designed to resolve."
   },
   {
     type: "text",
     value:
-      "In Sørbye et al. (2025) we have also looked at extending model-based approaches to long-range dependent processes, utilizing the computationally efficient AR(1) mixture approximation of Sørbye et al. (2019)."
+      "where $x$ is the state variable, with stability expressed through the time-dependent autocorrelation parameter $\\phi(t)$, and $\\varepsilon$ is the internal noise, which itself has time-dependent autocorrelation parameter $\\rho(t)$."
+  },
+  {
+    type: "text",
+    value:
+      "In [[t:sorbye2026identification]] we also extend model-based approaches to long-range dependent processes, utilizing the computationally efficient <a href='/research/longmemory#3-ar-1-mixture-approximation'>AR(1) mixture approximation</a> of [[t:Sorbye2019]], which is described in more detail in my work on long-range dependence. The <em>time-dependent fGn</em> model is expressed as a mixture of two fGn processes, $x_{H_1}$ and $x_{H_2}$, with different Hurst exponents, $H_1$ and $H_2$, where the mixture weights $w(t)$ are a linear function of time"
+  },
+  {
+    type: "math",
+    value:
+      "x(t) = \\sigma\\left( \\sqrt{1-w(t)} x_{H_1}(t)+\\sqrt{w(t)}x_{H_2}(t) \\right) ,"
+  },
+  {
+    type: "text",
+    value:
+      "where $\\sigma$ is the standard deviation. For this paper we also developed an AR(1) model where the lag-one autocorrelation parameter and the variance are not coupled through the shared parameter $\\lambda$, and are instead treated separately."
+  },
+  {
+    type: "text",
+    value:
+      "During 2025–2026 I co-supervised a Master's student on a project comparing sliding windows and model-based approaches to early warning signal detection. The results from this work suggest that sliding window approaches and model-based approaches may complement each other, as sliding window approaches could be used to help determine the appropriate model for the model-based approach."
   },
   {
     type: "heading",
@@ -217,78 +328,169 @@ const demoContent = [
     value: "5. Applications"
   },
   {
+    type: "heading",
+    level: 3,
+    value: "5.1. Dansgaard-Oeschger events"
+  },
+  {
     type: "text",
     value:
-      "."
+      "One of the first applications of the model-based approach to detect early warning signals is the Dansgaard-Oeschger (DO) events observed in Greenland ice core records. These are several critical transitions that occurred during the last ice age, where the climate changed rapidly (few decades) from a cold stadial state to a warm (up to 16 degrees warmer, locally in Greenland) interstadial state before returning gradually (over hundreds to thousands of years). These are considered by many to be the archetypal examples of climate tipping points in paleoclimate records, and whether or not these transitions are noise-induced or bifurcation-induced is contested [[ditlevsen2010; rypdal2016ews; boers2018]]."
   },
+  {
+    /* The record lives under agemodeling/ because that page
+       used it first. Referenced rather than copied: it is the
+       same 380 kB file and the same record, and the folder is
+       an organisational convenience rather than a claim about
+       which topic owns it. The caption differs, which is the
+       part that matters. */
+    type: "figure",
+    src: "/images/research/agemodeling/ngripdata.svg",
+    caption:
+      "NGRIP ice core record of the oxygen isotope ratios [[ngrip2004]], used as a proxy for temperature. Cold (stadial) periods are shown in blue and warm (interstadial) periods in red, following the event stratigraphy of [[t:rasmussen2014]]. The abrupt transitions from a stadial to an interstadial state are the Dansgaard–Oeschger events analysed here."
+  },
+  {
+    type: "text",
+    value:
+    "In [[t:myrvoll2025bayesian]] we were able to identify early warning signals for five of these transitions, using a $1-\\alpha=0.95$ threshold. We revisited the same dataset in [[t:hallali2025assessing]] using the extended model with time-dependent internal noise, and found that early warning signals were detected for six transitions. However, in [[t:sorbye2026identification]] we found early warning signals for none of the transitions using the fGn model, and when using the decoupled AR(1) model we identified four DO events with a significant increase in variance and one event with an increase in autocorrelation. We found no events in which both variance and autocorrelation increased simultaneously, suggesting that the coupled models may have confounded changes in variance with changes in autocorrelation."
+  },
+  {
+    /* A summary of findings, not a per-transition grid: the
+       papers report how many transitions showed a signal, not
+       which ones, so a transition-by-transition matrix would
+       mean inventing data.
+
+       The point of the table is that four analyses of the
+       same record disagree, which is hard to hold in your
+       head from prose alone. */
+    type: "html",
+    value: `
+      <div class="table-wrap" role="region" tabindex="0"
+           aria-label="Early warning signals detected in Dansgaard-Oeschger transitions, by model">
+        <table class="research-table">
+          <caption>
+            Early warning signals detected across Dansgaard&ndash;Oeschger
+            transitions in the NGRIP record, by model. All four analyses use
+            the same record; the disagreement between them is the result.
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Model</th>
+              <th scope="col">Study</th>
+              <th scope="col">Transitions with a signal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Time-dependent AR(1)</th>
+              <td>[[t:myrvoll2025bayesian]]</td>
+              <td class="num">5</td>
+            </tr>
+            <tr>
+              <th scope="row">Nested time-dependent AR(1)</th>
+              <td>[[t:hallali2025assessing]]</td>
+              <td class="num">6</td>
+            </tr>
+            <tr>
+              <th scope="row">Time-dependent fGn</th>
+              <td>[[t:sorbye2026identification]]</td>
+              <td class="num none">none</td>
+            </tr>
+            <tr>
+              <th scope="row">Decoupled AR(1)</th>
+              <td>[[t:sorbye2026identification]]</td>
+              <td class="num">4 variance &middot; 1 autocorrelation &middot; <span class="none">0 both</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    `
+  },
+  {
+    type: "heading",
+    level: 3,
+    value: "5.2. Atlantic Meridional Overturning Circulation"
+  },
+  {
+    type: "text",
+    value:
+    "Another important application of this approach is the Atlantic Meridional Overturning Circulation (AMOC). This is a large-scale ocean circulation pattern that plays a crucial role in regulating global climate. Recent studies suggest that the AMOC may be weakening [[caesar2021; ipcc2021]] and losing resilience, potentially approaching a tipping point [[boers2021; ditlevsen2023]]. An AMOC collapse would have severe consequences for the climate in Europe and North America. In [[t:hallali2025assessing]] we applied the model-based approach to a proxy for the AMOC strength, and found that early warning signals were detected with a posterior probability of $P(b>0\\mid \\bm y)=0.99$, suggesting that the AMOC may be approaching a tipping point. "
+  },
+  {
+    /* Sits between the two paragraphs: the reader has been told what the
+       AMOC is and what the result was, and the paragraph below then
+       describes how these two records are built and used. */
+    type: "figure",
+    src: "/images/research/earlywarning/amocdata.svg",
+    caption:
+      "<b>The two records behind the AMOC analysis.</b> (a) The fingerprint of AMOC strength: the annual mean sea-surface temperature anomaly in the subpolar gyre, minus twice the global mean anomaly to compensate for polar amplification, following [[b:caesar2018]]. 1870–2020. (b) Central-West Greenland surface melt [[b:trusel2018]], 1871–2013, used as forcing in one of the detrending strategies. "
+  },
+  {
+    type: "text",
+    value:
+    "Since instrumental measurements only started fairly recently, a sea-surface-temperature-based proxy fingerprint of the AMOC strength is often used instead [[caesar2018; ditlevsen2023]]. In [[t:hallali2025assessing]] we apply both the original and the nested time-dependent AR(1) model to the fingerprint constructed by taking the annual average of the sea-surface temperature (SST) anomaly in the subpolar gyre region, minus twice the global mean SST anomaly to compensate for the polar amplification effects under global warming. The data is non-stationary, which we account for in different ways. First, we try linear and square polynomial detrending. Second, we use Central-West Greenland (CWG) surface melt [[trusel2018]] as forcing. Working in the R-INLA framework allows us to fit the time-dependent model and the trends/forcing simultaneously.  Using the nested AR(1) model we find statistically significant early warning signals for all detrending strategies, suggesting that the AMOC may be approaching a tipping point, and that the early warning signals are not an artifact of the detrending strategy."
+  },
+  {
+    type: "heading",
+    level: 3,
+    value: "5.3. The Atlantic Multidecadal Variability"
+  },
+  {
+    type: "text",
+    value:
+    "The Atlantic Multidecadal Variability (AMV) is a pattern of long-term fluctuations in North Atlantic sea-surface temperatures, typically varying on timescales of about 50–80 years. It is often described as alternating periods of a warmer-than-average North Atlantic (positive AMV phase) and a cooler-than-average North Atlantic (negative AMV phase). In [[t:sorbye2026identification]] we applied the time-dependent fGn model to a reconstruction of the AMV provided by [[t:michel2022]], or more precisely, to a subset where the variance is approximately constant (1235--1931 CE). We find that $P(H_2-H_1>0\\mid \\bm y) =0.992$, suggesting increasing autocorrelation, which is consistent with the findings of [[t:michel2022]]."
+  },
+  
 {
     type: "heading",
     level: 2,
     value: "6. Relevant publications"
   },
   {
-    type: "text",
-    value:
-    `
-    <ul>
-  <li>Myrvoll-Nilsen, E., Hallali, L. & Rypdal, M. (2025). Bayesian analysis of early warning signals using a time-dependent model, <em>Earth System Dynamics</em>, 16, 1539–1556, https://doi.org/10.5194/esd-16-1539-2025, 2025</li>
-  <li>Hallali, L., Myrvoll-Nilsen, E. & Franzke, C.L.E. (2020). Assessing AMOC stability using a Bayesian nested time-dependent autoregressive model, <em>Nonlinear Processes in Geophysics</em>, 32, 383–395, https://doi.org/10.5194/npg-32-383-2025, 2025.</li>
-  <li>Sørbye, S. H., Myrvoll-Nilsen, E., & Rue, H. (2025). Bayesian identification of early warning signals for long-range dependent climatic time series. <em>arXiv preprint</em> arXiv:2602.09731.</li>
-</ul>
-<p>The full list, with abstracts and PDFs, is under <a href="/publications">Publications</a>.</p>
-`
+    /* Pulled from papers.bib by key and rendered with the
+       same card /publications uses, so abstracts, DOIs and
+       PDFs come along and nothing can fall out of step. */
+    type: "publications",
+    keys: [
+      "myrvoll2025bayesian",
+      "hallali2025assessing",
+      "sorbye2026identification"
+    ]
   },
   
   {
-    type: "text",
+    type: "html",
     value:
-      ""
+      `<p class="pub-selection-more"><a class="more-link" href="/publications"><span>All publications</span></a></p>`
   },
   {
     type: "heading",
     level: 2,
     value: "References"
   },
-  {
-    type: "text",
-    value:
-      ""
-  },
-  {
-    type: "text",
-    value:
-      ""
-  },
-  {
-    type: "text",
-    value:
-      ""
-  },
-  {
-    type: "text",
-    value:
-      ""
-  },
-  {
-    type: "text",
-    value:
-      ""
-  },
-  {
-    type: "text",
-    value:
-      ""
-  },
-  {
-    type: "text",
-    value:
-      ""
-  },
 ];
+
+const stripTags = (html = "") => String(html).replace(/<[^>]+>/g, "");
+
+/* Every marker expanded before bibliography() is called —
+   that call is what records which works the page used. */
+const content = demoContent.map((block) => {
+  if (block.type === "text" || block.type === "html") {
+    return { ...block, value: expandCitations(block.value) };
+  }
+  if ((block.type === "figure" || block.type === "video") && block.caption) {
+    const caption = expandCitations(block.caption);
+    return { ...block, caption, captionText: stripTags(caption) };
+  }
+  return block;
+});
+
+/* "html", not "text": a <ul> cannot live inside a <p>. */
+content.push({ type: "html", value: bibliography() });
 
 /* contents list, derived from the headings below so the two
    can never fall out of step */
-const sections = demoContent
+const sections = content
   .filter((b) => b.type === "heading" && (b.level ?? 3) === 2)
   .map((b) => ({ label: b.value, id: slugify(b.value) }));
 ---
@@ -310,10 +512,19 @@ const sections = demoContent
       <section class="research-card">
         <div class="content">
 
-          {demoContent.map((block) => {
+          {content.map((block) => {
             if (block.type === "text") {
               return (
                 <p class="text" set:html={renderText(block.value)} />
+              );
+            }
+
+            /* Block-level HTML needs a <div>: a <p> is
+               auto-closed the moment the parser meets a <p>
+               or <ul> inside it. */
+            if (block.type === "html") {
+              return (
+                <div class="text" set:html={renderText(block.value)} />
               );
             }
 
@@ -335,12 +546,35 @@ const sections = demoContent
               );
             }
 
+            if (block.type === "publications") {
+              return (
+                <div class="pub-selection">
+                  {selectPapers(block.keys).map((paper) => (
+                    <Publication
+                      title={paper.title}
+                      type={paper.type}
+                      authors={paper.authors}
+                      venue={paper.journal || paper.school}
+                      year={paper.year}
+                      abstract={paper.abstract}
+                      doi={paper.doi}
+                      pdf={paper.pdf}
+                      url={paper.url}
+                      volume={paper.volume}
+                      number={paper.number}
+                      pages={paper.pages}
+                    />
+                  ))}
+                </div>
+              );
+            }
+
             if (block.type === "figure") {
               return (
                 <figure class="figure">
-                  <img src={block.src} alt={block.caption ?? ""} />
+                  <img src={block.src} alt={block.captionText ?? block.caption ?? ""} />
                   {block.caption && (
-                    <figcaption>{block.caption}</figcaption>
+                    <figcaption set:html={block.caption} />
                   )}
                 </figure>
               );
@@ -499,10 +733,34 @@ html.dark .figure img {
   color: var(--text);
 }
 
+/* keep a bold lead-in on the same weight and colour as the
+   "Figure N." prefix it follows — see the matching rule in
+   ResearchVideo.astro. :global() because these captions are
+   injected with set:html and never carry the scope class. */
+.figure figcaption :global(:is(b, strong)) {
+  font-weight: 600;
+  color: var(--text);
+}
+
 /* videos now come from <ResearchVideo />, which carries its
    own styling — the old .figure .media rule lived here and
    could not have reached the component anyway */
 
+
+/* selected publications: uncapped, the cards need the width */
+.pub-selection {
+  margin: 1rem 0 0.5rem;
+}
+
+.pub-selection :global(.pub:last-child) {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.text :global(.pub-selection-more) {
+  margin: 1rem 0 0;
+}
 
 /* ---------------------------------------------------------
    READING MEASURE

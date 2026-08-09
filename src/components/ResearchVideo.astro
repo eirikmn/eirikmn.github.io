@@ -17,9 +17,14 @@
    Props:
      src      - path to the .mp4
      poster   - still frame shown before playback starts
-     caption  - figcaption text
+     caption  - figcaption content. Rendered as HTML, matching
+                the still-figure captions on the research
+                pages, so a bold lead-in or an <em> can be
+                written inline. Author-controlled only.
      aspect   - CSS aspect-ratio, reserves space to stop
-                layout shift while the video loads
+                layout shift while the video loads, and is
+                also parsed to a number so the stylesheet
+                can cap the HEIGHT (see --ar below)
 ========================================================= */
 
 const {
@@ -29,13 +34,32 @@ const {
   aspect = "4 / 3"
 } = Astro.props;
 
+/* "8 / 9" -> 0.8889. The frame is sized by width, but these
+   animations are portrait, so width alone is the wrong
+   constraint: 2/3 at the old 600px cap stood 900px tall,
+   which is more than a laptop viewport and meant the two
+   panels could never be seen at once. Knowing the ratio
+   numerically lets the width rule work back from a maximum
+   height. If it cannot be parsed the cap drops out and the
+   old width-only behaviour applies. */
+function ratioOf(value) {
+  const m = String(value).match(/^\s*([\d.]+)\s*(?:\/\s*([\d.]+))?\s*$/);
+  if (!m) return null;
+  const w = Number(m[1]);
+  const h = m[2] === undefined ? 1 : Number(m[2]);
+  return Number.isFinite(w) && Number.isFinite(h) && h > 0 ? w / h : null;
+}
+
+const ar = ratioOf(aspect);
+const frameStyle = `aspect-ratio: ${aspect};` + (ar ? ` --ar: ${ar.toFixed(4)};` : "");
+
 const id = `vid-${src.replace(/\W+/g, "-")}`;
 const captionId = `${id}-caption`;
 ---
 
 <figure class="figure video-figure">
 
-  <div class="video-frame" style={`aspect-ratio: ${aspect};`}>
+  <div class="video-frame" style={frameStyle}>
 
     <video
       class="media"
@@ -65,7 +89,7 @@ const captionId = `${id}-caption`;
 
   </div>
 
-  {caption && <figcaption id={captionId}>{caption}</figcaption>}
+  {caption && <figcaption id={captionId} set:html={caption} />}
 
 </figure>
 
@@ -171,11 +195,29 @@ const captionId = `${id}-caption`;
     color: var(--text);
   }
 
+  /* A bold lead-in runs straight on from that "Figure N." prefix, so
+     it has to match it: the browser default for <b> is 700, and the
+     caption body colour is --text-muted, which together would put a
+     visible seam in the middle of one continuous bold phrase. */
+  .video-figure figcaption :is(b, strong) {
+    font-weight: 600;
+    color: var(--text);
+  }
+
   .video-frame {
     position: relative;
 
-    max-width: 600px;
-    width: 100%;
+    /* Sized by width, but bounded by height as well. The three
+       candidates are: never overflow the column (100%), never
+       exceed the design width (600px), and never stand taller
+       than --vid-max-h — which, since height = width / --ar,
+       means a width of --vid-max-h * --ar.
+
+       The 999 fallback makes the third candidate lose whenever
+       the component could not parse the aspect, leaving the
+       original width-only behaviour intact. */
+    --vid-max-h: 66vh;
+    width: min(100%, 600px, calc(var(--vid-max-h) * var(--ar, 999)));
     margin: 1rem auto;
 
     border-radius: 8px;
@@ -189,8 +231,11 @@ const captionId = `${id}-caption`;
     cursor: zoom-in;
   }
 
-  /* dim in dark mode, matching the still figures */
-  html.dark .video-frame {
+  /* dim in dark mode, matching the still figures. Applied to the
+     video rather than the frame: a filter on the frame creates a
+     containing block for its absolutely-positioned children and
+     would dim the pause button along with the picture. */
+  html.dark .video-frame video.media {
     filter: brightness(0.9);
   }
 

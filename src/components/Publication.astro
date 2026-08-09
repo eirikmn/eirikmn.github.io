@@ -1,4 +1,6 @@
 ---
+import { withMath } from "../lib/math.js";
+
 const {
   title,
   authors,
@@ -7,7 +9,8 @@ const {
   abstract,
   doi,
   pdf,
-  url
+  url,
+  bibtex
 } = Astro.props;
 
 const myName = "Eirik Myrvoll-Nilsen";
@@ -85,18 +88,118 @@ const id = `${title}-${year}`.replace(/\s+/g, "-").toLowerCase();
     background: color-mix(in srgb, var(--accent) 10%, transparent);
   }
 
+  /* Pressed look while the abstract is open.
+
+     Keyed off aria-expanded, which the script already maintains, so the
+     look and the announced state cannot disagree - a separate .active
+     class would be a second source of truth for the same fact.
+
+     Stronger than :hover (18% against 10%) and with an inset shadow, so
+     an open button still reads as held down while the pointer is over
+     it; hover alone would otherwise look identical to open. */
+  .action-btn[aria-expanded="true"] {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
+    box-shadow: inset 0 1px 2px color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+
+  /* =========================
+     CITE BUTTON
+
+     The three labels are stacked in one grid cell so the button reserves
+     the width of the widest once and cannot resize when clicked. The icon
+     sits outside that stack, so it stays put while the word changes.
+
+     Only the label swaps - the 📋 stays throughout, because the button is
+     still the same control whatever state it is in.
+  ========================= */
+
+  .cite-label {
+    display: inline-grid;
+    justify-items: start;
+    align-items: center;
+  }
+
+  .cite-label > span {
+    grid-area: 1 / 1;
+    visibility: hidden;
+    white-space: nowrap;
+  }
+
+  .cite-btn[data-state="idle"]   .cite-label > span:nth-child(1),
+  .cite-btn[data-state="copied"] .cite-label > span:nth-child(2),
+  .cite-btn[data-state="failed"] .cite-label > span:nth-child(3) {
+    visibility: visible;
+  }
+
+  .cite-btn[data-state="copied"] {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .cite-btn[data-state="failed"] {
+    opacity: 0.75;
+  }
+
+  /* announced to screen readers; clipped rather than hidden, because
+     visibility:hidden would take it out of the accessibility tree and
+     the announcement would never be read */
+  .cite-live {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .cite-btn {
+    position: relative;
+  }
+
   /* =========================
      ABSTRACT TOGGLE
   ========================= */
 
+  /* An SVG rather than the ▸ character.
+
+     A text glyph sits on the baseline and carries its own side bearings,
+     so its box is not centred on the triangle you can see - and the old
+     scale(1.6) multiplied both offsets, which is why it read as low and
+     to the left rather than merely a shade off. Rotation compounded it:
+     transform-origin is the centre of the element box, not of the glyph
+     inside it, so the open state swung around the wrong point.
+
+     The path is drawn so its bounding box is exactly centred in the
+     viewBox - x from 3 to 7, y from 1.5 to 8.5, both centred on 5 - which
+     puts the visual centre, the box centre and the rotation origin in the
+     same place. inline-flex removes the baseline gap, and the size is in
+     em so it still tracks the button's font size.
+  ========================= */
+
   .chevron {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     transition: transform 0.2s ease;
-    transform: rotate(0deg) scale(1.6);
+    transform: rotate(0deg);
+  }
+
+  .chevron svg {
+    display: block;
+    width: 0.9em;
+    height: 0.9em;
   }
 
   .chevron.open {
-    transform: rotate(90deg) scale(1.6);
+    transform: rotate(90deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chevron {
+      transition: none;
+    }
   }
 
   .abstract-wrapper {
@@ -131,7 +234,7 @@ const id = `${title}-${year}`.replace(/\s+/g, "-").toLowerCase();
 <div class="pub" data-id={id}>
 
   <!-- TITLE -->
-  <div class="title">{title}</div>
+  <div class="title" set:html={withMath(title)}></div>
 
   <!-- AUTHORS -->
   <div class="authors" set:html={formattedAuthors}></div>
@@ -145,8 +248,17 @@ const id = `${title}-${year}`.replace(/\s+/g, "-").toLowerCase();
   <div class="action-row">
 
     {abstract && (
-      <button class="action-btn" data-toggle={id}>
-        <span class="chevron" data-chevron={id}>▸</span>
+      <button
+        class="action-btn"
+        data-toggle={id}
+        aria-expanded="false"
+        aria-controls={`panel-${id}`}
+      >
+        <span class="chevron" data-chevron={id}>
+          <svg viewBox="0 0 10 10" aria-hidden="true" focusable="false">
+            <path d="M3 1.5 L7 5 L3 8.5 Z" fill="currentColor" />
+          </svg>
+        </span>
         Abstract
       </button>
     )}
@@ -183,18 +295,64 @@ const id = `${title}-${year}`.replace(/\s+/g, "-").toLowerCase();
       </a>
     )}
 
+    {bibtex && (
+      <button class="action-btn cite-btn" data-bibtex={id} data-state="idle">
+        <span class="cite-icon" aria-hidden="true">📋</span>
+        <span class="cite-label">
+          <span aria-hidden="true">Cite</span>
+          <span aria-hidden="true">Copied</span>
+          <span aria-hidden="true">Failed</span>
+        </span>
+        <span class="cite-live" aria-live="polite"></span>
+      </button>
+    )}
+
   </div>
 
   <!-- ABSTRACT -->
   {abstract && (
-    <div class="abstract-wrapper" data-panel={id}>
-      <div class="abstract" set:html={abstract}></div>
+    <div class="abstract-wrapper" data-panel={id} id={`panel-${id}`}>
+      <div class="abstract" set:html={withMath(abstract)}></div>
     </div>
+  )}
+
+  {bibtex && (
+    <pre hidden data-bib={id}>{bibtex}</pre>
   )}
 
 </div>
 
 <script>
+  /* Copy the entry's BibTeX. Reads the hidden [data-bib] block rather
+     than holding a second copy of the record, and swaps a data-attribute
+     instead of rewriting the label, so the button never changes width. */
+  document.addEventListener("click", (e) => {
+    const citeBtn = e.target.closest("[data-bibtex]");
+    if (!citeBtn) return;
+
+    const bib = document.querySelector(
+      `[data-bib="${citeBtn.getAttribute("data-bibtex")}"]`
+    );
+    if (!bib) return;
+
+    const live = citeBtn.querySelector("[aria-live]");
+    const done = (state, message) => {
+      citeBtn.dataset.state = state;
+      if (live) live.textContent = message;
+      clearTimeout(citeBtn._resetTimer);
+      citeBtn._resetTimer = setTimeout(() => {
+        citeBtn.dataset.state = "idle";
+        if (live) live.textContent = "";
+      }, 1500);
+    };
+
+    /* clipboard writes need a secure context and can be refused */
+    navigator.clipboard?.writeText(bib.textContent).then(
+      () => done("copied", "BibTeX copied to clipboard"),
+      () => done("failed", "Copy failed. Select the citation manually.")
+    ) ?? done("failed", "Copy failed. Select the citation manually.");
+  });
+
   document.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-toggle]");
     if (!btn) return;
@@ -206,6 +364,12 @@ const id = `${title}-${year}`.replace(/\s+/g, "-").toLowerCase();
     if (!panel || !chevron) return;
 
     const isOpen = panel.classList.contains("open");
+
+    /* aria-expanded carries the open state, so it does double duty:
+       screen readers get proper disclosure semantics, and the CSS styles
+       the pressed look off the same attribute rather than a second class
+       that could drift out of step with it. */
+    btn.setAttribute("aria-expanded", String(!isOpen));
 
     if (isOpen) {
       panel.classList.remove("open");

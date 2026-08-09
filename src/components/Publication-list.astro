@@ -1,4 +1,53 @@
 ---
+import { fold } from "../lib/fold.js";
+import { withMath, stripMath } from "../lib/math.js";
+
+/* =========================
+   INLINE MATHS
+
+   Moved to src/lib/math.js and shared with Publication.astro.
+   It lived here alone at first, which is why the Sorbye 2019
+   paper rendered its O(n) correctly on this page and showed a
+   raw "$O(n)$" on the home page.
+
+   KaTeX's CSS is loaded globally by Layout.astro, so there is
+   nothing to add per page.
+========================= */
+
+/* =========================
+   CITE BUTTON
+
+   Notes kept here, in the frontmatter, because JS comments are stripped
+   from the build. Comments in the markup are not: an HTML comment ships
+   to every reader, and an Astro comment cannot contain a brace character
+   at all - braces are read as expression delimiters, so the comment ends
+   early and the remainder of the text is printed onto the page.
+
+   The button holds all three of its labels at once, stacked in a single
+   grid cell, so it sizes to the widest of them once and swapping the
+   visible one cannot change that width. Replacing textContent, which is
+   what it did originally, resized the button on every click.
+
+   The feedback states are single glyphs rather than the words "Copied"
+   and "Failed". That began as a layout constraint: the buttons used to
+   live in a right-hand column whose width came straight out of the
+   title, so reserving room for "Copied" narrowed every title by about
+   16px and pushed some entries onto a second row.
+
+   That constraint is gone now the actions have their own full-width row,
+   and the words would fit. The glyphs are kept because they still avoid
+   any reflow of the neighbouring buttons, but this is now a preference
+   rather than a necessity - swapping the two spans back to "Copied" and
+   "Failed" would be safe.
+
+   The glyph is not the only signal - the button also takes the accent
+   colour, and the live region announces the outcome in words.
+
+   The markup comment must also sit OUTSIDE the conditional below, or the
+   compiler emits it as a bare block statement ahead of the render call
+   and the build fails outright.
+========================= */
+
 const {
   title,
   authors,
@@ -12,6 +61,7 @@ const {
   pdf,
   url,
   bibtex,
+  themes,
   type
 } = Astro.props;
 
@@ -83,6 +133,39 @@ if (doi) {
 }
 
 /* =========================
+   LINK BUTTON
+
+   Suppressed when it would land the reader in the same place as DOI.
+   Every entry now carries a DOI, and on the preprints the url is simply
+   the page that DOI resolves to - arXiv mints its own DOIs under the
+   10.48550 prefix, so 10.48550/arXiv.2602.09731 IS arxiv.org/abs/
+   2602.09731. Two buttons to one destination is clutter, and those were
+   the only entries carrying four buttons rather than three.
+
+   Written as a general "same target" test rather than an arXiv special
+   case, so a journal whose url merely repeats its DOI is caught too, and
+   a url that genuinely points somewhere else - a project page, a data
+   repository - still gets its button.
+========================= */
+const sameTarget = (a, b) => {
+  if (!a || !b) return false;
+  const norm = (u) =>
+    String(u)
+      .replace(/^https?:\/\//i, "")
+      .replace(/^(dx\.)?doi\.org\//i, "")
+      .replace(/^www\./i, "")
+      .replace(/\/+$/, "")
+      .toLowerCase();
+  const [x, y] = [norm(a), norm(b)];
+  if (x === y) return true;
+  /* arXiv: 10.48550/arxiv.NNNN.NNNNN  vs  arxiv.org/abs/NNNN.NNNNN */
+  const idOf = (u) => (u.match(/(?:10\.48550\/arxiv\.|arxiv\.org\/(?:abs|pdf)\/)(\S+?)(?:v\d+)?$/) || [])[1];
+  return Boolean(idOf(x) && idOf(x) === idOf(y));
+};
+
+const showLink = Boolean(url) && !sameTarget(doiLink, url);
+
+/* =========================
    META
 ========================= */
 
@@ -110,22 +193,28 @@ const meta = metaParts.join(", ");
    SEARCH HAYSTACK
 
    Everything the search box on /publications matches
-   against, lowercased once at build time. The abstract is
+   against, folded once at build time. The abstract is
    included so a query hits even while its panel is closed.
+
+   fold() rather than toLowerCase(): the displayed fields are
+   now TeX-decoded, so the haystack contains "Sørbye" and
+   "1539–1556" literally. Folding both sides means a reader who
+   types "sorbye" or "1539-1556" still finds them.
 ========================= */
 
-const searchText = [
-  title,
-  authors,
-  venue,
-  year,
-  typeLabel,
-  abstract,
-  doi
-]
-  .filter(Boolean)
-  .join(" ")
-  .toLowerCase();
+const searchText = fold(
+  /* stripMath drops the $ delimiters: the reader sees rendered notation
+     and would type "O(n) computational", not "$O(n)$ computational" */
+  stripMath(
+    [title, authors, venue, year, typeLabel, abstract, doi,
+     /* volume/number/pages were missing, so a reader could not find an
+        entry by its page range or volume at all - and the dash folding
+        above had nothing to act on */
+     volume, number, pages]
+      .filter(Boolean)
+      .join(" ")
+  )
+);
 ---
 
 <style>
@@ -138,22 +227,13 @@ const searchText = [
 
 /* HEADER */
 
+/* The header used to be a flex row with a text column on the left and a
+   badge/button column on the right. The badge moved into the action row
+   and the buttons moved below the entry, so nothing is beside the text
+   any more - it is a plain block at full width, and the .left/.right
+   wrappers it needed are gone. */
 .header {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.left {
-  flex: 1;
   min-width: 0;
-}
-
-.right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
 }
 
 /* TEXT */
@@ -188,13 +268,51 @@ const searchText = [
   white-space: nowrap;
 }
 
+/* Preprints are the one type where the label changes what a reader should
+   DO - whether to cite it, and how much weight to give it. A grey chip
+   identical to "Journal article" buries that. This one is filled and
+   carries weight, so it separates from the neutral labels at a glance.
+
+   Amber rather than red: not yet peer reviewed is a caveat, not a fault.
+   Colour is not the only cue - the word "Preprint" is still there for
+   anyone who cannot see the difference. */
+.type-badge.is-preprint {
+  color: #7a4b00;
+  background: #fff3d6;
+  border-color: #e0b556;
+  opacity: 1;
+  font-weight: 600;
+}
+
+html.dark .type-badge.is-preprint {
+  color: #ffd894;
+  background: color-mix(in srgb, #e0b556 16%, transparent);
+  border-color: color-mix(in srgb, #e0b556 55%, transparent);
+}
+
 /* ACTION BUTTONS (FIXED) */
 
+/* One row beneath the entry carrying the type badge and every action,
+   left-aligned so it lines up with the text above.
+
+   The badge sits here rather than opposite the title because on a phone a
+   separate badge line cost a whole row of vertical space for one short
+   word. Sharing the row costs nothing and removes the header's right-hand
+   column entirely, which gives the title its full width at every size.
+
+   It stays visually distinct from the buttons: smaller type, a wider gap
+   after it, and no hover response - it is a label, not a control. */
 .action-row {
   display: flex;
+  align-items: center;
   gap: 6px;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: flex-start;
+  margin-top: 8px;
+}
+
+.action-row .type-badge {
+  margin-right: 4px;
 }
 
 .action-btn {
@@ -221,10 +339,93 @@ const searchText = [
               background 0.15s ease;
 }
 
+/* ---- Cite button: fixed width across its three states ----
+
+   inline-grid with every label in row 1 / column 1 stacks them, so the
+   track is as wide as the widest label and stays there. `visibility`
+   rather than `display: none`, because a hidden-by-display child would
+   not contribute its width and the whole point is that it does.
+
+   The feedback states are single glyphs rather than "Copied"/"Failed"
+   for a layout reason, not a stylistic one. .header is a flex row where
+   .left carries flex: 1 and .right sizes to its content, so the buttons'
+   intrinsic width is taken straight out of the title column - and
+   .action-row wraps, so a few extra pixels push the buttons onto an
+   extra line. Words would have made the reserved width that of "Copied"
+   and permanently narrowed the titles. A tick is narrower than "Cite",
+   so the button stays exactly the size it has always been.
+
+   The glyph is not the only signal: the button also takes the accent
+   colour, and the live region below announces the outcome in words. */
+.cite-btn {
+  display: inline-grid;
+  justify-items: center;
+  align-items: center;
+  /* containing block for the absolutely-positioned live region below,
+     so it cannot escape and add stray scrollable area to the page */
+  position: relative;
+}
+
+/* Only the visual labels stack and hide. The live region is matched by
+   [aria-hidden] NOT being present, and is excluded deliberately:
+   `visibility: hidden` removes an element from the accessibility tree,
+   so an aria-live announcement inside one is never read out. It hides
+   itself by clipping instead. */
+.cite-btn > span[aria-hidden] {
+  grid-area: 1 / 1;
+  visibility: hidden;
+  white-space: nowrap;
+}
+
+.cite-btn[data-state="idle"]   > span[aria-hidden]:nth-child(1),
+.cite-btn[data-state="copied"] > span[aria-hidden]:nth-child(2),
+.cite-btn[data-state="failed"] > span[aria-hidden]:nth-child(3) {
+  visibility: visible;
+}
+
+.cite-btn[data-state="copied"] {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.cite-btn[data-state="failed"] {
+  opacity: 0.75;
+}
+
+/* the tick and cross sit slightly small at the button's 0.75rem, and a
+   glyph has no descender to balance against, so nudge them up to match
+   the cap height of the word they replace */
+.cite-btn[data-state="copied"] > span:nth-child(2),
+.cite-btn[data-state="failed"] > span:nth-child(3) {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+/* the announcement for screen readers, which must not affect layout */
+.visually-hidden-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 .action-btn:hover {
   border-color: var(--accent);
   color: var(--accent);
   background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+/* Pressed look while the abstract is open. Keyed off aria-expanded,
+   which the toggle script maintains, so the appearance and the announced
+   state cannot disagree. Stronger than :hover so an open button still
+   reads as held down while the pointer is over it. */
+.action-btn[aria-expanded="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  box-shadow: inset 0 1px 2px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 /* ABSTRACT */
@@ -259,94 +460,92 @@ html.dark .abstract {
   background: rgba(255,255,255,0.03);
 }
 
-@media (max-width: 600px) {
-  .header {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  /* badge and action buttons share one wrapping row */
-  .right {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 6px;
-  }
-
-  /* dissolve the wrapper so its buttons become direct
-     children of .right and flow inline with the badge */
-  .action-row {
-    display: contents;
-  }
-}
+/* No mobile override needed any more. The header is one column and the
+   badge shares the action row at every width, so the phone layout is the
+   desktop layout - which is what the old `display: contents` rule here
+   was approximating. One layout to reason about instead of two. */
 
 </style>
 
-<article class="pub" data-id={id} data-search={searchText}>
+<article
+  class="pub"
+  data-id={id}
+  data-search={searchText}
+  data-themes={(themes ?? []).join(" ")}
+>
 
   <div class="header">
 
-    <div class="left">
+    <div class="title" set:html={withMath(title)}></div>
 
-      <div class="title">{title}</div>
+    <div class="authors" set:html={formattedAuthors}></div>
 
-      <div class="authors" set:html={formattedAuthors}></div>
+    <div class="meta" set:html={meta}></div>
 
-      <div class="meta" set:html={meta}></div>
+  </div>
 
-    </div>
+  <div class="action-row">
 
-    <div class="right">
+    {typeLabel && (
+      <span class:list={["type-badge", typeKey === "preprint" && "is-preprint"]}>
+        {typeLabel}
+      </span>
+    )}
 
-      {typeLabel && (
-        <span class="type-badge">
-          {typeLabel}
-        </span>
-      )}
+    {abstract && (
+      <button
+        class="action-btn"
+        data-toggle={id}
+        aria-expanded="false"
+        aria-controls={`panel-${id}`}
+      >
+        Abs
+      </button>
+    )}
 
-      <div class="action-row">
+    {doiLink && (
+      <a href={doiLink} target="_blank" rel="noopener noreferrer" class="action-btn">
+        DOI
+      </a>
+    )}
 
-        {abstract && (
-          <button class="action-btn" data-toggle={id}>
-            Abs
-          </button>
-        )}
+    {pdf && (
+      <a href={pdf} target="_blank" rel="noopener noreferrer" class="action-btn">
+        PDF
+      </a>
+    )}
 
-        {doiLink && (
-          <a href={doiLink} target="_blank" class="action-btn">
-            DOI
-          </a>
-        )}
+    {showLink && (
+      <a href={url} target="_blank" rel="noopener noreferrer" class="action-btn">
+        Link
+      </a>
+    )}
 
-        {pdf && (
-          <a href={pdf} target="_blank" class="action-btn">
-            PDF
-          </a>
-        )}
-
-        {url && (
-          <a href={url} target="_blank" class="action-btn">
-            Link
-          </a>
-        )}
-
-        {bibtex && (
-          <button class="action-btn" data-bibtex={id}>
-            Cite
-          </button>
-        )}
-
-      </div>
-
-    </div>
+    {/* fixed-width Cite button - see CITE BUTTON in the frontmatter */}
+    {bibtex && (
+      <button class="action-btn cite-btn" data-bibtex={id} data-state="idle">
+        <span aria-hidden="true">Cite</span>
+        <span aria-hidden="true">&#10003;</span>
+        <span aria-hidden="true">&#10007;</span>
+        <span class="visually-hidden-live" aria-live="polite"></span>
+      </button>
+    )}
 
   </div>
 
   {abstract && (
-    <div class="abstract-wrapper" data-panel={id}>
-      <div class="abstract" set:html={abstract}></div>
+    <div class="abstract-wrapper" data-panel={id} id={`panel-${id}`}>
+      <div class="abstract" set:html={withMath(abstract)}></div>
     </div>
+  )}
+
+  {/* The record the Cite button copies. The click handler below reads
+      textContent from [data-bib], so this element has to exist - the
+      button was previously rendered without it and the copy silently
+      did nothing. `hidden` keeps it out of the layout and out of the
+      accessibility tree while leaving textContent readable. */}
+  {bibtex && (
+    <pre hidden data-bib={id}>{bibtex}</pre>
   )}
 
 </article>
@@ -362,6 +561,11 @@ document.addEventListener("click", (e) => {
 
     const isOpen = panel.classList.contains("open");
 
+    /* aria-expanded is the disclosure semantic AND what the pressed
+       style keys off, so the look and the announced state cannot
+       disagree */
+    btn.setAttribute("aria-expanded", String(!isOpen));
+
     if (isOpen) {
       panel.classList.remove("open");
       panel.style.maxHeight = null;
@@ -375,15 +579,30 @@ document.addEventListener("click", (e) => {
   if (citeBtn) {
     const id = citeBtn.getAttribute("data-bibtex");
     const bib = document.querySelector(`[data-bib="${id}"]`);
+    if (!bib) return;
 
-    if (bib) {
-      navigator.clipboard.writeText(bib.textContent);
-      citeBtn.textContent = "Copied";
+    /* clipboard writes need a secure context and can be refused, so the
+       result is reported either way rather than leaving the button
+       claiming success after nothing was copied.
 
-      setTimeout(() => {
-        citeBtn.textContent = "Cite";
+       The state is swapped via an attribute, not by rewriting
+       textContent: all three labels are already in the button, so this
+       changes which one is visible without changing its width. */
+    const live = citeBtn.querySelector("[aria-live]");
+    const done = (state, message) => {
+      citeBtn.dataset.state = state;
+      if (live) live.textContent = message;
+      clearTimeout(citeBtn._resetTimer);
+      citeBtn._resetTimer = setTimeout(() => {
+        citeBtn.dataset.state = "idle";
+        if (live) live.textContent = "";
       }, 1500);
-    }
+    };
+
+    navigator.clipboard?.writeText(bib.textContent).then(
+      () => done("copied", "BibTeX copied to clipboard"),
+      () => done("failed", "Copy failed. Select the citation manually.")
+    ) ?? done("failed", "Copy failed. Select the citation manually.");
   }
 
 });

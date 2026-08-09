@@ -91,18 +91,25 @@
     },
     "cite": {
       "text": "If you use this package, please cite:",
-      "papers": [
-        "Myrvoll-Nilsen, E., Hallali, L., & Rypdal, M. (2025). <strong>Bayesian analysis of early warning signals using a time-dependent model</strong>. <em>Earth System Dynamics</em>, <strong>16</strong>(5), 1539-1556.",
-        "Hallali, L., Myrvoll-Nilsen, E., & Franzke, C. L. (2025). <strong>Assessing AMOC stability using a Bayesian nested time-dependent autoregressive model</strong>. <em>Nonlinear Processes in Geophysics</em>, <strong>32</strong>(4), 383-395."
-      ],
-      "bibtex": "@article{...}",
       "more_text": "Since this work is also based on other work, consider citing the following papers:",
-      "more_papers": [
-        "INLA:<br> Rue, H., Martino, S., & Chopin, N. (2009). <strong>Approximate Bayesian inference for latent Gaussian models by using integrated nested Laplace approximations</strong>. <em>Journal of the Royal Statistical Society Series B: Statistical Methodology</em>, <strong>71</strong>(2), 319-392.",
-        "Nested AR(1) model: <br>Boers, N. (2021). <strong>Observation-based early-warning signals for a collapse of the Atlantic Meridional Overturning Circulation</strong>. <em>Nature Climate Change</em>, <strong>11</strong>(8), 680-688.",
-        "Nested AR(1) model: <br>Morr, A., & Boers, N. (2024). <strong>Detection of approaching critical transitions in natural systems driven by red noise</strong>. <em>Physical Review X</em>, <strong>14</strong>(2), 021037."
+      "keys": [
+        "myrvoll2025bayesian",
+        "hallali2025assessing"
       ],
-      "more_bibtex": "@article{...}"
+      "more_keys": [
+        {
+          "key": "rue2009",
+          "note": "INLA"
+        },
+        {
+          "key": "boers2021",
+          "note": "Nested AR(1) model"
+        },
+        {
+          "key": "morr2024",
+          "note": "Nested AR(1) model"
+        }
+      ]
     },
     "github": "https://github.com/eirikmn/INLA.ews",
     "research": {
@@ -246,16 +253,23 @@
     },
     "cite": {
       "text": "If you use this package, please cite:",
-      "bibtex": "@article{...}",
-      "papers": [
-        "Synchronization methodology: <br>Myrvoll-Nilsen, E., Riechers, K., & Boers, N. (2025). <strong>Synchronization of layer-counted paleoclimatic proxy archives using a Bayesian regression modeling framework</strong>. <em>Bayesian Analysis Advance Publication</em>",
-        "Bayesian regression age-depth modeling: <br>Myrvoll-Nilsen, E., Riechers, K., Rypdal, M. W., & Boers, N. (2022). <strong>Comprehensive uncertainty estimation of the timing of Greenland warmings in the Greenland ice core records</strong>. <em>Climate of the Past</em>, <strong>18</strong>(6), 1275-1294."
-      ],
       "more_text": "Since this package use the INLA methodology, please consider citing:",
-      "more_papers": [
-        "INLA: <br>Rue, H., Martino, S., & Chopin, N. (2009). <strong>Approximate Bayesian inference for latent Gaussian models by using integrated nested Laplace approximations</strong>. <em>Journal of the Royal Statistical Society Series B: Statistical Methodology</em>, <strong>71</strong>(2), 319-392."
+      "keys": [
+        {
+          "key": "myrvoll2025synchronization",
+          "note": "Synchronization methodology"
+        },
+        {
+          "key": "MyrvollNilsen2022",
+          "note": "Bayesian regression age-depth modeling"
+        }
       ],
-      "more_bibtex": "@article{...}"
+      "more_keys": [
+        {
+          "key": "rue2009",
+          "note": "INLA"
+        }
+      ]
     },
     "github": "https://github.com/eirikmn/bremla",
     "research": {
@@ -355,16 +369,20 @@
     },
     "cite": {
       "text": "If you use this package, please cite:",
-      "bibtex": "@article{...}",
-      "papers": [
-        "Myrvoll-Nilsen, E., Sørbye, S. H., Fredriksen, H. B., Rue, H., & Rypdal, M. (2020). <strong>Statistical estimation of global surface temperature response to forcing under the assumption of temporal scaling</strong>. <em>Earth System Dynamics</em>, <strong>11</strong>(2), 329-345."
-      ],
       "more_text": "Since this package builds upon methodology from other papers, please consider citing:",
-      "more_papers": [
-        "Approximate fGn model: <br>Sørbye, S. H., Myrvoll-Nilsen, E., & Rue, H. (2019). <strong>An approximate fractional Gaussian noise model with O(n) computational cost</strong>. <em>Statistics and Computing</em>, <strong>29</strong>(4), 821-833.",
-        "INLA: <br>Rue, H., Martino, S., & Chopin, N. (2009). <strong>Approximate Bayesian inference for latent Gaussian models by using integrated nested Laplace approximations</strong>. <em>Journal of the Royal Statistical Society Series B: Statistical Methodology</em>, <strong>71</strong>(2), 319-392."
+      "keys": [
+        "myrvoll2020statistical"
       ],
-      "more_bibtex": "@article{...}"
+      "more_keys": [
+        {
+          "key": "Sorbye2019",
+          "note": "Approximate fGn model"
+        },
+        {
+          "key": "rue2009",
+          "note": "INLA"
+        }
+      ]
     },
     "github": "https://github.com/eirikmn/INLA.climate",
     "research": {

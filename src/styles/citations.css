@@ -26,7 +26,20 @@
 --------------------------------------------------------- */
 
 .cite-link {
-  color: color-mix(in srgb, var(--accent) 45%, var(--text));
+  /* The mix is toward --text, which is near-black in light mode and
+     near-white in dark mode - so the SAME percentage produces a shade in
+     one theme and a tint in the other, and they do not read alike.
+
+     At 45% light mode landed on #165276, L* 33: a dark navy. Chroma is
+     perceptually weak at low lightness, so in running text it reads as
+     "dark", indistinguishable from the body text beside it. Dark mode's
+     #a9d0fa is L* 82 - a tint, which reads as blue at once.
+
+     70% lifts light mode to #1976ae, L* 47, chroma 38, and still clears
+     WCAG AA on white at 4.95:1. Going further is tempting but 75% drops
+     to 4.48:1 and fails. Dark mode keeps 45% below, since that one
+     already works. */
+  color: color-mix(in srgb, var(--accent) 70%, var(--text));
   text-decoration: none;
 
   /* the global content-link rule in Layout.astro adds a
@@ -35,6 +48,12 @@
   border-bottom: none;
 
   transition: color 0.15s ease, background 0.15s ease;
+}
+
+/* Dark mode was already right - a light blue tint against dark text.
+   Left at the original 45% rather than dragged along with the change above. */
+html.dark .cite-link {
+  color: color-mix(in srgb, var(--accent) 45%, var(--text));
 }
 
 .cite-link:hover {

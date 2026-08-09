@@ -1,0 +1,123 @@
+/* =========================================================
+   TABLES ON THE RESEARCH PAGES
+
+   Global rather than scoped, because tables are injected
+   through set:html where Astro's scope class never lands on
+   the element.
+
+   Numbered with a CSS counter, the same way figures are, so
+   inserting a table above another renumbers both without
+   anything to maintain by hand. The counter is reset on
+   .content, so each page starts at Table 1.
+========================================================= */
+
+.content {
+  counter-reset: research-table;
+}
+
+/* ---------------------------------------------------------
+   THE SCROLL WRAPPER
+
+   A results table will not fit a phone at any readable size,
+   and the usual fix — turning rows into blocks with
+   display: block — destroys the table semantics that make it
+   navigable by screen reader in the first place.
+
+   So the table stays a table and the wrapper scrolls.
+   role="region" plus tabindex="0" is the accepted pattern:
+   it makes the scroll container focusable, so a keyboard
+   user can actually reach and pan it.
+--------------------------------------------------------- */
+
+.table-wrap {
+  counter-increment: research-table;
+
+  max-width: 100%;
+  overflow-x: auto;
+
+  margin: 1.5rem 0;
+
+  /* a visible edge when there is more table than viewport */
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.table-wrap:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------
+   THE TABLE
+--------------------------------------------------------- */
+
+.research-table {
+  border-collapse: collapse;
+  width: 100%;
+
+  font-size: 0.85rem;
+  line-height: 1.45;
+
+  /* stops the browser squeezing columns to nothing before it
+     decides to scroll */
+  min-width: 34rem;
+}
+
+.research-table caption {
+  caption-side: bottom;
+
+  padding: 0.7rem 0.9rem 0;
+
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+  text-align: left;
+}
+
+.research-table caption::before {
+  content: "Table " counter(research-table) ". ";
+  font-weight: 600;
+  color: var(--text);
+}
+
+.research-table th,
+.research-table td {
+  padding: 0.55rem 0.9rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.research-table thead th {
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-ui);
+  white-space: nowrap;
+}
+
+/* Row headers carry the model name — the thing the reader is
+   scanning down — so they stay at full text colour while the
+   column headers recede. */
+.research-table tbody th {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.research-table tbody tr + tr th,
+.research-table tbody tr + tr td {
+  border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+}
+
+/* The numbers are the comparison; give them room to line up
+   rather than sitting flush against the prose beside them. */
+.research-table .num {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.research-table .none {
+  color: var(--text-muted);
+}

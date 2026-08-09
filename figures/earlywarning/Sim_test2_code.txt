@@ -1,0 +1,259 @@
+========================================================================
+Wolfram Language input cells extracted from Sim_test2.nb
+========================================================================
+
+Extracted 2026-08-09 from the Mathematica notebook
+by pulling the string tokens out of each "Input" cell's box structure and
+concatenating them in order.
+
+CAVEATS - read before running:
+  * This is a RECONSTRUCTION, not the notebook itself. The .nb remains the
+    original; keep it. Superscripts, fractions and 2D typeset forms are
+    flattened to linear text, so anything typeset may need an eye before it
+    will evaluate.
+  * Cached output, inline plots and graphics blobs were dropped.
+  * Export[] paths point at /Users/lha305/Desktop/ and will need changing.
+
+22 input cells follow, in notebook order.
+
+
+------------------------------------------------------------------------
+-- cell 1
+------------------------------------------------------------------------
+(* --------------   Tipping Model with white Noise ----------*)
+TMCWN=List[];
+Do[
+Clear[x,F,t,tmax,zero,ans,data,Trend,NTrend,proc,n,F,t,s,noise,x2];
+n=1000;
+F=(2/n)*t -1;
+noise=Interpolation[Table[{i,RandomReal[NormalDistribution[0,0.2]]},{i,0,n}]];
+s=NDSolve[{x'[t]==-x[t]^3+x[t]-F+noise[t], x2'[t]==-x2[t]^3+x2[t]-F ,x[0]==1.25, x2[0]==1.25},{x,x2},{t,0,n}];
+(*Plot[{Evaluate[x[t]/.s], Evaluate[x2[t]/.s]},{t,0,n},PlotRange->All,Epilog->{InfiniteLine[{600,0},{0,1}]}]*)
+Clear[signal];
+signal ={};
+Do[
+AppendTo[signal,Evaluate[x[i]/.s][[1]]],{i,0,600,1}];
+
+TMCWN=AppendTo[TMCWN,signal]
+,100]
+
+------------------------------------------------------------------------
+-- cell 2
+------------------------------------------------------------------------
+(*Dimensions[TMCWN]*)
+TM=Transpose[TMCWN]
+
+------------------------------------------------------------------------
+-- cell 3
+------------------------------------------------------------------------
+ListLinePlot[TMCWN[[5,All]]]
+
+------------------------------------------------------------------------
+-- cell 4
+------------------------------------------------------------------------
+Export["\</Users/lha305/Desktop//TMCWN.csv\>",TM]
+
+------------------------------------------------------------------------
+-- cell 5
+------------------------------------------------------------------------
+(* --------------   Tipping Model with time dependent Red Noise ----------*)
+
+------------------------------------------------------------------------
+-- cell 6
+------------------------------------------------------------------------
+bphi=RandomReal[{-0.9,0.9},500];
+aphi=RandomReal[{-0.9,0.9},500];
+Do[
+aphi[[i]]=RandomReal[{-Min[bphi[[i]],0],(1-Max[bphi[[i]],0])},1][[1]],{i,1,500}]
+
+------------------------------------------------------------------------
+-- cell 7
+------------------------------------------------------------------------
+TMTDRN=List[];
+Do[
+Clear[x,F,t,tmax,zero,ans,data,Trend,NTrend,proc,n,F,t,s,noise,x2];
+Clear[n,noise,phi,sigma,no,phio,sigmao];
+Clear[x,F,t,tmax,zero,ans,data,Trend,NTrend,proc,n,F,t,s,noise,x2,ARe,AR,noise2,noisew];
+n=300;
+F=(2/n)*t -1;
+no=0;
+phio = aphi[j];
+sigmao=0.13;
+noise ={};
+Do[
+AppendTo[noise,no];
+phio =aphi[[j]]+((i*bphi[[j]])/n);
+no = phio*no + RandomReal[NormalDistribution[0,sigmao]],
+{i,0,n}];
+cont=Interpolation[noise];
+s=NDSolve[{x'[t]==-x[t]^3+x[t]-F+cont[t+1], x2'[t]==-x2[t]^3+x2[t]-F ,x[0]==1.25, x2[0]==1.25},{x,x2},{t,0,n}];
+Clear[signal];
+signal ={};
+Do[
+AppendTo[signal,Evaluate[x[i]/.s][[1]]],{i,0,200,1}];
+
+TMTDRN=AppendTo[TMTDRN,signal];
+,{j,1,500}]
+
+------------------------------------------------------------------------
+-- cell 8
+------------------------------------------------------------------------
+TM=Transpose[TMTDRN];
+Dimensions[TM]
+ListLinePlot[TM[[All,4]]]
+
+------------------------------------------------------------------------
+-- cell 9
+------------------------------------------------------------------------
+Plot[{Evaluate[x[t]/.s], Evaluate[x2[t]/.s]},{t,0,n},PlotRange->All,Epilog->{InfiniteLine[{500,0},{0,1}]}]
+
+------------------------------------------------------------------------
+-- cell 10
+------------------------------------------------------------------------
+Export["\</Users/lha305/Desktop//TMTDRN_150.csv\>",TM];
+Export["\</Users/lha305/Desktop//TMTDRN_a_150.csv\>",aphi];
+Export["\</Users/lha305/Desktop//TMTDRN_b_150.csv\>",bphi];
+
+------------------------------------------------------------------------
+-- cell 11
+------------------------------------------------------------------------
+(* --------------   Non-Tipping Model with time dependent Red Noise ----------*)
+
+------------------------------------------------------------------------
+-- cell 12
+------------------------------------------------------------------------
+bphi=RandomReal[{-0.9,0.9},100];
+aphi=RandomReal[{-0.9,0.9},100];
+Do[
+aphi[[i]]=RandomReal[{-Min[bphi[[i]],0],(1-Max[bphi[[i]],0])},1][[1]],{i,1,100}]
+
+------------------------------------------------------------------------
+-- cell 13
+------------------------------------------------------------------------
+NTMTDRN=List[];
+Do[
+Clear[n,noise,phi,sigma,no,phio,sigmao];
+Clear[x,F,t,tmax,zero,ans,data,Trend,NTrend,proc,n,F,t,s,noise,x2,ARe,AR,noise2,noisew];
+n=150;
+noise ={};
+no=0;
+phio = aphi[j];
+sigmao=1;
+Do[
+AppendTo[noise,no];
+phio =aphi[[j]]+((i*bphi[[j]])/n);
+no = phio*no + RandomReal[NormalDistribution[0,sigmao]],
+{i,0,n}];
+cont=Interpolation[noise];
+s=NDSolve[{x'[t]==-5*x[t]+ cont[t+1], x2'[t]==-5*x2[t] ,x[0]==0, x2[0]==0},{x,x2},{t,0,n}];
+Clear[signal];
+signal ={};
+Do[
+AppendTo[signal,Evaluate[x[i]/.s][[1]]],{i,0,150,1/2}];
+
+NTMTDRN=AppendTo[NTMTDRN,signal];
+,{j,1,100}]
+
+------------------------------------------------------------------------
+-- cell 14
+------------------------------------------------------------------------
+TM=Transpose[NTMTDRN];
+Dimensions[TM]
+ListLinePlot[TM[[All,1]]]
+
+------------------------------------------------------------------------
+-- cell 15
+------------------------------------------------------------------------
+Export["\</Users/lha305/Desktop//NTMTDRN_2.csv\>",TM];
+Export["\</Users/lha305/Desktop//NTMTDRN_a_2.csv\>",aphi];
+Export["\</Users/lha305/Desktop//NTMTDRN_b_2.csv\>",bphi];
+
+------------------------------------------------------------------------
+-- cell 16
+------------------------------------------------------------------------
+(* --------------   Non tipping Model Constant Red Noise ----------*)
+NTMCRN=List[];
+Do[
+Clear[n,noise,phi,sigma,no,phio,sigmao];
+Clear[x,F,t,tmax,zero,ans,data,Trend,NTrend,proc,n,F,t,s,noise,x2,ARe,AR,noise2,noisew];
+n=650;
+noise ={};
+phi={};
+sigma={};
+no=0;
+phio = 0.1;
+sigmao=0.2;
+Do[
+AppendTo[noise,no];
+phio = 0.7;
+no = phio*no + RandomReal[NormalDistribution[0,sigmao]],
+{i,0,n}];
+cont=Interpolation[noise];
+s=NDSolve[{x'[t]==-5*x[t]+ cont[t+1], x2'[t]==-5*x2[t] ,x[0]==0, x2[0]==0},{x,x2},{t,0,n}];
+Clear[signal];
+signal ={};
+Do[
+AppendTo[signal,Evaluate[x[i]/.s][[1]]],{i,0,650,1}];
+
+NTMCRN=AppendTo[NTMCRN,signal];
+,100]
+
+------------------------------------------------------------------------
+-- cell 17
+------------------------------------------------------------------------
+TM=Transpose[NTMCRN];
+Dimensions[TM]
+
+------------------------------------------------------------------------
+-- cell 18
+------------------------------------------------------------------------
+ListLinePlot[TM[[All,6]]]
+
+------------------------------------------------------------------------
+-- cell 19
+------------------------------------------------------------------------
+Export["\</Users/lha305/Desktop//NTMCRN.csv\>",TM]
+
+------------------------------------------------------------------------
+-- cell 20
+------------------------------------------------------------------------
+(* --------------   Tipping Model with Constant Red Noise ----------*)
+TMCRN=List[];
+Do[
+Clear[x,F,t,tmax,zero,ans,data,Trend,NTrend,proc,n,F,t,s,noise,x2];
+Clear[n,noise,phi,sigma,no,phio,sigmao];
+Clear[x,F,t,tmax,zero,ans,data,Trend,NTrend,proc,n,F,t,s,noise,x2,ARe,AR,noise2,noisew];
+F=(2/n)*t -1;
+n=1000;
+noise ={};
+phi={};
+sigma={};
+no=0;
+phio = 0.3;
+sigmao=0.1;
+Do[
+AppendTo[noise,no];
+phio = 0.3;
+no = phio*no + RandomReal[NormalDistribution[0,sigmao]],
+{i,0,n}];
+cont=Interpolation[noise];
+s=NDSolve[{x'[t]==-x[t]^3+x[t]-F+cont[t+1], x2'[t]==-x2[t]^3+x2[t]-F ,x[0]==1.25, x2[0]==1.25},{x,x2},{t,0,n}];
+Clear[signal];
+signal ={};
+Do[
+AppendTo[signal,Evaluate[x[i]/.s][[1]]],{i,0,650,1}];
+
+TMCRN=AppendTo[TMCRN,signal];
+,100]
+
+------------------------------------------------------------------------
+-- cell 21
+------------------------------------------------------------------------
+TM=Transpose[TMCRN];
+Dimensions[TM]
+ListLinePlot[TM[[All,1]]]
+
+------------------------------------------------------------------------
+-- cell 22
+------------------------------------------------------------------------
+Export["\</Users/lha305/Desktop//TMCRN.csv\>",TM]
