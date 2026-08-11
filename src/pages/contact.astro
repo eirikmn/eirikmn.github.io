@@ -3,7 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import ProfileIcons from "../components/ProfileIcons.astro";
 import profile from "../data/cvheader.json";
 
-const { email, affiliation, office } = profile;
+const { email, affiliation, office, orcid } = profile;
 
 /* A plain link rather than an embedded map: an iframe would
    add weight and set third-party cookies on a site that
@@ -34,8 +34,14 @@ const mapUrl = hasCoords
 
     <p class="intro">
       I am happy to discuss research collaborations, statistical methodology,
-      and applications of Bayesian inference to complex real-world problems —
-      including supervision of student projects.
+      and applications of Bayesian inference to complex real-world problems.
+    </p>
+
+    <p class="intro intro--students">
+      If you are a student looking for a master's or PhD project, I would
+      like to hear from you. You do not need a fully formed topic, or a
+      background in statistics beyond the basics — a sense of what you find
+      interesting is enough to start a conversation.
     </p>
 
     <!-- PRIMARY ACTION -->
@@ -47,6 +53,30 @@ const mapUrl = hasCoords
       <p class="contact-address">
         or write to <a href={`mailto:${email}`}>{email}</a>
       </p>
+
+      <div class="contact-brief">
+        <p class="contact-brief-title">What helps in a first email</p>
+        <ul>
+          <li>
+            A sentence or two on what you are working on, or would like to
+            work on — a rough direction is fine.
+          </li>
+          <li>
+            For student enquiries: your background, and roughly when you
+            would be starting.
+          </li>
+          <li>
+            If you have read something of mine that prompted you to write,
+            saying which one gives us somewhere to begin.
+          </li>
+        </ul>
+
+        <p class="contact-reply">
+          I read everything that arrives and normally reply within a few days.
+          If you do not hear back, it is safe to assume the message went
+          astray rather than that you were ignored — do send it again.
+        </p>
+      </div>
     </div>
 
     <!-- DETAILS -->
@@ -71,6 +101,15 @@ const mapUrl = hasCoords
         </a>
       </dd>
 
+      <dt>ORCID</dt>
+      <dd>
+        {/* the iD itself, not just a link: it is copied into submission
+            systems and grant forms far more often than it is clicked */}
+        <a href={`https://orcid.org/${orcid}`} target="_blank" rel="noopener noreferrer me">
+          {orcid}
+        </a>
+      </dd>
+
       <dt>Office</dt>
       <dd>
         {office.building}<br />
@@ -90,10 +129,13 @@ const mapUrl = hasCoords
     </dl>
 
     <!-- PROFILES -->
-    <h2>Elsewhere</h2>
+    <h2>Profiles</h2>
 
     <p>
-      Profiles, code and a downloadable copy of my CV.
+      My publication record, code and professional profiles on other sites.
+      The <a href="/cv">CV</a> and <a href="/publications">publication list</a>
+      here are the authoritative versions, and the CV is also available
+      as a <a href="/CV.pdf">PDF</a>.
     </p>
 
     <ProfileIcons />
@@ -168,6 +210,57 @@ const mapUrl = hasCoords
 .contact-address {
   margin: 0.9rem 0 0;
   font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* The second paragraph is addressed to students specifically, so it is
+   set apart from the general opening rather than run on from it - the
+   reader it is for should be able to find it without reading past two
+   clauses about methodology first. */
+.intro--students {
+  margin-bottom: 0;
+}
+
+/* =========================
+   WHAT TO WRITE
+
+   Inside the card, under the button: the moment someone decides whether
+   to write is the moment they are looking at it, not further down the
+   page. Quieter than the button so it reads as guidance rather than as
+   a form to complete.
+========================= */
+
+.contact-brief {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.contact-brief-title {
+  margin: 0 0 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+
+.contact-brief ul {
+  margin: 0;
+  padding-left: 1.1rem;
+
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.contact-brief li {
+  margin-bottom: 0.3rem;
+}
+
+.contact-reply {
+  margin: 0.9rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
   color: var(--text-muted);
 }
 

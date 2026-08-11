@@ -9,21 +9,55 @@
    is to be unambiguous, and the ORCID and ResearchGate marks
    are not recognisable to everyone the way GitHub's is. The
    label also means the link works if an icon fails to load.
+
+   Email and the CV PDF are deliberately absent. Email is the
+   primary action at the top of the page, and repeating it as
+   one tile of seven flattened the hierarchy the card above
+   builds; the CV is a download from this site rather than a
+   profile elsewhere, and both are linked from the section's
+   own paragraph instead.
+
+   One flat row, not groups. With those two removed the five
+   that remain are all the same kind of thing - an external
+   profile with a handle behind it - so subheadings were more
+   chrome than five items can carry. Order does the work
+   instead: the two that a collaborator checks first lead.
+
+   No secondary text on the tiles either. Only two of the five
+   had an identifier worth showing, which made those cards
+   taller than the rest; the ORCID iD moved to the details
+   list on the page, where the other identifying facts live.
 ========================================================= */
 
 import profile from "../data/cvheader.json";
 
 const links = [
-  { label: "Email",          href: `mailto:${profile.email}`,                                        icon: "email.svg" },
-  { label: "Google Scholar", href: "https://scholar.google.com/citations?user=FHoe1FQAAAAJ",         icon: "googlescholar.svg" },
-  { label: "ORCID",          href: `https://orcid.org/${profile.orcid}`,                             icon: "orcid.svg" },
-  { label: "ResearchGate",   href: "https://www.researchgate.net/profile/Eirik-Myrvoll-Nilsen",      icon: "researchgate.svg" },
-  { label: "GitHub",         href: "https://github.com/eirikmn",                                     icon: "github.svg" },
-  { label: "LinkedIn",       href: "https://www.linkedin.com/in/eirik-myrvoll-nilsen-816b7379/",     icon: "linkedin.svg" },
-  { label: "CV (PDF)",       href: "/CV.pdf",                                                        icon: "cv-square.svg" }
+  {
+    label: "Google Scholar",
+    href: "https://scholar.google.com/citations?user=FHoe1FQAAAAJ",
+    icon: "googlescholar.svg"
+  },
+  {
+    label: "ORCID",
+    href: `https://orcid.org/${profile.orcid}`,
+    icon: "orcid.svg"
+  },
+  {
+    label: "GitHub",
+    href: "https://github.com/eirikmn",
+    icon: "github.svg"
+  },
+  {
+    label: "ResearchGate",
+    href: "https://www.researchgate.net/profile/Eirik-Myrvoll-Nilsen",
+    icon: "researchgate.svg"
+  },
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/in/eirik-myrvoll-nilsen-816b7379/",
+    icon: "linkedin.svg"
+  }
 ];
-
-const isExternal = (href) => href.startsWith("http");
 ---
 
 <ul class="profile-links">
@@ -32,10 +66,14 @@ const isExternal = (href) => href.startsWith("http");
       <a
         class="profile-link"
         href={link.href}
-        target={isExternal(link.href) ? "_blank" : undefined}
-        rel={isExternal(link.href) ? "noopener noreferrer me" : undefined}
+        target="_blank"
+        rel="noopener noreferrer me"
       >
-        <img src={`/icons/${link.icon}`} alt="" aria-hidden="true" />
+        <span
+          class="profile-icon"
+          style={`--icon: url('/icons/${link.icon}')`}
+          aria-hidden="true"
+        ></span>
         <span>{link.label}</span>
       </a>
     </li>
@@ -80,39 +118,53 @@ const isExternal = (href) => href.startsWith("http");
 /* =========================
    ICONS
 
-   Filters carried over verbatim from the original icon row
-   on the home page: invert for dark mode, and the
-   invert/sepia/saturate/hue-rotate stack that tints them to
-   the accent blue on hover. The dark-mode hover keeps the
-   leading invert(1) so the tint is applied to the already
-   inverted image.
+   Masked rather than filtered.
+
+   The previous version tinted with
+     invert(48%) sepia(90%) saturate(1000%) hue-rotate(180deg)
+   which never referenced --accent at all: it produced an approximate
+   blue that only resembled it by coincidence. Worse, light and dark use
+   different accents (#1da1f2 and #4da3ff) while the filter chain was the
+   same in both, so it could not match either reliably.
+
+   A mask paints the shape with `background: currentColor`, so the icon
+   takes whatever colour the link already has - the theme's text colour
+   at rest, the exact --accent on hover, with no second set of rules for
+   dark mode and nothing to keep in sync if the accent changes.
 ========================= */
 
-.profile-link img {
+.profile-icon {
   width: 22px;
   height: 22px;
   flex-shrink: 0;
   display: block;
 
-  transition: transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
+  background: currentColor;
 
-  filter: invert(0);
+  -webkit-mask-image: var(--icon);
+  mask-image: var(--icon);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+
+  transition: transform 0.2s ease;
 }
 
-html.dark .profile-link img {
-  filter: invert(1);
+.profile-link:hover .profile-icon {
+  transform: translateY(-2px) scale(1.05);
 }
 
-.profile-link:hover img {
-  transform: translateY(-3px) scale(1.05);
-  opacity: 0.85;
-  filter: invert(48%) sepia(90%) saturate(1000%) hue-rotate(180deg);
-}
+@media (prefers-reduced-motion: reduce) {
+  .profile-icon {
+    transition: none;
+  }
 
-html.dark .profile-link:hover img {
-  transform: translateY(-3px) scale(1.05);
-  opacity: 0.9;
-  filter: invert(1) invert(48%) sepia(90%) saturate(1000%) hue-rotate(180deg);
+  .profile-link:hover .profile-icon {
+    transform: none;
+  }
 }
 
 @media (max-width: 600px) {
@@ -127,7 +179,7 @@ html.dark .profile-link:hover img {
     gap: 0.45rem;
   }
 
-  .profile-link img {
+  .profile-icon {
     width: 20px;
     height: 20px;
   }

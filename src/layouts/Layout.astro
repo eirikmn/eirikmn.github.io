@@ -382,13 +382,40 @@ const personSchema = {
     a:hover {
       opacity: 0.8;
     }
+    /* Content links carry colour at rest, not only on hover.
+
+       They used to be `color: var(--text)` with a 0.5px underline at 35%
+       opacity - the same colour as the surrounding prose, distinguished
+       by a hairline most readers will not register. Colour is the cue
+       people actually scan for, and hover is no help at all on a touch
+       screen, where there is no hover state to discover.
+
+       One formula for both themes, mixing the accent toward --text.
+       Because --text flips with the theme, so does the direction of the
+       mix: in light mode it darkens the accent to #1976ae, and in dark
+       mode it pales it to #7fbcfc. Both read as "link", neither shouts.
+
+       70% is the ceiling in light mode, not a preference: it is the
+       strongest blue that still clears WCAG AA on white at 4.95:1, where
+       75% drops to 4.48:1 and the raw accent is 2.83:1. Dark mode is
+       comfortable at 9.42:1.
+
+       Hover then moves to the accent at full strength in both themes,
+       which is a deltaE of about 20 in light and 18 in dark - plainly
+       visible either way. An earlier version set dark mode to the full
+       accent at rest, which left hover with nowhere to go: same colour
+       before and after, so only the underline moved.
+
+       The underline stays, at full width rather than a hairline. Colour
+       alone is not a sufficient signal: it fails for readers with colour
+       vision deficiency, and WCAG 1.4.1 asks for a second cue. */
     :global(.container a:not([class])),
     :global(.link) {
-      color: var(--text);
+      color: color-mix(in srgb, var(--accent) 70%, var(--text));
       text-decoration: none;
       font-weight: 500;
 
-      border-bottom: 0.5px solid color-mix(in srgb, var(--text) 35%, transparent);
+      border-bottom: 1px solid color-mix(in srgb, currentColor 40%, transparent);
       transition: color 0.15s ease, border-color 0.15s ease;
 
       overflow-wrap: anywhere;
@@ -397,7 +424,7 @@ const personSchema = {
     :global(.container a:not([class]):hover),
     :global(.link:hover) {
       color: var(--accent);
-      border-bottom: 1px solid var(--accent);
+      border-bottom-color: currentColor;
       opacity: 1;
     }
     
