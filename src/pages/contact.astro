@@ -38,10 +38,8 @@ const mapUrl = hasCoords
     </p>
 
     <p class="intro intro--students">
-      If you are a student looking for a master's or PhD project, I would
-      like to hear from you. You do not need a fully formed topic, or a
-      background in statistics beyond the basics — a sense of what you find
-      interesting is enough to start a conversation.
+      Students looking for a master's or PhD project are welcome to write,
+      with or without a specific topic in mind.
     </p>
 
     <!-- PRIMARY ACTION -->
@@ -54,29 +52,11 @@ const mapUrl = hasCoords
         or write to <a href={`mailto:${email}`}>{email}</a>
       </p>
 
-      <div class="contact-brief">
-        <p class="contact-brief-title">What helps in a first email</p>
-        <ul>
-          <li>
-            A sentence or two on what you are working on, or would like to
-            work on — a rough direction is fine.
-          </li>
-          <li>
-            For student enquiries: your background, and roughly when you
-            would be starting.
-          </li>
-          <li>
-            If you have read something of mine that prompted you to write,
-            saying which one gives us somewhere to begin.
-          </li>
-        </ul>
-
-        <p class="contact-reply">
-          I read everything that arrives and normally reply within a few days.
-          If you do not hear back, it is safe to assume the message went
-          astray rather than that you were ignored — do send it again.
-        </p>
-      </div>
+      <p class="contact-reply">
+        I read everything that arrives and normally reply within a few days.
+        If you do not hear back, it is safe to assume the message went
+        astray rather than that you were ignored — do send it again.
+      </p>
     </div>
 
     <!-- DETAILS -->
@@ -221,44 +201,14 @@ const mapUrl = hasCoords
   margin-bottom: 0;
 }
 
-/* =========================
-   WHAT TO WRITE
-
-   Inside the card, under the button: the moment someone decides whether
-   to write is the moment they are looking at it, not further down the
-   page. Quieter than the button so it reads as guidance rather than as
-   a form to complete.
-========================= */
-
-.contact-brief {
-  margin-top: 1.25rem;
+/* The reply note, separated from the button by a rule. It carries the
+   divider itself now that the guidance list it used to sit inside is
+   gone - the wrapper and its three rules went with the list. */
+.contact-reply {
+  margin: 1.25rem 0 0;
   padding-top: 1rem;
   border-top: 1px solid var(--border);
-}
 
-.contact-brief-title {
-  margin: 0 0 0.4rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--text);
-}
-
-.contact-brief ul {
-  margin: 0;
-  padding-left: 1.1rem;
-
-  font-size: 0.88rem;
-  line-height: 1.5;
-  color: var(--text-muted);
-}
-
-.contact-brief li {
-  margin-bottom: 0.3rem;
-}
-
-.contact-reply {
-  margin: 0.9rem 0 0;
   font-size: 0.88rem;
   line-height: 1.5;
   color: var(--text-muted);

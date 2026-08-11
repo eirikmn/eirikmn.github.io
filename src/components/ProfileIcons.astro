@@ -81,13 +81,23 @@ const links = [
 </ul>
 
 <style>
+/* Flex rather than an equal-width grid.
+
+   The grid forced every tile to one width, which meant five items never
+   filled their rows evenly - 4 + 1 at full width, 3 + 2 below that - and
+   the orphan sat alone against empty tracks. It also padded "ORCID" out
+   to the width of "Google Scholar", so half the tiles were mostly empty
+   space.
+
+   Sizing each tile to its own label lets the five flow and wrap without
+   a ragged last row, and the widths vary the way the labels do. */
 .profile-links {
   list-style: none;
   padding: 0;
   margin: 1.25rem 0 0;
 
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.6rem;
 }
 
@@ -169,7 +179,6 @@ const links = [
 
 @media (max-width: 600px) {
   .profile-links {
-    grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
   }
 
