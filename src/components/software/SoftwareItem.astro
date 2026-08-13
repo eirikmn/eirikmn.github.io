@@ -1,5 +1,6 @@
 ---
 import { resolveCitations } from "../../lib/citable.js";
+import { createCitations } from "../../lib/references.js";
 import "../../styles/citations.css";
 
 const {
@@ -12,8 +13,7 @@ const {
   cite,
   github,
   language,
-  research,
-  keywords = []
+  research
 } = Astro.props;
 
 const idBase = name.replace(/\s+/g, "-").toLowerCase();
@@ -60,6 +60,45 @@ const formatCode = (input) => {
 const primaryCitations = resolveCitations(cite?.keys, `${name} cite.keys`);
 const secondaryCitations = resolveCitations(cite?.more_keys, `${name} cite.more_keys`);
 
+/* =========================================================
+   CITATIONS IN THE DETAILS PANEL
+
+   The Details prose is where the package is actually argued
+   for, so it cites the literature — and it used to do so in
+   hand-written plain text, "(Rue et al., 2009)", followed by
+   a hand-maintained "References:" list of bare paragraphs.
+   That was the one place on the site not running through
+   src/lib/references.js, and it showed: the citations were
+   inert rather than linked, the list had no hanging indent
+   and no DOIs, "&" stood where the rest of the site writes
+   "and", page ranges kept their hyphens, and the two halves
+   had already drifted — the INLA.climate text cited Huybers
+   and Curry as 2005 while its own list said 2006.
+
+   Same machinery as the research pages now: [[key]] markers
+   in software.json, expanded here, and a list DERIVED from
+   what each package's text cites.
+
+   One recorder per package, not one per page. Three packages
+   share /software, and each needs a list of its own — a
+   shared recorder would give all three the union of what any
+   of them cited. The anchor is namespaced for the same
+   reason: rue2009 is cited by all three, and a fixed
+   "ref-rue2009" would be a duplicate id whose links all
+   landed in the first package's panel.
+========================================================= */
+const detailCitations = createCitations({
+  sources: [
+    { path: "./src/data/references.bib", anchor: `ref-${idBase}` },
+    { path: "./src/data/papers.bib", anchor: `ref-${idBase}` }
+  ]
+});
+
+/* expanded before bibliography() is read — that expansion is
+   what records which works this package cited */
+const detailsHtml = detailsArray.map((p) => detailCitations.expandCitations(p));
+const detailsReferences = detailCitations.bibliography();
+
 const linkify = (text) => {
   if (!text) return text;
   const urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -84,34 +123,34 @@ const linkify = (text) => {
       </div>
 
       {tagline && <div class="software-tagline">{tagline}</div>}
-
-      {/* Context rather than an action, so it sits with the
-          description instead of in the button row — which was
-          already full at five on a phone. */}
-      {research && (
-        <a class="research-link" href={research.href}>
-          <span class="research-label">Research:</span>
-          {research.label}
-        </a>
-      )}
-
-      {keywords?.length > 0 && (
-        <div class="software-meta">
-          {keywords.map(k => (
-            <span class="badge keyword">{k}</span>
-          ))}
-        </div>
-      )}
     </div>
   </div>
-
-
 
   <!-- SUMMARY -->
   {summary?.length > 0 && (
     <ul class="software-summary">
       {summary.map((s) => <li>{s}</li>)}
     </ul>
+  )}
+
+  {/* Below the summary, not between it and the tagline.
+
+      The tagline states the claim and the bullets elaborate
+      it — one thought in two parts — and this link used to
+      run straight through the middle of it. Being the only
+      accent-coloured thing up there, it was also the
+      brightest element on the card, sitting in precisely the
+      seam where the eye should not stop.
+
+      Still its own line rather than folded into the button
+      row: the original reason for keeping it out of that row
+      holds, since the row is already full at five on a
+      phone. */}
+  {research && (
+    <a class="research-link" href={research.href}>
+      <span class="research-label">Research:</span>
+      {research.label}
+    </a>
   )}
 
   <!-- ACTIONS -->
@@ -146,9 +185,18 @@ const linkify = (text) => {
 
   <!-- DETAILS -->
   <div id={panels.details} class="panel">
-    {detailsArray.map((p) => (
-      <p>{p}</p>
+
+    {detailsHtml.map((p) => (
+      <p set:html={p}></p>
     ))}
+
+    {detailsReferences && (
+      <>
+        <div class="panel-title">References</div>
+        <div class="details-refs" set:html={detailsReferences}></div>
+      </>
+    )}
+
   </div>
 
   <!-- INSTALL -->
@@ -237,6 +285,31 @@ const linkify = (text) => {
             data-state="idle"
             title="Copy BibTeX"
           >
+            {/* An icon is the part a reader recognises without
+                reading: a label alone can be a tag, a label with
+                a copy glyph is a control. Swaps to a tick on
+                success, so the confirmation is not carried by
+                the word "Copied" alone. */}
+            <svg class="cite-icon icon-copy" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 9h10v10H9z M5 15V5h10"
+              />
+            </svg>
+            <svg class="cite-icon icon-check" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M5 12.5l4.5 4.5L19 7"
+              />
+            </svg>
             <span class="cite-label">
               <span aria-hidden="true">BibTeX</span>
               <span aria-hidden="true">Copied</span>
@@ -268,6 +341,31 @@ const linkify = (text) => {
             data-state="idle"
             title="Copy BibTeX"
           >
+            {/* An icon is the part a reader recognises without
+                reading: a label alone can be a tag, a label with
+                a copy glyph is a control. Swaps to a tick on
+                success, so the confirmation is not carried by
+                the word "Copied" alone. */}
+            <svg class="cite-icon icon-copy" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 9h10v10H9z M5 15V5h10"
+              />
+            </svg>
+            <svg class="cite-icon icon-check" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M5 12.5l4.5 4.5L19 7"
+              />
+            </svg>
             <span class="cite-label">
               <span aria-hidden="true">BibTeX</span>
               <span aria-hidden="true">Copied</span>
@@ -375,9 +473,14 @@ document.addEventListener("click", (e) => {
    so the tokens resolve to the site palette. */
 
 :root {
-  --code-bg: #f3f4f6;
+  /* Warmed to sit on the off-white page, and darkened to keep
+     the step it used to have. #f3f4f6 stood 1.10 clear of a
+     #ffffff page but only 1.05 clear of this one, which left the
+     border doing all the work of saying "this is a code block".
+     #efeee9 restores the original 1.10. */
+  --code-bg: #efeee9;
   --code-text: #111827;
-  --code-border: #e5e7eb;
+  --code-border: #e5e3dc;
 }
 
 html.dark {
@@ -431,11 +534,41 @@ html.dark {
   font-size: 1.05rem;
 }
 
-/* the language badge is a label, so it stays quiet: no
-   hover state, no pointer cursor, slightly muted */
+/* =========================================================
+   LANGUAGE BADGE
+
+   The one badge left. It stays quiet — no hover state, no
+   pointer cursor, muted colour — because it is a label, and
+   it sits in a card whose other pills are real buttons.
+
+   It sits beside the name because the language is a fact
+   about the package rather than a description of it, and
+   that is what makes it worth scanning when comparing
+   several. That test is also what the keyword pills that
+   used to sit below the tagline failed: each one restated
+   the tagline, the research link, or a summary bullet a few
+   lines further down, and being disjoint across the three
+   packages they could not even show what the packages have
+   in common. Removed rather than restyled.
+
+   inline-block so the border closes around the whole label
+   instead of being split across two line boxes.
+========================================================= */
 .badge.language {
+  display: inline-block;
+  max-width: 100%;
+
+  font-size: 0.7rem;
+  line-height: 1.5;
+  padding: 2px 8px;
+
+  border-radius: 999px;
+  border: 1px solid var(--border-ui);
+  background: transparent;
+
   color: var(--text-muted);
   letter-spacing: 0.02em;
+
   /* nudge up so it optically centres against the name */
   transform: translateY(-1px);
 }
@@ -448,7 +581,8 @@ html.dark {
 }
 
 /* the research this package came out of — context, not an
-   action, so it lives here rather than in the button row */
+   action, so it sits on its own line rather than in the
+   button row */
 .research-link {
   display: inline-flex;
   align-items: baseline;
@@ -456,7 +590,18 @@ html.dark {
      come back to a normal word space */
   gap: 0.3rem;
 
-  margin-top: 0.5rem;
+  /* .software-item is a flex column, and a flex item stretches
+     on the cross axis by default — which here is the width. An
+     inline-flex link would have been pulled the full width of
+     the card, making its hover state and focus ring span the
+     whole row. Only needed since the link moved out of the
+     header <div> and became a flex child in its own right. */
+  align-self: flex-start;
+
+  /* more air below than above: this closes the tagline-and-
+     summary block and separates it from the actions, rather
+     than floating equidistant between the two */
+  margin: 0.1rem 0 0.55rem;
   font-size: 0.82rem;
 
   color: var(--accent);
@@ -478,38 +623,67 @@ html.dark {
   transform: translateX(3px);
 }
 
-/* META */
-/* The badges had no layout rules at all. As bare inline
-   <span>s, a multi-word keyword like "Global mean surface
-   temperature" could break across two lines mid-pill, which
-   splits the border open and reads as a cropped button. */
+/* .software-meta and the shared .badge base lived here, for the keyword
+   row. Both are gone with it; the language badge above carries the few
+   properties it actually used. */
 
-.software-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.35rem;
+/* =========================================================
+   SUMMARY
 
-  margin-top: 0.6rem;
-  min-width: 0;
+   This had no rule at all, so it fell through to the global
+   `ul` in Layout.astro and rendered at full body size, 20px
+   indent, default disc markers — set LARGER and darker than
+   the .software-tagline immediately above it, which is
+   0.85rem at 0.7 opacity.
+
+   That is the hierarchy upside down. The tagline is the
+   card's one-line claim and the summary elaborates it, so
+   the summary should read as the substance without
+   outweighing the line it expands. 0.88rem at full --text
+   sits just above the tagline: quieter in size, clearer in
+   colour, which is the right pair of signals.
+========================================================= */
+.software-summary {
+  margin: 0.7rem 0 0.35rem;
+  padding-left: 1.05rem;
+
+  /* Nothing inside the card had a measure. The page is 850px
+     and the card's padding takes 48px of it, so a bullet ran
+     to about 114 characters — comfortable reading is 45 to
+     75. .software-intro on this same page already sets 70ch;
+     the cards simply never got the same treatment. */
+  max-width: 68ch;
+
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text);
+
+  /* markers drawn below rather than by the browser */
+  list-style: none;
 }
 
-.badge {
-  /* inline-block is the actual fix: such a box is never split
-     across line boxes, so the border always closes around the
-     whole label. If a very long keyword ever does need two
-     lines, the pill grows taller instead of breaking apart. */
-  display: inline-block;
-  max-width: 100%;
+.software-summary li {
+  position: relative;
+  margin-bottom: 0.2rem;
+}
 
-  font-size: 0.7rem;
-  line-height: 1.5;
-  padding: 2px 8px;
+/* A small accent dot instead of the default disc. Same colour formula
+   as .cite-note's rule, so the two quiet markers on this page are
+   recognisably the same idea. Absolutely positioned rather than styled
+   through ::marker, whose colour support is the newest part of that
+   pseudo-element. */
+.software-summary li::before {
+  content: "";
 
-  border-radius: 999px;
-  border: 1px solid var(--border-ui);
-  background: transparent;
-  color: var(--text);
+  position: absolute;
+  left: -0.8rem;
+  top: 0.58em;
+
+  width: 4px;
+  height: 4px;
+
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 60%, var(--border-ui));
 }
 
 /* ACTIONS */
@@ -607,33 +781,61 @@ html.dark {
    model". Set apart from the reference itself so it does not read as part
    of the citation. */
 /* On its own line above the reference rather than inline before it.
-   Sitting inline it read as a control butted against the text - the chip
-   shape does not help - and on a wrapped citation it was ambiguous where
-   the label stopped and the authors began.
+   Sitting inline it read as a control butted against the text, and on a
+   wrapped citation it was ambiguous where the label stopped and the
+   authors began.
 
-   width: fit-content so the block does not stretch the chip across the
-   column, and the negative margin pulls it out to meet the hanging
-   indent, so label and citation share a left edge. */
+   It used to be a pill: 999px radius, 1px border, transparent fill -
+   which is character for character the .cite-copy button sitting on the
+   next line. Two things a millimetre apart, identical in shape, one
+   clickable and one not. The pill is gone; what is left reads as a label
+   because labels look like this and controls do not.
+
+   No text-transform, deliberately: these notes carry "fGn" and "AR(1)",
+   and uppercasing is lossy on a term whose casing is the term.
+
+   width: fit-content so the block does not stretch across the column,
+   and the negative margin pulls it out to meet the hanging indent, so
+   the marker and the citation share a left edge. */
 .cite-note {
   display: block;
   width: fit-content;
 
   font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
 
   color: var(--text-muted);
-  border: 1px solid var(--border-ui);
-  border-radius: 999px;
-  padding: 1px 7px;
-  margin: 0 0 4px -1.6rem;
+  margin: 0 0 2px -1.6rem;
 
   text-indent: 0;
 }
 
+/* A short rule in place of the border. It gives the label something to
+   sit against - without it a bare muted phrase floating above a citation
+   reads as a fragment that lost its sentence - while being the one shape
+   a button never has. */
+.cite-note::before {
+  content: "";
+
+  display: inline-block;
+  width: 2px;
+  height: 0.72em;
+  margin-right: 6px;
+  vertical-align: -0.05em;
+
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--accent) 60%, var(--border-ui));
+}
+
+/* Now the only pill in the list, and the only thing carrying an icon,
+   a fill and a hover state - three signals of "control" against the
+   label's none. inline-flex rather than inline-grid, to seat the icon
+   beside the three-state label (which keeps its own grid below). */
 .cite-copy {
-  display: inline-grid;
+  display: inline-flex;
   align-items: center;
+  gap: 4px;
   vertical-align: baseline;
 
   margin-left: 8px;
@@ -643,7 +845,10 @@ html.dark {
   font-size: 0.7rem;
 
   color: var(--text-muted);
-  background: transparent;
+
+  /* a faint fill at rest. The border alone was doing all the work of
+     saying "control", and it was the same border the label had. */
+  background: color-mix(in srgb, var(--text) 5%, transparent);
   border: 1px solid var(--border-ui);
   border-radius: 999px;
 
@@ -657,6 +862,23 @@ html.dark {
   color: var(--accent);
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+/* keyboard users get the same promise the pointer gets */
+.cite-copy:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.cite-icon {
+  width: 11px;
+  height: 11px;
+  flex: none;
+}
+
+.cite-copy[data-state="copied"] .icon-copy,
+.cite-copy:not([data-state="copied"]) .icon-check {
+  display: none;
 }
 
 /* the three labels share one grid cell, so the button reserves the width
@@ -744,6 +966,55 @@ html.dark {
 /* PANELS */
 .panel { display: none; }
 .panel.open { display: block; margin-top: 0.35rem; }
+
+/* The section labels inside a panel — "Before installing",
+   "Install", "R code", "Output", "Plots", "References" — had
+   no rule at all, so they rendered as ordinary body text and
+   read as a stray sentence rather than as a label for what
+   follows. Small, semibold and muted is the same treatment
+   .research-label gets in the header above. */
+.panel-title {
+  margin: 0.9rem 0 0.35rem;
+
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+
+  color: var(--text-muted);
+}
+
+/* the first label in a panel sits directly under the button
+   row and needs no extra air above it */
+.panel-title:first-child {
+  margin-top: 0.15rem;
+}
+
+/* Same measure as the summary, for the same reason: the
+   Details prose ran to about 100 characters a line at the
+   card's full width. Paragraphs only — code blocks and demo
+   plots want every pixel the card will give them. */
+.panel p {
+  max-width: 68ch;
+}
+
+/* =========================================================
+   DETAILS REFERENCES
+
+   Derived from the [[key]] markers in the Details prose by
+   src/lib/references.js, and wearing .reflist — the same
+   hanging-indent list as the research pages, imported from
+   styles/citations.css rather than restyled here.
+========================================================= */
+
+.details-refs .reflist {
+  /* This rule used to cancel the list's own measure, on the
+     assumption that the card was narrower than a research
+     page's column so the limit would never bind. That was
+     wrong — the card gives text roughly 800px — and the
+     cancellation is gone, so .reflist keeps its 68ch and the
+     references share the measure of the prose above them. */
+  margin-bottom: 0;
+}
 
 /* CODE */
 .code-wrapper {

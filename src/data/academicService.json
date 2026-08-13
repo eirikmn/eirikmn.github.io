@@ -1,5 +1,5 @@
 {
-  "leadership": [
+  "governance": [
     {
       "title": "Treasurer and Board Member",
       "organization": "The Norwegian Statistical Association",
@@ -54,40 +54,49 @@
   "review": [
     {
       "title": "Earth System Dynamics",
-      "organization": "Three times",
+      "count": 3,
       "start": "2021",
       "end": "2024"
     },
     {
       "title": "Journal of Climate",
-      "organization": "Once",
+      "count": 1,
       "period": "2022"
     }
   ],
 
-  "outreach": [    
-    
+  "professional": [
     {
-      "title": "Panel discussant for publication discussion",
-      "organization": "TEST Journal Webinar",
-      "details": "Paper: Data integration via analysis of subspaces (DIVAS)",
+      "title": "Invited panel discussant",
+      "organization": "TEST journal webinar (Springer)",
+      "details": "Panel on the discussion paper \"Data integration via analysis of subspaces (DIVAS)\", following the published comment in TEST 33, 683–685.",
       "period": "2025-03"
     },
     {
-      "title": "AI Exhibition",
-      "details": "Contributed to an AI Exhibition for the Northern Norwegian Science Centre",
-      "start": "2024-01",
-      "end": "2024-03"
-    },
-    {
-      "title": "Organized a reading group on multimodal data",
+      "title": "Organizer, reading group on multimodal data",
+      "details": "Selected papers and arranged presenters on multimodal deep learning, data integration and multi-view analysis. Participants from UiT, UiO, NORCE and UNC Chapel Hill.",
       "period": "Spring 2024"
     },
     {
       "title": "Session chair",
-      "organization": "NORDSTAT 2021",
-      "details": "Session C3: Applications, models and methods for high-dimensional and complex data I, at 28th Nordic Conference in Mathematical Statistics.",
+      "organization": "NORDSTAT 2021 — 28th Nordic Conference in Mathematical Statistics",
+      "details": "Session C3: Applications, models and methods for high-dimensional and complex data.",
       "period": "2021-06"
+    }
+  ],
+
+  "outreach": [
+    {
+      "title": "Activity facilitator",
+      "organization": "Artificial Intelligence Day, UiT The Arctic University of Norway",
+      "details": "Hands-on activity in which upper secondary pupils enacted the computation of a neural network. Four groups, around 30 pupils in total.",
+      "period": "2026-06"
+    },
+    {
+      "title": "Exhibition contributor",
+      "organization": "Northern Norwegian Science Centre (Nordnorsk vitensenter)",
+      "start": "2024-01",
+      "end": "2024-03"
     }
   ]
 }

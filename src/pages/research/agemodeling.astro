@@ -547,10 +547,16 @@ const sections = content
 
   /* These plots are exported with transparent backgrounds and
      black axes, so on the dark theme they were drawing
-     black-on-black. Give every figure a light plate — off-
-     white rather than pure white, which is gentler beside
-     body text. */
-  background: #fafafa;
+     black-on-black. Every figure gets a plate.
+
+     True white, now that the page itself is off-white. The
+     plate used to be the off-white one at #fafafa against a
+     #ffffff page, which made it marginally DARKER than its
+     surroundings and left it reading as nothing. The two have
+     swapped: the page is the gentle surface and the plate is
+     the white the plots were exported on, so a figure lifts
+     off the page rather than dissolving into it. */
+  background: #ffffff;
   padding: 0.5rem;
   box-sizing: border-box;
 }

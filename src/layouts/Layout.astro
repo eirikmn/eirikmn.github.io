@@ -157,7 +157,7 @@ const personSchema = {
   <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
 
-  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)" />
 
   <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
@@ -174,7 +174,25 @@ const personSchema = {
     ========================= */
 
     :root {
-      --bg: #ffffff;
+      /* Off-white, not white. Pure #ffffff is a hard surface to
+         read a long page against, and the warmth matters as much
+         as the value: it keeps the page distinguishable from the
+         neutral white the figures are plotted on, so a figure can
+         sit on a true-white plate and lift off the page instead
+         of dissolving into it.
+
+         How far this can go is set by the link colour, not by
+         taste. Content links and citations both resolve to
+         color-mix(--accent 70%, --text) = #1976ae, which is
+         4.95:1 on white — only 0.45 above the AA floor. It reads
+         4.70:1 here and falls below 4.5 at about #f2f2f2, which
+         is the real limit.
+
+         Everything derived from --bg follows on its own:
+         --text-muted below, the card tint on the software and
+         contact panels, the header's translucent bar, and the
+         CV's toggle pill. */
+      --bg: #faf9f7;
       --text: #111111;
 
       /* layout separators */
@@ -458,12 +476,42 @@ const personSchema = {
       z-index: 1000;
     }
 
+    /* =========================
+       WORDMARK
+
+       Two weights rather than one. At a uniform 600 the name
+       read as a bolded nav link; splitting it makes it a mark,
+       and puts the weight on the surname — the half that gets
+       cited, searched and remembered.
+
+       400 and 600 because those are what the Google Fonts URL
+       above actually requests. Inter is loaded as static
+       instances rather than the variable font, so a 700 here
+       would be synthesised by the browser, and the
+       font-variation-settings declaration that used to sit on
+       this rule did nothing whatsoever.
+    ========================= */
     .left {
-      font-weight: 600;
       font-size: 1.1rem;
       letter-spacing: -0.02em;
-      font-variation-settings: "wght" 600;
     }
+
+    .left .given {
+      font-weight: 400;
+    }
+
+    .left .family {
+      font-weight: 600;
+
+      /* A hyphen is a break opportunity, so a narrow enough
+         header would set "Myrvoll-" above "Nilsen". Only the
+         surname is locked: the space before it stays breakable,
+         so this can never force a horizontal overflow. In
+         practice the whole name holds one line anyway — even at
+         320px the brand has roughly 240px and needs about 150. */
+      white-space: nowrap;
+    }
+
     .left a {
       color: var(--text);
       text-decoration: none;
@@ -608,7 +656,7 @@ const personSchema = {
 
   <header>
     <div class="left">
-      <a href="/">Eirik Myrvoll-Nilsen</a>
+      <a href="/"><span class="given">Eirik</span> <span class="family">Myrvoll-Nilsen</span></a>
     </div>
 
     <div class="right">

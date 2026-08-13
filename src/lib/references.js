@@ -69,7 +69,7 @@ function loadReferences(path = BIB_PATH) {
       volume: clean(f.volume),
       number: clean(f.number),
       pages: clean(f.pages),
-      doi: clean(f.doi),
+      doi: bareDoi(clean(f.doi)),
       url: clean(f.url)
     });
   }
@@ -93,6 +93,36 @@ const LATEX = [
   [/\{\\"o\}/g, "ö"], [/\{\\"a\}/g, "ä"], [/\{\\"u\}/g, "ü"],
   [/\\&/g, "&"]
 ];
+
+/* -------------------------------------------------------
+   DOI NORMALISATION
+
+   A DOI field is written three ways in the wild — bare
+   (10.5194/esd-11-329-2020), prefixed (doi:10.5194/...), or
+   as a resolver URL (https://doi.org/10.5194/...). All three
+   name the same thing, but formatEntry both links the value
+   and prints it, so an unnormalised field gave
+   "doi:https://doi.org/10.5194/..." beside a neighbour's
+   plain "doi:10.5194/...".
+
+   That was not hypothetical: 14 of the 15 DOIs in papers.bib
+   carry the full URL and all 55 in references.bib are bare,
+   so every reference list on the site rendered your own work
+   in one style and everyone else's in another.
+
+   Reduce to the bare DOI, which is the form the resolver URL
+   is built from anyway. DISPLAY ONLY — bib.js reads the file
+   separately for the BibTeX the reader copies, so the record
+   keeps whatever it was written with.
+------------------------------------------------------- */
+function bareDoi(value) {
+  if (!value) return value;
+
+  return String(value)
+    .replace(/^(?:https?:\/\/)?(?:dx\.)?doi\.org\//i, "")
+    .replace(/^doi:\s*/i, "")
+    .trim();
+}
 
 /* Exported as cleanTex so bib.js can use the same one. The research pages
    and /publications read the same .bib, and for a while only the research
@@ -490,9 +520,26 @@ export function createCitations(options = {}) {
 
     if (list.length === 0) return "";
 
+    /* The id comes from the source's own anchor, not a fixed
+       "ref-", because link() above already uses that anchor and
+       the two halves have to agree. A research page passes
+       anchor: "ref" and gets exactly what it always got.
+
+       It matters where one page carries several independent
+       reference lists — the software page renders three
+       packages, and rue2009 is cited by all three. A fixed
+       prefix would repeat id="ref-rue2009" three times, and a
+       citation in the third package would jump to the first
+       package's list. Giving each list its own anchor keeps the
+       ids unique and every link local to its own panel. */
     return (
       '<ul class="reflist">' +
-      list.map((e) => `<li id="ref-${e.key}">${formatEntry(e)}</li>`).join("") +
+      list
+        .map(
+          (e) =>
+            `<li id="${e.anchor ?? "ref"}-${e.key}">${formatEntry(e)}</li>`
+        )
+        .join("") +
       "</ul>"
     );
   }

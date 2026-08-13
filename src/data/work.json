@@ -26,7 +26,6 @@
       "Collaboration on interdisciplinary projects"
     ]
   },
-
   {
     "title": "Visiting Scholar",
     "company": "The University of North Carolina at Chapel Hill",
@@ -40,7 +39,7 @@
     "personalGrant": true,
     "grantAwarded": "2023-11",
     "grantAmount": "NOK 1,853,000",
-"logo": {
+    "logo": {
       "light": "unc-dark.svg",
       "dark": "unc-dark.svg",
       "fallback": "unc-dark.svg"
@@ -55,7 +54,7 @@
       "Data integration"
     ]
   },
-{
+  {
     "title": "Researcher",
     "company": "UiT The Arctic University of Norway",
     "location": "Tromsø, Norway",
@@ -65,7 +64,7 @@
     "projectshort": "TiPES",
     "funder": "EU",
     "funderprogram": "Horizon 2020",
-"logo": {
+    "logo": {
       "light": "uit-black.svg",
       "dark": "uit-dark.svg",
       "fallback": "uit-light.svg"
@@ -90,10 +89,10 @@
     "projectshort": "TiPES",
     "funder": "EU",
     "funderprogram": "Horizon 2020",
-"logo": {
+    "logo": {
       "light": "pik-black.svg",
       "dark": "pik-dark.svg",
-      "fallback": "uit-light.svg"
+      "fallback": "pik-light.svg"
     },
     "link": "https://www.pik-potsdam.de/en",
     "type": "academic",
@@ -116,7 +115,7 @@
     "projectshort": "TiPES",
     "funder": "EU",
     "funderprogram": "Horizon 2020",
-"logo": {
+    "logo": {
       "light": "uit-black.svg",
       "dark": "uit-dark.svg",
       "fallback": "uit-light.svg"
@@ -135,7 +134,7 @@
     "title": "PhD Researcher",
     "company": "UiT The Arctic University of Norway",
     "location": "Tromsø, Norway",
-"logo": {
+    "logo": {
       "light": "uit-black.svg",
       "dark": "uit-dark.svg",
       "fallback": "uit-light.svg"

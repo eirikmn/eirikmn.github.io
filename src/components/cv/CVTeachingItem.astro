@@ -59,6 +59,18 @@ const id = `${role}-${institution}`
                 </>
               ))}
             </span>
+
+            {/* Optional facts about THIS course — level, size,
+                format — as opposed to the responsibilities
+                list, which describes the position and so has
+                nowhere to put a per-course enrolment.
+
+                Deliberately not a disclosure — the same
+                reasoning that removed the entry's own Details
+                button, and doubly so per course, where a
+                collapsible would have put three toggles in one
+                entry to hide a line each. */}
+            {c.note && <span class="cv-course-note">{c.note}</span>}
           </div>
         ))}
       </div>
@@ -80,27 +92,69 @@ const id = `${role}-${institution}`
 </div>
 
 <script>
+  /* Astro bundles a component's script once per page, however
+     many times the component is used, so this is one delegated
+     listener rather than one per entry. */
+
+  const reduceMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+
+  /* An open panel is pinned to a pixel max-height so it can be
+     animated. Left pinned, it clips its own content the moment
+     the text reflows taller — a narrowed window, a late-loading
+     font — because the measurement was taken at click time and
+     never revisited. Releasing the cap once the opening
+     transition has finished lets the panel size itself from
+     then on. */
+  document.querySelectorAll("[data-panel]").forEach((panel) => {
+    panel.addEventListener("transitionend", (e) => {
+      if (e.propertyName !== "max-height") return;
+      if (panel.classList.contains("open")) panel.style.maxHeight = "none";
+    });
+  });
+
   document.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-toggle]");
     if (!btn) return;
 
-    const id = btn.getAttribute("data-toggle");
-    const panel = document.querySelector(`[data-panel="${id}"]`);
+    const panel = document.querySelector(
+      `[data-panel="${btn.getAttribute("data-toggle")}"]`
+    );
     if (!panel) return;
 
     const isOpen = panel.classList.contains("open");
 
     if (isOpen) {
       panel.classList.remove("open");
-      panel.style.maxHeight = null;
       btn.setAttribute("aria-expanded", "false");
+
+      if (reduceMotion) {
+        panel.style.maxHeight = "";
+        return;
+      }
+
+      /* max-height is "none" by now, and "none" cannot be
+         animated to zero. Pin the current height, then clear the
+         inline value on the next frame so the stylesheet's
+         max-height: 0 becomes the target of a real transition. */
+      panel.style.maxHeight = panel.scrollHeight + "px";
+      requestAnimationFrame(() => {
+        panel.style.maxHeight = "";
+      });
     } else {
       panel.classList.add("open");
-      panel.style.maxHeight = panel.scrollHeight + "px";
       btn.setAttribute("aria-expanded", "true");
+
+      /* with motion off there is no transitionend to wait for,
+         so release the cap immediately */
+      panel.style.maxHeight = reduceMotion
+        ? "none"
+        : panel.scrollHeight + "px";
     }
   });
 </script>
+
 
 <style>
 /* only what differs from src/styles/cv.css */
@@ -134,7 +188,7 @@ const id = `${role}-${institution}`
      the card's tinted fill this reaches 1.83:1 in light mode
      and 4.92:1 in dark, and it is the same token the card
      edge and the publication action buttons use — so it no
-     longer needs a separate dark-mode correction below.
+     longer needs a separate dark-mode correction.
 
      The page background rather than transparent, so the pill
      lifts off the tint instead of dissolving into it. */
@@ -157,21 +211,24 @@ const id = `${role}-${institution}`
 }
 
 /* visibility rather than display, so the hidden label still
-   contributes its width — and is still hidden from screen
-   readers, which display: none would also do but at the cost
-   of the reserved space */
+   contributes its width */
 .toggle-btn[aria-expanded="false"] .toggle-label--hide,
 .toggle-btn[aria-expanded="true"] .toggle-label--show {
   visibility: hidden;
 }
 
-/* Mixed into var(--bg), not transparent: the pill now has a
+/* Mixed into var(--bg), not transparent: the pill has a
    background of its own, so mixing into transparent would
    let the card's tint show through and muddy the hover. */
 .toggle-btn:hover {
   border-color: var(--accent);
   color: var(--accent);
   background: color-mix(in srgb, var(--accent) 12%, var(--bg));
+}
+
+.toggle-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* =========================
@@ -268,6 +325,23 @@ const id = `${role}-${institution}`
   white-space: nowrap;
 }
 
+/* Its own row beneath both columns. Spanning to -1 rather than
+   sitting in the title column: the terms column is empty on
+   this row, so there is no reason to make the note wrap inside
+   half the width, and a long note would otherwise turn into a
+   narrow ribbon under the course name.
+
+   Set at the same size and colour as the terms, because it is
+   the same kind of thing — a fact about the course rather than
+   the course itself. */
+.cv-course-note {
+  grid-column: 1 / -1;
+  margin-top: 0.1rem;
+
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
 /* ---------------------------------------------------------
    PHONES
 
@@ -299,34 +373,34 @@ const id = `${role}-${institution}`
   max-height: 0;
   overflow: hidden;
   opacity: 0;
-  transition: max-height 0.25s ease, opacity 0.2s ease;
+
+  /* visibility, not just opacity and a zero height. Clipped
+     content stays in the accessibility tree, so a screen
+     reader could read out responsibilities while the button's
+     aria-expanded="false" said there were none to read. The
+     0.25s delay holds it visible for the length of the closing
+     animation; opening flips it back with no delay, below. */
+  visibility: hidden;
+
+  transition: max-height 0.25s ease, opacity 0.2s ease,
+              visibility 0s linear 0.25s;
 }
 
 .cv-collapse.open {
   opacity: 1;
+  visibility: visible;
+  transition: max-height 0.25s ease, opacity 0.2s ease,
+              visibility 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cv-collapse {
+    transition: none;
+  }
 }
 
 .cv-bullets {
-  margin: 0.5rem 0 0 0;
-  padding-left: 1.2rem;
+  margin-top: 0.5rem;
 }
 
-.cv-bullets li {
-  margin-bottom: 0.3rem;
-}
-
-/* =========================
-   DARK MODE
-
-   Nothing to correct any more. These used to hand-mix a
-   stronger border and a stronger hover for dark mode; both
-   are now handled by the tokens themselves — --border-ui is
-   already #8a8a8a in dark against #b8b8b8 in light, and the
-   hover mixes into var(--bg), which flips with the theme.
-
-   The old override was also actively harmful once the base
-   moved to --border-ui: html.dark is more specific, so it
-   won, and it resolved to roughly #6a6a6a — weaker than the
-   token it was overriding.
-========================= */
 </style>

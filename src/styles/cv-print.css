@@ -145,13 +145,16 @@
      itself is meaningless.
 
      max-height is set inline by the toggle script, hence
-     !important here.
+     !important here. visibility likewise: a closed panel is
+     hidden from assistive technology on screen, and that must
+     not follow it onto the page.
   --------------------------------------------------------- */
 
   .cv-collapse {
     max-height: none !important;
     opacity: 1 !important;
     overflow: visible !important;
+    visibility: visible !important;
   }
 
   .toggle-btn {

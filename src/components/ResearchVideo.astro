@@ -280,9 +280,17 @@ const captionId = `${id}-caption`;
     border: 1px solid var(--border-ui);
     overflow: hidden;
 
-    /* the animations are plotted on white, so keep a light
-       stage rather than letting dark mode show through */
-    background: #fafafa;
+    /* The animations are plotted on white, so the stage is
+       white — both to be faithful to the artwork and to stop
+       dark mode showing through behind it.
+
+       It used to be #fafafa against a #ffffff page, which made
+       the plate a shade DARKER than what surrounded it and left
+       it reading as nothing at all. Now the page is off-white
+       and the plate is true white, so the same 1.05 of
+       separation works in the other direction and the figure
+       lifts. */
+    background: #ffffff;
 
     cursor: zoom-in;
   }

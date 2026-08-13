@@ -186,9 +186,12 @@ const dated = [
   ...teaching,
   ...supervision,
   ...development,
-  ...(academicService?.leadership ?? []),
-  ...(academicService?.review ?? []),
-  ...(academicService?.outreach ?? [])
+  /* every bucket in academicService.json, whatever they happen
+     to be called. Naming them one at a time meant that adding a
+     subsection — as splitting "outreach" into professional
+     service and public engagement just did — would silently drop
+     its dates out of the "last updated" scan. */
+  ...Object.values(academicService ?? {}).flat()
 ];
 
 const isoDates = dated
@@ -417,13 +420,34 @@ const lastUpdatedLabel = lastUpdated
         </div>
       </CVSection>
 
-      <!-- SERVICE -->
+      {/* SERVICE
+
+          Four subsections rather than three. "Outreach &
+          Engagement" had become a catch-all for everything that
+          was neither governance nor peer review, and it held
+          three different kinds of thing: chairing a conference
+          session and sitting on a journal panel are service to
+          the FIELD, evidence that peers ask you to run things;
+          contributing to a science-centre exhibition is public
+          engagement, which funders assess as its own criterion;
+          organising a reading group is internal community work.
+          Filed together, the conference service read as though
+          it were the best that could be found to put there.
+
+          "Organizational Roles" rather than "Leadership": the
+          seven entries include deputy and student representative
+          posts, which are representation on a governing body
+          rather than leadership of one, and the heading was
+          claiming a seniority half of them do not have. This one
+          claims nothing — membership, representation and office
+          all sit under it without strain, and each entry's own
+          title says which it was. */}
       <CVSection id="service" title="Academic Service & Outreach">
 
-        {(academicService?.leadership ?? []).length > 0 && (
+        {(academicService?.governance ?? []).length > 0 && (
           <>
-            <h3 class="cv-subsection">Leadership & Institutional Service</h3>
-            {academicService.leadership.map((item) => (
+            <h3 class="cv-subsection">Organizational Roles</h3>
+            {academicService.governance.map((item) => (
               <CVAcademicServiceItem {...item} />
             ))}
           </>
@@ -438,9 +462,18 @@ const lastUpdatedLabel = lastUpdated
           </>
         )}
 
+        {(academicService?.professional ?? []).length > 0 && (
+          <>
+            <h3 class="cv-subsection">Professional & Community Service</h3>
+            {academicService.professional.map((item) => (
+              <CVAcademicServiceItem {...item} />
+            ))}
+          </>
+        )}
+
         {(academicService?.outreach ?? []).length > 0 && (
           <>
-            <h3 class="cv-subsection">Outreach & Engagement</h3>
+            <h3 class="cv-subsection">Outreach & Public Engagement</h3>
             {academicService.outreach.map((item) => (
               <CVAcademicServiceItem {...item} />
             ))}

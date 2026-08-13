@@ -7,7 +7,8 @@ const {
   start,
   end,
   details,
-  period
+  period,
+  count
 } = Astro.props;
 
 /* `period` is a single stored value ("2022", "Spring 2024",
@@ -16,6 +17,23 @@ const {
 const formattedTime = period
   ? formatDate(period)
   : formatRange(start, end);
+
+/* A peer-review entry has no organization to give — the
+   journal IS the title — but it does have a number of
+   reviews, and that number used to be stored in
+   `organization` as the words "Three times". A frequency was
+   sitting in the slot every other entry on the page uses for
+   an institution, and because it was prose it also had to be
+   written out by hand, which is why one entry said "Three
+   times" and the other "Once" rather than agreeing on a form.
+
+   A dedicated `count` lets the singular and plural be derived
+   instead, and leaves `organization` meaning one thing
+   everywhere. */
+const reviewCount =
+  Number.isFinite(count) ? `${count} ${count === 1 ? "review" : "reviews"}` : null;
+
+const subtitle = organization ?? reviewCount;
 ---
 
 <div class="cv-item">
@@ -37,10 +55,17 @@ const formattedTime = period
 
     </div>
 
-    <!-- ORGANIZATION -->
-    <div class="cv-sub">
-      {organization}
-    </div>
+    {/* Conditional, not always-rendered. Entries with neither an
+        organization nor a review count — the reading group, the
+        exhibition before its host was filled in — were emitting an
+        empty <div> that still carried its 0.25rem bottom margin, so
+        those entries sat on a little more air than their neighbours
+        for no visible reason. */}
+    {subtitle && (
+      <div class="cv-sub">
+        {subtitle}
+      </div>
+    )}
 
     <!-- OPTIONAL DETAILS -->
     {details && (

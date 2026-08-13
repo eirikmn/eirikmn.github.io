@@ -137,13 +137,38 @@ html.dark .cv-logo-dark {
 
 /* ---------------------------------------------------------
    BULLET LISTS
+
+   Shared by the work entries and by the responsibilities the
+   teaching entries keep behind their Details button.
+
+   These carried no font-size at all, so they inherited the
+   card's full body size and came out LARGER than the lines
+   they sit beneath — .cv-sub at 0.9rem, and inside a teaching
+   entry the course list at 0.85rem. Supporting detail was the
+   biggest text in the entry, and in the teaching case it was
+   detail the reader has to press a button to see.
+
+   0.85rem lines them up with .cv-course, the neighbouring
+   element in the same card. Colour stays at full --text:
+   these are the substance of an entry rather than metadata,
+   and the step down in size carries the hierarchy on its own.
+
+   Native markers, deliberately — not the tinted dot the
+   software page draws with a pseudo-element. cv-print.css
+   expands these lists onto paper, and browsers drop
+   background colours when printing, so a marker drawn as a
+   coloured box would vanish exactly where this content
+   matters most.
 --------------------------------------------------------- */
 
 .cv-bullets {
   margin: 0;
-  padding-left: 1.2rem;
+  padding-left: 1.1rem;
+
+  font-size: 0.85rem;
+  line-height: 1.5;
 }
 
 .cv-bullets li {
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.25rem;
 }
