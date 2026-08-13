@@ -109,6 +109,52 @@ const captionId = `${id}-caption`;
        and back does not override their choice */
     let pausedByUser = reduceMotion;
 
+    /* Last resort. The custom toggle assumes the browser can
+       decode the file; where it cannot, a bespoke button is
+       worse than none, because it looks live and does nothing.
+       So hand the element back to the browser: native controls
+       report the failure in the browser's own words instead of
+       failing silently.
+
+       Kept distinct from an autoplay refusal, which is normal
+       and must not trigger this. */
+    let degraded = false;
+
+    function degrade(reason) {
+      if (degraded) return;
+      degraded = true;
+
+      video.controls = true;
+      toggle.hidden = true;
+
+      /* click-to-enlarge would otherwise swallow taps meant for
+         the native scrubber — and there is nothing to enlarge
+         to, since the lightbox would fail on the same file */
+      frame.style.cursor = "default";
+      video.addEventListener("click", (e) => e.stopPropagation());
+
+      console.warn(`[ResearchVideo] ${video.currentSrc || "video"}: ${reason}`);
+    }
+
+    /* fires on a network failure and, on iOS, on a stream the
+       hardware decoder refuses — a profile or level above what
+       the device advertises fails here even when the picture is
+       small enough to decode easily */
+    video.addEventListener("error", () =>
+      degrade(video.error?.message || `media error ${video.error?.code ?? ""}`)
+    );
+
+    function attemptPlay() {
+      video.play().catch((err) => {
+        /* NotAllowedError is the browser declining to autoplay.
+           That is expected and self-correcting — the reader can
+           still press the button. Anything else means the media
+           itself will not run. */
+        if (err?.name === "NotAllowedError") return;
+        degrade(`${err?.name ?? "play() rejected"}: ${err?.message ?? ""}`);
+      });
+    }
+
     function sync() {
       const playing = !video.paused && !video.ended;
       toggle.dataset.playing = String(playing);
@@ -127,7 +173,17 @@ const captionId = `${id}-caption`;
 
       if (video.paused) {
         pausedByUser = false;
-        video.play().catch(() => {});
+
+        /* preload="none" means a reader who presses play before
+           the prefetch observer has fired has nothing buffered.
+           load() inside the gesture starts the fetch and keeps
+           the gesture attached to the play() that follows. */
+        if (video.preload === "none") {
+          video.preload = "auto";
+          video.load();
+        }
+
+        attemptPlay();
       } else {
         pausedByUser = true;
         video.pause();
@@ -156,7 +212,7 @@ const captionId = `${id}-caption`;
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            if (!pausedByUser) video.play().catch(() => {});
+            if (!pausedByUser && !degraded) attemptPlay();
           } else {
             video.pause();
           }
@@ -281,6 +337,18 @@ const captionId = `${id}-caption`;
     height: 16px;
   }
 
+  /* A 36px circle is the right visual weight over the plot but
+     is under the 44px minimum touch target, and a near-miss is
+     not a no-op here: it lands on the frame, which opens the
+     lightbox instead of starting playback. Extend the hit area
+     outward rather than growing the circle. */
+  .video-toggle::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+  }
+
   /* show on hover, on keyboard focus, and whenever the
      animation is stopped so there is always a way back */
   .video-frame:hover .video-toggle,
@@ -305,5 +373,13 @@ const captionId = `${id}-caption`;
     .video-toggle {
       opacity: 1;
     }
+  }
+
+  /* the script sets `hidden` and turns on native controls when
+     the browser cannot play the file; `display: flex` above
+     outranks the user-agent `hidden` rule, as it does for the
+     lightbox media */
+  .video-toggle[hidden] {
+    display: none;
   }
 </style>
