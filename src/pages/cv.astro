@@ -26,6 +26,7 @@ import teaching from "../data/teaching.json";
 import development from "../data/development.json";
 import supervision from "../data/supervision.json";
 import academicService from "../data/academicService.json";
+import presentations from "../data/presentations.json";
 import software from "../data/software.json";
 import skills from "../data/skills.json";
 
@@ -316,6 +317,55 @@ const lastUpdatedLabel = lastUpdated
           </a>
         </div>
       </CVSection>
+      <!-- PRESENTATIONS
+
+           Sits with Publications rather than with Service,
+           because a talk is an output: the same work, reaching
+           people who will not read the paper. Split by whether
+           somebody asked — an invitation is third-party
+           evidence that people want to hear from you, and a
+           contributed talk is evidence you turned up. Merging
+           the two throws that distinction away.
+
+           Each list renders only when it has entries, and the
+           section as a whole disappears while they are all
+           empty, so nothing shows until presentations.json is
+           filled in. -->
+      {(presentations.invited?.length ||
+        presentations.contributed?.length ||
+        presentations.posters?.length) > 0 && (
+        <CVSection id="presentations" title="Presentations">
+
+          {(presentations.invited ?? []).length > 0 && (
+            <>
+              <h3 class="cv-subsection">Invited Talks</h3>
+              {presentations.invited.map((item) => (
+                <CVAcademicServiceItem {...item} />
+              ))}
+            </>
+          )}
+
+          {(presentations.contributed ?? []).length > 0 && (
+            <>
+              <h3 class="cv-subsection">Conference Presentations</h3>
+              {presentations.contributed.map((item) => (
+                <CVAcademicServiceItem {...item} />
+              ))}
+            </>
+          )}
+
+          {(presentations.posters ?? []).length > 0 && (
+            <>
+              <h3 class="cv-subsection">Posters</h3>
+              {presentations.posters.map((item) => (
+                <CVAcademicServiceItem {...item} />
+              ))}
+            </>
+          )}
+
+        </CVSection>
+      )}
+
 
       <!-- FUNDING
 
@@ -350,13 +400,6 @@ const lastUpdatedLabel = lastUpdated
         </CVSection>
       )}
 
-      <!-- TEACHING -->
-      <CVSection id="teaching" title="Teaching Experience">
-        {teaching.map((item) => (
-          <CVTeachingItem {...item} />
-        ))}
-      </CVSection>
-
       <!-- SUPERVISION -->
       <CVSection id="supervision" title="Supervision">
 
@@ -380,10 +423,10 @@ const lastUpdatedLabel = lastUpdated
 
       </CVSection>
 
-      <!-- DEVELOPMENT (NEW SECTION) -->
-      <CVSection id="development" title="Professional Development & Certifications">
-        {development.map((item) => (
-          <CVDevelopmentItem {...item} />
+      <!-- TEACHING -->
+      <CVSection id="teaching" title="Teaching Experience">
+        {teaching.map((item) => (
+          <CVTeachingItem {...item} />
         ))}
       </CVSection>
 
@@ -482,6 +525,13 @@ const lastUpdatedLabel = lastUpdated
 
       </CVSection>
 
+      <!-- DEVELOPMENT (NEW SECTION) -->
+      <CVSection id="development" title="Professional Development & Certifications">
+        {development.map((item) => (
+          <CVDevelopmentItem {...item} />
+        ))}
+      </CVSection>
+
       <!-- SKILLS -->
       <CVSection id="skills" title="Skills" class="cv-skills-section">
         <CVSkills skills={skills} />
@@ -495,6 +545,80 @@ const lastUpdatedLabel = lastUpdated
     </aside>
 
   </div>
+
+
+<!-- =========================
+     DISCLOSURE BEHAVIOUR
+
+     One delegated listener for the whole page, rather than a
+     copy inside each component that renders a Details button.
+     Astro would bundle a component's script once per page
+     anyway, but two components carrying the same script is two
+     things to keep in step.
+========================= -->
+<script>
+  /* Astro bundles a component's script once per page, however
+     many times the component is used, so this is one delegated
+     listener rather than one per entry. */
+
+  const reduceMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+
+  /* An open panel is pinned to a pixel max-height so it can be
+     animated. Left pinned, it clips its own content the moment
+     the text reflows taller — a narrowed window, a late-loading
+     font — because the measurement was taken at click time and
+     never revisited. Releasing the cap once the opening
+     transition has finished lets the panel size itself from
+     then on. */
+  document.querySelectorAll("[data-panel]").forEach((panel) => {
+    panel.addEventListener("transitionend", (e) => {
+      if (e.propertyName !== "max-height") return;
+      if (panel.classList.contains("open")) panel.style.maxHeight = "none";
+    });
+  });
+
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-toggle]");
+    if (!btn) return;
+
+    const panel = document.querySelector(
+      `[data-panel="${btn.getAttribute("data-toggle")}"]`
+    );
+    if (!panel) return;
+
+    const isOpen = panel.classList.contains("open");
+
+    if (isOpen) {
+      panel.classList.remove("open");
+      btn.setAttribute("aria-expanded", "false");
+
+      if (reduceMotion) {
+        panel.style.maxHeight = "";
+        return;
+      }
+
+      /* max-height is "none" by now, and "none" cannot be
+         animated to zero. Pin the current height, then clear the
+         inline value on the next frame so the stylesheet's
+         max-height: 0 becomes the target of a real transition. */
+      panel.style.maxHeight = panel.scrollHeight + "px";
+      requestAnimationFrame(() => {
+        panel.style.maxHeight = "";
+      });
+    } else {
+      panel.classList.add("open");
+      btn.setAttribute("aria-expanded", "true");
+
+      /* with motion off there is no transitionend to wait for,
+         so release the cap immediately */
+      panel.style.maxHeight = reduceMotion
+        ? "none"
+        : panel.scrollHeight + "px";
+    }
+  });
+</script>
 
 </Layout>
 

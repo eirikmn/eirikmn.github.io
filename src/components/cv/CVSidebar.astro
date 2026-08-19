@@ -9,19 +9,40 @@
 ========================================================= */
 
 import SectionNav from "../SectionNav.astro";
+import presentations from "../../data/presentations.json";
 
+const hasPresentations =
+  (presentations.invited?.length ?? 0) +
+  (presentations.contributed?.length ?? 0) +
+  (presentations.posters?.length ?? 0) > 0;
+
+/* Order matches cv.astro, and has to: these are anchors into
+   the page, so a list in a different order would send a reader
+   backwards.
+
+   Supervision now precedes Teaching — supervising three PhD
+   candidates, main supervisor on one, is a stronger claim to
+   independence than course delivery and was the seventh thing
+   a reader reached. Software precedes Development for the same
+   reason: three maintained packages implementing your own
+   methods outranked two training certificates.
+
+   Presentations is only listed when presentations.json has
+   entries, since cv.astro drops the section entirely while it
+   is empty and a nav link to a missing anchor goes nowhere. */
 const sections = [
-  { label: "Summary",      id: "summary" },
-  { label: "Experience",   id: "work" },
-  { label: "Education",    id: "education" },
-  { label: "Publications", id: "publications" },
-  { label: "Funding",      id: "funding" },
-  { label: "Teaching",     id: "teaching" },
-  { label: "Supervision",  id: "supervision" },
-  { label: "Development",  id: "development" },
-  { label: "Software",     id: "software" },
-  { label: "Service",      id: "service" },
-  { label: "Skills",       id: "skills" }
+  { label: "Summary",       id: "summary" },
+  { label: "Experience",    id: "work" },
+  { label: "Education",     id: "education" },
+  { label: "Publications",  id: "publications" },
+  ...(hasPresentations ? [{ label: "Talks", id: "presentations" }] : []),
+  { label: "Funding",       id: "funding" },
+  { label: "Supervision",   id: "supervision" },
+  { label: "Teaching",      id: "teaching" },
+  { label: "Software",      id: "software" },
+  { label: "Service",       id: "service" },
+  { label: "Development",   id: "development" },
+  { label: "Skills",        id: "skills" }
 ];
 ---
 

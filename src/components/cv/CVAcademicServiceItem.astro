@@ -8,8 +8,31 @@ const {
   end,
   details,
   period,
-  count
+  count,
+  bullets
 } = Astro.props;
+
+/* Two ways to say more about an entry, and which one you use
+   decides how it is presented.
+
+   `details` is one short line — a gloss, always visible, the
+   way the session chair names its session. Folding a sentence
+   behind a click costs the reader more attention than the
+   sentence does.
+
+   `bullets` is a list, and gets a Details button. That is the
+   threshold: a disclosure earns its place when there is enough
+   behind it that showing it outright would push the next entry
+   off the screen. The presidency of a national organisation
+   plausibly clears that; a one-line note does not.
+
+   Entries with neither render no button at all, so the seven
+   governance rows stay as clean as they are now. */
+const id = [title, organization, period, start]
+  .filter(Boolean)
+  .join("-")
+  .replace(/\W+/g, "-")
+  .toLowerCase();
 
 /* `period` is a single stored value ("2022", "Spring 2024",
    "2025-03"); start/end is a range. formatDate and
@@ -47,6 +70,18 @@ const subtitle = organization ?? reviewCount;
         {title}
       </strong>
 
+      {bullets?.length > 0 && (
+        <button
+          class="toggle-btn"
+          data-toggle={id}
+          aria-expanded="false"
+          aria-controls={id}
+        >
+          <span class="toggle-label toggle-label--show">Details</span>
+          <span class="toggle-label toggle-label--hide">Hide</span>
+        </button>
+      )}
+
       {formattedTime && (
         <span class="cv-dates">
           {formattedTime}
@@ -71,6 +106,16 @@ const subtitle = organization ?? reviewCount;
     {details && (
       <div class="cv-details">
         {details}
+      </div>
+    )}
+
+    {bullets?.length > 0 && (
+      <div class="cv-collapse" id={id} data-panel={id}>
+        <ul class="cv-bullets">
+          {bullets.map((b) => (
+            <li>{b}</li>
+          ))}
+        </ul>
       </div>
     )}
 

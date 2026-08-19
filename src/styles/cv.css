@@ -135,6 +135,130 @@ html.dark .cv-logo-dark {
   font-size: 0.9rem;
 }
 
+
+/* ---------------------------------------------------------
+   DISCLOSURE: Details button + collapsible panel
+
+   Shared, because two entry types use it — the teaching
+   entries for their responsibilities, and the service entries
+   for anything long enough to be worth folding away. It lived
+   in CVTeachingItem's scoped block while that was the only
+   user; a second user meant either duplicating it or moving
+   it, and duplicated CSS drifts.
+
+   The behaviour lives once in cv.astro, as a delegated
+   listener on the page rather than a script per component.
+
+   The header alignment belongs here too: an entry whose
+   right-hand slot holds a button wants its row centred rather
+   than baseline-aligned, and that is now a property of having
+   a button, not of being a teaching entry.
+--------------------------------------------------------- */
+
+.cv-item-header:has(.toggle-btn) {
+  align-items: center;
+}
+
+/* =========================
+   BUTTON (IMPROVED CONTRAST)
+========================= */
+.toggle-btn {
+  font-size: 0.8rem;
+
+  /* The label alternates between "Details" and "Hide", which
+     are different widths. If the button were free to resize,
+     it would shift on every click, and a role title long
+     enough to wrap would re-flow against the new free space.
+
+     Both labels therefore share one grid cell: the button is
+     permanently as wide as the wider of the two, and only
+     visibility changes. flex: none keeps a long title from
+     squeezing it either. */
+  display: inline-grid;
+  text-align: center;
+  flex: none;
+
+  /* --border-ui rather than a hand-rolled color-mix. Against
+     the card's tinted fill this reaches 1.83:1 in light mode
+     and 4.92:1 in dark, and it is the same token the card
+     edge and the publication action buttons use — so it no
+     longer needs a separate dark-mode correction.
+
+     The page background rather than transparent, so the pill
+     lifts off the tint instead of dissolving into it. */
+  border: 1px solid var(--border-ui);
+  background: var(--bg);
+
+  padding: 3px 10px;
+  border-radius: 999px;
+
+  cursor: pointer;
+  color: var(--text);
+
+  transition: border-color 0.15s ease, color 0.15s ease,
+              background 0.15s ease;
+}
+
+/* stack, don't sit side by side */
+.toggle-label {
+  grid-area: 1 / 1;
+}
+
+/* visibility rather than display, so the hidden label still
+   contributes its width */
+.toggle-btn[aria-expanded="false"] .toggle-label--hide,
+.toggle-btn[aria-expanded="true"] .toggle-label--show {
+  visibility: hidden;
+}
+
+/* Mixed into var(--bg), not transparent: the pill has a
+   background of its own, so mixing into transparent would
+   let the card's tint show through and muddy the hover. */
+.toggle-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg));
+}
+
+.toggle-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+
+/* =========================
+   COLLAPSIBLE
+========================= */
+.cv-collapse {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+
+  /* visibility, not just opacity and a zero height. Clipped
+     content stays in the accessibility tree, so a screen
+     reader could read out responsibilities while the button's
+     aria-expanded="false" said there were none to read. The
+     0.25s delay holds it visible for the length of the closing
+     animation; opening flips it back with no delay, below. */
+  visibility: hidden;
+
+  transition: max-height 0.25s ease, opacity 0.2s ease,
+              visibility 0s linear 0.25s;
+}
+
+.cv-collapse.open {
+  opacity: 1;
+  visibility: visible;
+  transition: max-height 0.25s ease, opacity 0.2s ease,
+              visibility 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cv-collapse {
+    transition: none;
+  }
+}
+
 /* ---------------------------------------------------------
    BULLET LISTS
 

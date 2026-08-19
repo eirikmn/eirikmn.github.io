@@ -1,0 +1,73 @@
+{
+  "invited": [],
+  "contributed": [
+    {
+      "title": "Automating object detection and classification of foraminifera",
+      "organization": "NOBIM 2023, Tromsø, Norway",
+      "details": "Myrvoll-Nilsen, E., Sørensen, S. Aa., Galata, S., Johansen, T. H., Martinsen, I., Hald, M. and Godtliebsen, F.",
+      "period": "2023-06"
+    },
+    {
+      "title": "Synchronization of layer-counted archives using a statistical age-depth model",
+      "organization": "EGU General Assembly 2022, Vienna, Austria",
+      "details": "Myrvoll-Nilsen, E., Riechers, K. and Boers, N.",
+      "period": "2022-05"
+    },
+    {
+      "title": "Quantification of the dating uncertainties in Greenland ice core records",
+      "organization": "NORDSTAT 2021, Tromsø, Norway",
+      "details": "Myrvoll-Nilsen, E., Boers, N., Riechers, K. and Rypdal, M.",
+      "period": "2021-06"
+    },
+    {
+      "title": "Statistical modeling of dating uncertainties in Greenland ice core records",
+      "organization": "DYNAMO Seminar, UiT The Arctic University of Norway, Tromsø, Norway",
+      "details": "Myrvoll-Nilsen, E., Boers, N., Rypdal, M. and Riechers, K.",
+      "period": "2021-06"
+    },
+    {
+      "title": "A statistical model for dating uncertainties in Greenland ice core records",
+      "organization": "EGU General Assembly 2021, Vienna, Austria",
+      "details": "Myrvoll-Nilsen, E., Boers, N., Rypdal, M. and Riechers, K.",
+      "period": "2021-04"
+    },
+    {
+      "title": "Incorporating long-range dependency into Bayesian spatio-temporal modeling",
+      "organization": "Det 20. norske statistikermøtet, Sola, Norway",
+      "details": "Myrvoll-Nilsen, E. and Sørbye, S. H.",
+      "period": "2019-06"
+    },
+    {
+      "title": "A statistical model for global surface temperature response to radiative forcing with long-range dependent noise",
+      "organization": "EGU General Assembly 2019, Vienna, Austria",
+      "details": "Myrvoll-Nilsen, E., Rypdal, M., Fredriksen, H.-B. and Sørbye, S. H.",
+      "period": "2019-04"
+    },
+    {
+      "title": "Modeling global surface temperatures in terms of climate forcing and a long-memory stochastic process",
+      "organization": "NORDSTAT 2018, Tartu, Estonia",
+      "details": "Myrvoll-Nilsen, E., Sørbye, S. H., Rypdal, M., Fredriksen, H.-B. and Rue, H.",
+      "period": "2018-06"
+    },
+    {
+      "title": "Computationally efficient Bayesian approximation of fractional Gaussian noise",
+      "organization": "Det 19. norske statistikermøtet, Fredrikstad, Norway",
+      "details": "Myrvoll-Nilsen, E., Sørbye, S. H. and Rue, H.",
+      "period": "2017-06"
+    }
+  ],
+  "posters": [
+    {
+      "title": "Automating object detection and classification of foraminifera",
+      "organization": "VIDAYS 2023, Lillestrøm, Norway",
+      "details": "Myrvoll-Nilsen, E., Sørensen, S. Aa., Galata, S., Johansen, T. H., Martinsen, I., Hald, M. and Godtliebsen, F.",
+      "period": "2023-09"
+    },
+    {
+      "title": "Modeling global surface temperatures in terms of climate forcing and a long-memory stochastic process",
+      "organization": "BAYSM 2018, Warwick, UK",
+      "details": "Myrvoll-Nilsen, E., Sørbye, S. H., Rypdal, M., Fredriksen, H.-B. and Rue, H.",
+      "period": "2018-07"
+    }
+  ]
+}
