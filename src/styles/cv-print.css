@@ -150,6 +150,14 @@
      not follow it onto the page.
   --------------------------------------------------------- */
 
+  /* Shadows are a screen cue. Browsers mostly drop them when
+     printing anyway, but where backgrounds are enabled they
+     come out as grey smears around every card, so kill them
+     explicitly rather than relying on the browser. */
+  * {
+    box-shadow: none !important;
+  }
+
   .cv-collapse {
     max-height: none !important;
     opacity: 1 !important;

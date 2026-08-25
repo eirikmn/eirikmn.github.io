@@ -255,7 +255,9 @@ const linkify = (text) => {
     <div class="panel-title">Plots</div>
     <div class="demo-plots">
       {demo.plots.map((p) => (
-        <img src={p} alt="Demo plot" />
+        {/* inside a panel that starts closed, so it is never
+            needed on first paint */}
+        <img src={p} alt="Demo plot" loading="lazy" decoding="async" />
       ))}
     </div>
   </>
@@ -469,7 +471,7 @@ document.addEventListener("click", (e) => {
    to also redefine --text, --border-ui and --accent with
    values that differed from Layout.astro, which meant the
    Software page was quietly running a second colour scheme
-   (accent #2563eb rather than the site's #1da1f2). Removed
+   (a hard-coded blue rather than the site's --accent). Removed
    so the tokens resolve to the site palette. */
 
 :root {
@@ -507,7 +509,8 @@ html.dark {
   border: 1px solid var(--border);
   border-radius: 12px;
 
-  background: color-mix(in srgb, var(--bg) 92%, var(--accent));
+  background: var(--surface);
+  box-shadow: var(--shadow);
 
   display: flex;
   flex-direction: column;
@@ -1057,6 +1060,11 @@ html.dark {
 
   border-radius: 8px;
   border: 1px solid var(--border-ui);
+
+  /* the card beneath is white in light mode, so the plot needs
+     the same lift the research-page figures get or it reads as
+     part of the card rather than as a figure on it */
+  box-shadow: var(--shadow);
 
   object-fit: contain;
 }

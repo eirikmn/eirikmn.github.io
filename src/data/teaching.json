@@ -3,8 +3,7 @@
     "role": "Course coordinator and lecturer",
     "institution": "UiT The Arctic University of Norway",
     "location": "Tromsø, Norway",
-    "start": "2020-01",
-    "end": null,
+    "period": "Spring 2020, Spring 2026",
     "logo": {
       "light": "uit-black.svg",
       "dark": "uit-dark.svg",
@@ -28,9 +27,9 @@
       }
     ],
     "responsibilities": [
-      "Hold full course responsibility, including lectures and administration",
-      "Prepare and grade examinations",
-      "Develop exercises and teaching material"
+      "Held full course responsibility, including lectures and administration",
+      "Prepared and graded examinations",
+      "Developed exercises and teaching material"
     ]
   },
   {

@@ -438,6 +438,8 @@ const sections = content
                   <img
                     src={block.src}
                     alt={block.captionText ?? block.caption ?? ""}
+                    loading="lazy"
+                    decoding="async"
                   />
                   {block.caption && (
                     <figcaption set:html={block.caption} />
@@ -497,10 +499,11 @@ const sections = content
 }
 
 /* headings inside content */
-.subheading {
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
-}
+/* No margins of its own. A flat 1.5rem above every subheading
+   made an h2 and an h3 sit identically, and left research pages
+   spaced differently from every other page on the site. The
+   global scale distinguishes them — 48px above an h2, 32px above
+   an h3 — and is now the single source for heading rhythm. */
 
 /* equations */
 /* `overflow-x: auto` made every equation a scroll container.
@@ -557,6 +560,7 @@ const sections = content
      the white the plots were exported on, so a figure lifts
      off the page rather than dissolving into it. */
   background: #ffffff;
+  box-shadow: var(--shadow);
   padding: 0.5rem;
   box-sizing: border-box;
 }
@@ -635,9 +639,11 @@ html.dark .figure img {
 --------------------------------------------------------- */
 
 .text,
-.subheading,
-.research-card > h2,
-.research-card > h3 {
+/* `.research-card > h2` used to be listed here too. It could
+   never match: the headings sit inside .content, so they are
+   grandchildren of the card, not children. .subheading is the
+   class they actually carry and is doing all the work. */
+.subheading {
   max-width: 68ch;
 }
 

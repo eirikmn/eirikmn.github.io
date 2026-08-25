@@ -66,21 +66,29 @@ const subtitle = organization ?? reviewCount;
     <!-- HEADER -->
     <div class="cv-item-header">
 
-      <strong>
-        {title}
-      </strong>
+      {/* Title and button are ONE flex child. The header is
+          justify-content: space-between, so three children put
+          the button in the gap between the title and the date —
+          floating in dead space, attached to neither. Grouped,
+          the row is two parts again: identity left, date hard
+          right, where every other entry on the page has it. */}
+      <span class="cv-item-title">
+        <strong>
+          {title}
+        </strong>
 
-      {bullets?.length > 0 && (
-        <button
-          class="toggle-btn"
-          data-toggle={id}
-          aria-expanded="false"
-          aria-controls={id}
-        >
-          <span class="toggle-label toggle-label--show">Details</span>
-          <span class="toggle-label toggle-label--hide">Hide</span>
-        </button>
-      )}
+        {bullets?.length > 0 && (
+          <button
+            class="toggle-btn"
+            data-toggle={id}
+            aria-expanded="false"
+            aria-controls={id}
+          >
+            <span class="toggle-label toggle-label--show">Details</span>
+            <span class="toggle-label toggle-label--hide">Hide</span>
+          </button>
+        )}
+      </span>
 
       {formattedTime && (
         <span class="cv-dates">

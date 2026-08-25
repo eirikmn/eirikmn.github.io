@@ -329,8 +329,8 @@ const publicationsSchema = {
 
     navigator.clipboard?.writeText(text).then(
       () => say(`Copied BibTeX for ${n} publication${n === 1 ? "" : "s"}.`),
-      () => say("Copy failed — use the .bib download instead.")
-    ) ?? say("Copy failed — use the .bib download instead.");
+      () => say("Copy failed. Use the .bib download instead.")
+    ) ?? say("Copy failed. Use the .bib download instead.");
   });
 
   chips.forEach((chip) => {
@@ -547,6 +547,15 @@ const publicationsSchema = {
 /* quieter than a document heading: this is a divider in a
    list, not a section title, so no border and no top margin
    competing with the global h2 */
+/* The heading rules in Layout are global, so this is a year
+   label wearing an h2's clothes. It opts out of the border it
+   never wanted and, now, of the accent tick — a mark under each
+   of "2026", "2025", "2024" down the page would read as a dozen
+   section headings rather than one list broken into years. */
+.pub-year::after {
+  display: none;
+}
+
 .pub-year {
   font-size: 0.95rem;
   font-weight: 600;

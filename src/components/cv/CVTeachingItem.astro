@@ -18,19 +18,25 @@ const id = `${role}-${institution}`
 
     <!-- HEADER -->
     <div class="cv-item-header">
-      <strong>{role}</strong>
+      {/* grouped for the same reason as the service entries, so
+          a Details button sits immediately after the role in
+          both — it used to be flung to the far right here, since
+          there was no date to hold that edge */}
+      <span class="cv-item-title">
+        <strong>{role}</strong>
 
-      {responsibilities && (
-        <button
-          class="toggle-btn"
-          data-toggle={id}
-          aria-expanded="false"
-          aria-controls={id}
-        >
-          <span class="toggle-label toggle-label--show">Details</span>
-          <span class="toggle-label toggle-label--hide">Hide</span>
-        </button>
-      )}
+        {responsibilities && (
+          <button
+            class="toggle-btn"
+            data-toggle={id}
+            aria-expanded="false"
+            aria-controls={id}
+          >
+            <span class="toggle-label toggle-label--show">Details</span>
+            <span class="toggle-label toggle-label--hide">Hide</span>
+          </button>
+        )}
+      </span>
     </div>
 
     <!-- INSTITUTION -->
@@ -181,6 +187,9 @@ const id = `${role}-${institution}`
   color: var(--text-muted);
   font-size: 0.8rem;
   text-align: right;
+
+  /* same reason as .cv-dates: a right-aligned stack of years */
+  font-variant-numeric: tabular-nums;
 }
 
 /* The unbreakable unit is one term, not the whole list. On a

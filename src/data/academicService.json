@@ -3,6 +3,9 @@
     {
       "title": "Treasurer and Board Member",
       "organization": "The Norwegian Statistical Association",
+      "bullets": [
+        "Responsible for the association's finances and membership registry"
+      ],
       "start": "2023-06",
       "end": null,
       "url": "https://sites.google.com/site/statistiskforening/english"
@@ -12,11 +15,18 @@
       "organization": "Faculty Board (NT-Fak), UiT The Arctic University of Norway",
       "start": "2023-01",
       "end": "2023-12",
-      "url": "https://en.uit.no/enhet/ntfak?p_dimension_id=88131"
+      "url": "https://en.uit.no/enhet/ntfak?p_dimension_id=88131",
+      "details": "Deputy to the elected representative for temporary academic staff on the faculty's governing board."
     },
     {
       "title": "President",
       "organization": "Association of Doctoral Organizations in Norway",
+      "bullets": [
+        "Represented the organisation at conferences and seminars on Norwegian research policy, including summits attended by ministers, rectors and sector leadership",
+        "Wrote consultation responses to government on the organisation's behalf",
+        "Wrote funding applications to the Norwegian Ministry of Education and Research",
+        "Gave talks across the sector, including a seminar for doctoral candidates run by Forskerforbundet, the Norwegian Association of Researchers"
+      ],
       "start": "2018-05",
       "end": "2019-05",
       "url": "https://stipendiat.no"
@@ -24,6 +34,12 @@
     {
       "title": "Vice President",
       "organization": "Association of Doctoral Organizations in Norway",
+      "bullets": [
+        "Served as acting president from August to October 2017",
+        "Advised doctoral candidates at the University of Bergen during the founding of UiBDoc, their local organisation, which subsequently joined the association",
+        "Represented Norway at the Eurodoc annual general meeting, 2018",
+        "Contributed to consultation responses to government and to funding applications to the Norwegian Ministry of Education and Research"
+      ],
       "start": "2017-05",
       "end": "2018-05",
       "url": "https://stipendiat.no"
@@ -31,13 +47,19 @@
     {
       "title": "Vice President",
       "organization": "TODOS - Tromsø Doctoral Students (Now ArcticDoc)",
+      "bullets": [
+        "Organised academic and social events for doctoral candidates at UiT, and relayed information relevant to them"
+      ],
       "start": "2017-01",
       "end": "2018-06",
       "url": "https://site.uit.no/arcticdoc/about/"
     },
     {
       "title": "TODOS Representative",
-      "organization": "Strategisk Forskningsutvalg (SFU)",
+      "organization": "Strategisk Forskningsutvalg (Strategic Research Committee), UiT",
+      "bullets": [
+        "Represented doctoral candidates on UiT's strategic research committee"
+      ],
       "start": "2017-01",
       "end": "2018-06",
       "url": "https://uit.no/moteportalen/ikb/utvalg?p_document_id=787829"
@@ -45,12 +67,15 @@
     {
       "title": "Student Representative (IME Faculty)",
       "organization": "Student Parliament, Norwegian University of Science and Technology",
+      "bullets": [
+        "Elected as one of four representatives from the Faculty of Information Technology, Mathematics and Electrical Engineering",
+        "One of 25 representatives in NTNU's highest student governing body, representing some 22,000 students"
+      ],
       "start": "2015-01",
       "end": "2015-11",
       "url": "https://studenttinget.no"
     }
   ],
-
   "review": [
     {
       "title": "Earth System Dynamics",
@@ -64,7 +89,6 @@
       "period": "2022"
     }
   ],
-
   "professional": [
     {
       "title": "Invited panel discussant",
@@ -79,12 +103,11 @@
     },
     {
       "title": "Session chair",
-      "organization": "NORDSTAT 2021 — 28th Nordic Conference in Mathematical Statistics",
+      "organization": "NORDSTAT 2021: 28th Nordic Conference in Mathematical Statistics",
       "details": "Session C3: Applications, models and methods for high-dimensional and complex data.",
       "period": "2021-06"
     }
   ],
-
   "outreach": [
     {
       "title": "Activity facilitator",
@@ -95,6 +118,7 @@
     {
       "title": "Exhibition contributor",
       "organization": "Northern Norwegian Science Centre (Nordnorsk vitensenter)",
+      "details": "Contributed to an exhibition on artificial intelligence, including an interactive exhibit in which visitors are shown an object on screen and must find and hold a matching real-world object up to a camera for an image-classification model to recognise.",
       "start": "2024-01",
       "end": "2024-03"
     }

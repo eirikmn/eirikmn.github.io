@@ -43,10 +43,30 @@ const selected = FEATURED
     <!-- PROFILE HEADER -->
     <div class="profile-header">
 
-      <img src="/profile.jpg" alt="Eirik Myrvoll-Nilsen" />
+      {/* width/height are the INTRINSIC pixel dimensions, not the
+          display size — the CSS clamp still governs how big it is
+          drawn. Giving them lets the browser reserve the right
+          box before the file arrives, instead of reflowing the
+          whole hero when it lands. It is the largest image on the
+          site and it sits at the top of the first page. */}
+      <img
+        src="/profile.jpg"
+        alt="Eirik Myrvoll-Nilsen"
+        width="800"
+        height="1067"
+        fetchpriority="high"
+        decoding="async"
+      />
 
       <div class="intro">
-        <h1>Eirik Myrvoll-Nilsen</h1>
+        {/* Same treatment as the header wordmark: the given
+            name lighter, the surname carrying the weight. It is
+            the same object in both places, and a wordmark only
+            accumulates recognition by being repeated. Size and
+            tracking still differ by context, which is correct —
+            a 1.85rem heading and a 1.1rem mark want different
+            optical settings. */}
+        <h1><span class="given">Eirik</span> <span class="family">Myrvoll-Nilsen</span></h1>
 
         <p class="tagline">
           {profile.title} · {profile.affiliation.institution}
@@ -69,7 +89,7 @@ const selected = FEATURED
     <h2>Research</h2>
 
     <p>
-      The main directions I work in — each has a page with the methods,
+      The main directions I work in. Each has a page with the methods,
       figures and papers behind it.
     </p>
 
@@ -158,9 +178,27 @@ const selected = FEATURED
 
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid var(--border);
 
-  box-shadow: 0 6px 20px color-mix(in srgb, var(--text) 15%, transparent);
+  /* No ring. The 2px --border outline predates the shadow scale,
+     and with real elevation available a grey circle around a
+     circular photo is a second edge doing the first one's job.
+
+     Two layers: a close contact shadow that seats the photo on
+     the page, and a wide soft one that does the lifting. One
+     layer at a single blur reads as a smudge at this size. */
+  box-shadow:
+    0 2px 6px color-mix(in srgb, var(--text) 7%, transparent),
+    0 10px 24px color-mix(in srgb, var(--text) 16%, transparent);
+}
+
+/* In dark mode --text is near-white, so the same formula
+   produces a glow rather than a shadow — which is right, but it
+   wants different geometry. A glow radiates, so the offset goes
+   and the blur widens; a shadow falls, so it keeps both. */
+html.dark .profile-header img {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--text) 9%, transparent),
+    0 5px 34px color-mix(in srgb, var(--text) 20%, transparent);
 }
 
 .intro {
@@ -170,6 +208,17 @@ const selected = FEATURED
 .intro h1 {
   margin: 0 0 4px 0;
   font-size: 1.85rem;
+}
+
+.intro h1 .given {
+  font-weight: 400;
+}
+
+.intro h1 .family {
+  font-weight: 600;
+
+  /* the hyphen is a break opportunity; never split the surname */
+  white-space: nowrap;
 }
 
 /* affiliation line, directly under the name */
@@ -196,21 +245,25 @@ const selected = FEATURED
    publications and News read as distinct blocks rather than
    one continuous scroll.
 
-   Note this styles h2 locally. The h1/h2/h3 rules in
-   Layout.astro are scoped to Layout's own markup, which
-   contains no headings, so they never reach page content —
-   these headings would otherwise be browser defaults.
+   This used to restate the whole heading style, because the
+   h1/h2/h3 rules in Layout.astro were scoped to Layout's own
+   markup — which contains no headings — and so never reached
+   page content. They are wrapped in :global() now and do, so
+   only the local spacing survives here.
 ========================= */
 
 section > h2 {
-  font-size: 1.45rem;
-  line-height: 1.25;
-  letter-spacing: -0.01em;
+  /* Only the extra breathing room is local now. Size, weight,
+     tracking and the accent tick all come from the global
+     heading scale, which reaches page content since the rules
+     in Layout were wrapped in :global().
 
-  margin: 3.25rem 0 0.5rem;
-  padding-top: 2.25rem;
-
-  border-top: 1px solid var(--border);
+     The border-top is gone with them. It was a section
+     separator drawn above the heading, and the tick is a mark
+     drawn below it — one heading wearing two dividers, on a
+     page whose cards already carry a border and a shadow. The
+     larger top margin does the separating instead. */
+  margin-top: 4rem;
 }
 
 /* A section that ends on its "all …" link needs less air

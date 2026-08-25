@@ -192,7 +192,13 @@ const dated = [
      subsection — as splitting "outreach" into professional
      service and public engagement just did — would silently drop
      its dates out of the "last updated" scan. */
-  ...Object.values(academicService ?? {}).flat()
+  ...Object.values(academicService ?? {}).flat(),
+  /* and every bucket in presentations.json, for the same reason.
+     Talks carry a `period` in the same YYYY-MM form, so they are
+     eligible to date the page; leaving them out would mean a CV
+     whose newest visible entry is a talk still claimed the date
+     of something older. */
+  ...Object.values(presentations ?? {}).flat()
 ];
 
 const isoDates = dated

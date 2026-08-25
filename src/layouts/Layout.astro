@@ -142,7 +142,7 @@ const personSchema = {
   <meta property="og:image" content={imageURL} />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content={`${AUTHOR} — ${SITE_NAME}`} />
+  <meta property="og:image:alt" content={`${AUTHOR}, ${SITE_NAME}`} />
   <meta property="og:locale" content="en_GB" />
 
   <meta name="twitter:card" content="summary_large_image" />
@@ -161,6 +161,44 @@ const personSchema = {
   <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)" />
 
   <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+
+  <!-- =========================
+       THEME, APPLIED BEFORE FIRST PAINT
+
+       The toggle's own script sits at the end of the body, which
+       is too late: the browser paints the light palette first and
+       a dark-mode reader gets a white flash on every navigation.
+
+       This runs in <head>, synchronously, before anything is
+       drawn. It is deliberately the smallest thing that can
+       decide the question — read the stored preference, fall
+       back to the OS, set one class — and it must stay in step
+       with setTheme() at the end of this file: "dark" and
+       "light" are explicit choices, anything else (including a
+       missing key, which is how "system" is stored) defers to
+       the OS.
+
+       is:inline so Astro leaves it alone; a bundled module would
+       be deferred and we would be back to flashing. The
+       try/catch is for Safari's private mode, where reading
+       localStorage throws — better an unstyled theme than a
+       thrown error that stops the rest of the head.
+  ========================= -->
+  <script is:inline>
+    (function () {
+      try {
+        var stored = localStorage.getItem("theme");
+        var dark =
+          stored === "dark" ||
+          (stored !== "light" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+        if (dark) document.documentElement.classList.add("dark");
+      } catch (e) {
+        /* storage unavailable — fall through to the light default */
+      }
+    })();
+  </script>
 
   <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
 
@@ -202,6 +240,48 @@ const personSchema = {
       --border-ui: #b8b8b8;
 
       --accent: #1da1f2;
+
+      /* tells the browser to paint its own furniture — scroll
+         bars, the caret, form controls — to match. Without it a
+         dark page keeps light scrollbars. */
+      color-scheme: light;
+
+      /* ---------------------------------------------------
+         SURFACE AND ELEVATION
+
+         A card used to be color-mix(--bg 92%, --accent) in
+         both themes, and that one formula does opposite
+         things. On the dark page it lands LIGHTER than its
+         background — a surface catching light. On the light
+         page it lands DARKER — which the eye reads as a stain
+         or a recess rather than a panel. Same code, and it is
+         most of why the light theme looked flat beside the
+         dark one.
+
+         So the surface is a token, set per theme to whatever
+         lifts: white here, the accent tint below.
+
+         Depth then has to come from somewhere, and the two
+         themes cannot use the same cue. On near-black a
+         shadow is invisible, which is why the dark theme is
+         right to carry its depth in borders alone. On a light
+         page shadow is the native cue, and its absence is
+         what makes a border-only design read as a wireframe.
+         Hence a real shadow here and none in dark mode.
+
+         Warm, not grey: the page is #faf9f7, and neutral grey
+         shade over a warm ground reads as dirt. #3a3128 is a
+         warm dark, so the shadow reads as shade.
+      --------------------------------------------------- */
+      --surface: #ffffff;
+
+      --shadow:
+        0 1px 2px color-mix(in srgb, #3a3128 8%, transparent),
+        0 2px 10px color-mix(in srgb, #3a3128 6%, transparent);
+
+      --shadow-hover:
+        0 2px 4px color-mix(in srgb, #3a3128 9%, transparent),
+        0 8px 22px color-mix(in srgb, #3a3128 9%, transparent);
     }
 
     html.dark {
@@ -215,6 +295,19 @@ const personSchema = {
       --border-ui: #8a8a8a;
 
       --accent: #4da3ff;
+
+      color-scheme: dark;
+
+      /* The tint that was the card colour in both themes.
+         Here it is correct on its own terms: mixed into a
+         near-black page it comes out LIGHTER than the page,
+         so the card lifts without needing a shadow — which
+         is just as well, since a shadow on #111111 is
+         invisible. Depth stays in the borders. */
+      --surface: color-mix(in srgb, var(--bg) 92%, var(--accent));
+
+      --shadow: none;
+      --shadow-hover: none;
     }
 
     /* Secondary text: dates, affiliations, captions, nav.
@@ -228,6 +321,14 @@ const personSchema = {
        dark background. */
     :root {
       --text-muted: color-mix(in srgb, var(--text) 65%, var(--bg));
+    }
+
+    /* Dragging over text gave the browser's default blue, which
+       on a page with its own accent reads as a leak from outside
+       the design. 22% keeps the text underneath legible in both
+       themes rather than reversing it out. */
+    :global(::selection) {
+      background: color-mix(in srgb, var(--accent) 22%, transparent);
     }
 
     /* =========================
@@ -328,9 +429,33 @@ const personSchema = {
       padding: 0 24px;
     }
 
-    section {
-      margin-bottom: 64px;
-    }
+    /* A `section { margin-bottom: 64px }` rule used to sit here.
+       It was one of the dead ones, so its 64px had never been
+       tested against anything — and once the rules went global
+       it would have landed on far more than the homepage
+       wrapper it was written for: every .cv-section card (28px
+       apart today) and every .pub-year-group (32px). Both would
+       have jumped to 64. Removed rather than globalised; the
+       pages that want section spacing already set their own. */
+
+    /* :global() throughout the typographic rules below.
+
+       Astro scopes a bare `h2 { }` to `h2:where(.astro-xxxx)`
+       and only puts that class on elements in THIS component's
+       template — which holds a header, a main and a footer, and
+       no headings or paragraphs at all. Every one of these rules
+       was therefore matching nothing, and had been since they
+       were written. It went unnoticed because the intended
+       values sit very close to the browser defaults they were
+       silently falling back to: 1.45rem against a UA 1.5em for
+       h2, 2rem against 2em for h1. What did NOT survive the
+       fallback was everything with no default — the letter
+       spacing, the 48px heading margins, the h2 rule, and the
+       1.6 line height on body copy.
+
+       Verified with @astrojs/compiler: `h2 {}` emits
+       `h2:where(.astro-xxxx){}`, `:global(h2) {}` emits `h2{}`.
+    ========================= */
 
     /* =========================
        HEADINGS
@@ -346,7 +471,26 @@ const personSchema = {
        than floating between two paragraphs.
     ========================= */
 
-    h1 {
+    /* 600, explicitly, on all three heading levels.
+
+       Nothing set a heading weight, so they fell to the user
+       agent's `bold` — 700 — and the Google Fonts request above
+       loads 400, 500 and 600 only. The browser was therefore
+       SYNTHESISING every heading on the site: smearing the 400
+       face rather than drawing a real cut. Faux bold is muddier
+       at large sizes, which is exactly where the headings live.
+
+       600 rather than adding 700 to the request: it is already
+       loaded, so this costs no extra download, and it is the
+       weight the wordmark in the header uses — so headings and
+       the site's own name are now cut from the same cloth. */
+    :global(h1),
+    :global(h2),
+    :global(h3) {
+      font-weight: 600;
+    }
+
+    :global(h1) {
       font-size: 2rem;
       line-height: 1.2;
       letter-spacing: -0.02em;
@@ -354,19 +498,40 @@ const personSchema = {
       margin-bottom: 16px;
     }
 
-    h2 {
+    :global(h2) {
       font-size: 1.45rem;
       line-height: 1.25;
       letter-spacing: -0.01em;
 
       margin-top: 48px;
       margin-bottom: 16px;
-
-      padding-bottom: 6px;
-      border-bottom: 1px solid var(--border);
     }
 
-    h3 {
+    /* A short tick rather than a full-width rule.
+
+       The rule was the third kind of horizontal line on a page
+       that now also has bordered cards and shadows under them,
+       and full-width rules chop the column into slabs. A 2.5rem
+       mark separates just as well without banding.
+
+       The colour is the one already used for the summary bullets
+       and the label before a cite-panel note, so this reads as
+       the same quiet-marker idiom rather than a fourth thing. It
+       also gives light mode a little accent presence, which it
+       otherwise only gets from links. */
+    :global(h2::after) {
+      content: "";
+      display: block;
+
+      width: 2.5rem;
+      height: 2px;
+      margin-top: 8px;
+
+      border-radius: 1px;
+      background: color-mix(in srgb, var(--accent) 60%, var(--border-ui));
+    }
+
+    :global(h3) {
       font-size: 1.15rem;
       line-height: 1.3;
 
@@ -375,17 +540,17 @@ const personSchema = {
     }
 
     /* no leading gap when a heading opens a section */
-    h2:first-child,
-    h3:first-child {
+    :global(h2:first-child),
+    :global(h3:first-child) {
       margin-top: 0;
     }
 
-    p {
+    :global(p) {
       line-height: 1.6;
       margin-bottom: 14px;
     }
 
-    ul {
+    :global(ul) {
       line-height: 1.6;
       padding-left: 20px;
       margin-bottom: 14px;
@@ -470,6 +635,17 @@ const personSchema = {
       border-bottom: 1px solid var(--border);
 
       backdrop-filter: blur(8px);
+
+      /* Elevation once the page has moved under it. At rest the
+         header is part of the page and the border is enough; the
+         moment content slides beneath it, it is floating, and a
+         border alone does not say so on a light background. The
+         shadow token is `none` in dark mode, so this is a
+         light-mode cue only — which is correct, because on a
+         near-black page the blur and the border already read as
+         a layer. */
+      box-shadow: none;
+      transition: box-shadow 0.2s ease;
       background: color-mix(in srgb, var(--bg) 92%, transparent);
       position: sticky;
       top: 0;
@@ -491,6 +667,10 @@ const personSchema = {
        font-variation-settings declaration that used to sit on
        this rule did nothing whatsoever.
     ========================= */
+    header[data-scrolled="true"] {
+      box-shadow: var(--shadow);
+    }
+
     .left {
       font-size: 1.1rem;
       letter-spacing: -0.02em;
@@ -554,19 +734,52 @@ const personSchema = {
       align-items: center;
       justify-content: center;
 
-      border-radius: 6px;
+      /* was 6px — the only 6px radius on a site whose other
+         controls are 999px pills and whose cards are 12px */
+      border-radius: 999px;
 
       border: 1px solid var(--border-ui);
       background: transparent;
       color: var(--text);
 
       cursor: pointer;
-      transition: background 0.2s ease, border-color 0.2s ease;
+      transition: background 0.2s ease, border-color 0.2s ease,
+                  color 0.2s ease;
     }
 
+    /* the same wash every other control on the site uses, rather
+       than filling with --border, which is a layout token and
+       came out heavier than the pill buttons beside it */
     .toggle:hover {
-      background: var(--border);
       border-color: var(--accent);
+      color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 10%, transparent);
+    }
+
+    .toggle-icon {
+      width: 17px;
+      height: 17px;
+      display: block;
+    }
+
+    /* Three states now, so the icon shows the CURRENT mode
+       rather than the destination. With two states "click me to
+       get a moon" was readable; with three, an icon promising the
+       next state in a cycle of three is a puzzle. The accessible
+       name carries the destination instead, where it can say it
+       in words.
+
+       Driven by a data attribute the script sets rather than the
+       theme class on <html>: both halves of the selector are then
+       inside this component, which is what Astro's scoping sees. */
+    .toggle .toggle-icon {
+      display: none;
+    }
+
+    .toggle[data-mode="system"] .icon-system,
+    .toggle[data-mode="light"] .icon-sun,
+    .toggle[data-mode="dark"] .icon-moon {
+      display: block;
     }
 
     /* =========================
@@ -668,8 +881,47 @@ const personSchema = {
         <a href="/contact">Contact</a>
       </nav>
 
-      <button class="toggle" id="themeToggle" aria-label="Toggle theme">
-        🌙
+      {/* Inline SVG rather than an emoji. 🌙 / ☀️ rendered as
+          whichever glyph the reader's platform ships — a different
+          shape and a different palette on Apple, Android and
+          Windows — and being full-colour it was the only saturated
+          non-accent thing in the header. Painted with currentColor
+          it takes the button's own colour instead, which means it
+          follows the theme and picks up the accent on hover, the
+          same mechanism ProfileIcons uses for its masked icons. */}
+      <button
+        class="toggle"
+        id="themeToggle"
+        data-mode="system"
+        aria-label="Theme: system. Switch to light."
+      >
+        <svg class="toggle-icon icon-system" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="2.6" y="4" width="18.8" height="12.4" rx="2"
+                fill="none" stroke="currentColor" stroke-width="1.9" />
+          <line x1="8.6" y1="20" x2="15.4" y2="20"
+                stroke="currentColor" stroke-width="1.9" stroke-linecap="round" />
+          <line x1="12" y1="16.4" x2="12" y2="20"
+                stroke="currentColor" stroke-width="1.9" />
+        </svg>
+        <svg class="toggle-icon icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            fill="currentColor"
+            d="M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a7 7 0 0 0 10.7 10.7z"
+          />
+        </svg>
+        <svg class="toggle-icon icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.2" fill="currentColor" />
+          <g stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+            <line x1="12" y1="2.4" x2="12" y2="4.9" />
+            <line x1="12" y1="19.1" x2="12" y2="21.6" />
+            <line x1="2.4" y1="12" x2="4.9" y2="12" />
+            <line x1="19.1" y1="12" x2="21.6" y2="12" />
+            <line x1="5.3" y1="5.3" x2="7.1" y2="7.1" />
+            <line x1="16.9" y1="16.9" x2="18.7" y2="18.7" />
+            <line x1="5.3" y1="18.7" x2="7.1" y2="16.9" />
+            <line x1="16.9" y1="7.1" x2="18.7" y2="5.3" />
+          </g>
+        </svg>
       </button>
     </div>
   </header>
@@ -689,31 +941,83 @@ const personSchema = {
     const root = document.documentElement;
     const btn = document.getElementById("themeToggle");
 
-    function updateIcon() {
-      btn.textContent = root.classList.contains("dark") ? "☀️" : "🌙";
+    /* Three modes, cycled in this order. "system" is first
+       because it is the default: a visitor who has never touched
+       the button is following their OS, and the button should say
+       so rather than claiming a choice they never made. */
+    const ORDER = ["system", "light", "dark"];
+
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+
+    let mode = localStorage.getItem("theme");
+    if (!ORDER.includes(mode)) mode = "system";
+
+    function nextOf(current) {
+      return ORDER[(ORDER.indexOf(current) + 1) % ORDER.length];
     }
 
-    function setTheme(mode) {
-      root.classList.toggle("dark", mode === "dark");
-      localStorage.setItem("theme", mode);
-      updateIcon();
+    function apply() {
+      const dark = mode === "dark" || (mode === "system" && media.matches);
+      root.classList.toggle("dark", dark);
+
+      /* CSS picks the icon off data-mode; the label has to move
+         with it, or a screen reader announces the wrong
+         destination. It names the current mode as well as the
+         next, since the icon alone cannot say which of three. */
+      btn.dataset.mode = mode;
+      btn.setAttribute(
+        "aria-label",
+        `Theme: ${mode}. Switch to ${nextOf(mode)}.`
+      );
     }
 
-    const saved = localStorage.getItem("theme");
+    function setTheme(next) {
+      mode = next;
 
-    if (saved) {
-      setTheme(saved);
-    } else {
-      const systemDark =
-        window.matchMedia("(prefers-color-scheme: dark)").matches;
+      /* "system" is the absence of a preference, so it is stored
+         as the absence of a key. A reader who cycles back to it
+         is returned to the default rather than pinned to whatever
+         their OS happened to be at the time. */
+      if (mode === "system") localStorage.removeItem("theme");
+      else localStorage.setItem("theme", mode);
 
-      setTheme(systemDark ? "dark" : "light");
+      apply();
     }
 
-    btn.addEventListener("click", () => {
-      const isDark = root.classList.contains("dark");
-      setTheme(isDark ? "light" : "dark");
+    /* follow the OS live while in system mode — someone on a
+       sunset schedule should not have to reload */
+    media.addEventListener("change", () => {
+      if (mode === "system") apply();
     });
+
+    btn.addEventListener("click", () => setTheme(nextOf(mode)));
+
+    apply();
+
+    /* ---------------------------------------------------------
+       HEADER ELEVATION
+
+       An observer on a zero-height sentinel at the very top of
+       the document, rather than a scroll listener: the browser
+       tells us when the top of the page leaves the viewport, so
+       there is no handler running on every frame of every
+       scroll. Cheap enough to leave on.
+    --------------------------------------------------------- */
+    const header = document.querySelector("header");
+
+    if (header && "IntersectionObserver" in window) {
+      const sentinel = document.createElement("div");
+      sentinel.setAttribute("aria-hidden", "true");
+      sentinel.style.cssText = "position:absolute;top:0;height:1px;width:1px;";
+      document.body.prepend(sentinel);
+
+      new IntersectionObserver(
+        ([entry]) => {
+          header.dataset.scrolled = String(!entry.isIntersecting);
+        },
+        { threshold: 0 }
+      ).observe(sentinel);
+    }
   </script>
 
 </body>

@@ -138,6 +138,13 @@ const pages = [
   line-height: 1.5;
 }
 
+/* The heading rules in Layout reach here, which is why this
+   opts out of them. Same reason the tick is suppressed below:
+   these are column labels, not section headings. */
+.footer-heading::after {
+  display: none;
+}
+
 .footer-heading {
   margin: 0 0 0.5rem;
   padding: 0;

@@ -121,6 +121,13 @@ html.dark .cv-logo-dark {
   color: var(--text-muted);
   font-size: 0.9rem;
   white-space: nowrap;
+
+  /* Dates sit in a right-aligned column, one under another, so
+     the digits should share a width — proportional figures make
+     "2016" and "2011" different lengths and the column reads as
+     ragged. Inter carries a tabular set; this asks for it. The
+     research tables and the publications page already do. */
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---------------------------------------------------------
@@ -157,6 +164,20 @@ html.dark .cv-logo-dark {
 
 .cv-item-header:has(.toggle-btn) {
   align-items: center;
+}
+
+/* The left half of an entry header: the title, plus a Details
+   button where the entry has one. One flex child, so the header
+   stays the two-part row it was designed as — identity left,
+   date hard right — however many things live on the left. */
+.cv-item-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  /* a long role must still be able to wrap rather than shove
+     the date off the row */
+  min-width: 0;
 }
 
 /* =========================
