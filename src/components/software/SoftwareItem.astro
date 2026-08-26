@@ -249,14 +249,19 @@ const linkify = (text) => {
     )}
 
 
-{/* ADD THIS */}
+{/* The plots sit inside a panel that starts closed, so they are
+    never needed on first paint — hence lazy.
+
+    The comment has to live out here, above the expression. Put a
+    {/* ... *\/} inside the parentheses of the arrow function below
+    and it is no longer a comment in a JSX child position but a
+    second expression after one that has already been returned;
+    Astro emits it verbatim and esbuild fails to parse the output. */}
 {demo?.plots?.length > 0 && (
   <>
     <div class="panel-title">Plots</div>
     <div class="demo-plots">
       {demo.plots.map((p) => (
-        {/* inside a panel that starts closed, so it is never
-            needed on first paint */}
         <img src={p} alt="Demo plot" loading="lazy" decoding="async" />
       ))}
     </div>
