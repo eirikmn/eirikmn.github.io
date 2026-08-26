@@ -9,7 +9,15 @@
    pages (research_OLD, math, 404) stay out of the index —
    an automatic crawl would happily submit all of them.
    Add new pages here.
+
+   The one exception is the per-publication pages: those are
+   generated from papers.bib, so listing them by hand would
+   mean a new paper silently missing from the sitemap. They
+   are read from the same file the pages themselves are built
+   from, which is the only way the two cannot drift.
 ========================================================= */
+
+import { loadBib } from "../lib/bib.js";
 
 const PAGES = [
   { path: "/",                       changefreq: "monthly", priority: "1.0" },
@@ -27,7 +35,17 @@ export async function GET({ site }) {
   const base = site ?? new URL("https://eirikmyrvollnilsen.com");
   const lastmod = new Date().toISOString().slice(0, 10);
 
-  const urls = PAGES.map(
+  /* Newest first, matching the listing page. Priority sits just
+     under /publications itself: these are the leaves. */
+  const papers = loadBib("./src/data/papers.bib")
+    .sort((a, b) => Number(b.year) - Number(a.year))
+    .map((p) => ({
+      path: `/publications/${p.key}`,
+      changefreq: "yearly",
+      priority: "0.7"
+    }));
+
+  const urls = [...PAGES, ...papers].map(
     ({ path, changefreq, priority }) => `  <url>
     <loc>${new URL(path, base).href}</loc>
     <lastmod>${lastmod}</lastmod>

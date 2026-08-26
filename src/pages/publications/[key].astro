@@ -1,0 +1,305 @@
+---
+/* =========================================================
+   ONE PAGE PER PUBLICATION
+
+   Why this exists: Google Scholar indexes an article from
+   citation_title / citation_author / citation_doi meta tags,
+   and those describe ONE article. The /publications listing
+   carries fifteen, which is not a supported arrangement — it
+   is why that page emits an ItemList of ScholarlyArticle
+   instead and gets no Scholar coverage from it.
+
+   Generated from papers.bib at build time, so there is
+   nothing to keep in sync: adding an entry to the .bib adds
+   a page, a sitemap row and a link from the listing.
+
+   The slug is the BibTeX key, which is already stable,
+   already unique, and already what the citation markers
+   elsewhere on the site use.
+========================================================= */
+
+import Layout from "../../layouts/Layout.astro";
+import { loadBib } from "../../lib/bib";
+import { withMath, stripMath } from "../../lib/math.js";
+
+export async function getStaticPaths() {
+  return loadBib("./src/data/papers.bib").map((paper) => ({
+    params: { key: paper.key },
+    props: { paper }
+  }));
+}
+
+const { paper } = Astro.props;
+
+const SITE = "https://eirikmyrvollnilsen.com";
+const canonical = `${SITE}/publications/${paper.key}`;
+
+/* BibTeX gives "Surname, Given and Surname, Given". Scholar wants
+   one citation_author per person and prefers the "Surname, Given"
+   form, so the split is all that is needed. "and others" is the
+   et-al marker, not a person. */
+const authorList = (paper.authors ?? "")
+  .split(/\s+and\s+/i)
+  .map((a) => a.trim())
+  .filter((a) => a && a.toLowerCase() !== "others");
+
+const myNames = ["Myrvoll-Nilsen, Eirik", "Eirik Myrvoll-Nilsen"];
+
+let formattedAuthors = paper.authors ?? "";
+myNames.forEach((name) => {
+  formattedAuthors = formattedAuthors.replace(name, `<strong>${name}</strong>`);
+});
+
+/* "123--145" or "123-145" or a single article number. Scholar reads
+   firstpage and lastpage separately; a lone number is the first page
+   and there is no last. */
+const pageParts = String(paper.pages ?? "")
+  .split(/--|–|-/)
+  .map((x) => x.trim())
+  .filter(Boolean);
+
+const venue = paper.journal || paper.school || null;
+const isThesis = /thesis/i.test(paper.entryType ?? "");
+
+const pdfURL = paper.pdf ? new URL(paper.pdf, SITE).href : null;
+const doiURL = paper.doi
+  ? (paper.doi.startsWith("http") ? paper.doi : `https://doi.org/${paper.doi}`)
+  : null;
+const doiBare = paper.doi
+  ? paper.doi.replace(/^https?:\/\/(dx\.)?doi\.org\//, "").replace(/^doi:/i, "")
+  : null;
+
+/* The meta description is read by people in a search result, so it
+   gets the opening of the abstract rather than a template sentence. */
+const plainAbstract = stripMath(paper.abstract ?? "");
+const description = plainAbstract
+  ? plainAbstract.slice(0, 155).replace(/\s+\S*$/, "") + (plainAbstract.length > 155 ? "…" : "")
+  : `${paper.title}${venue ? ` — ${venue}` : ""}, ${paper.year}.`;
+
+const THEME_LABELS = {
+  longmemory: "Long-range dependence",
+  agemodeling: "Age-depth modelling",
+  earlywarning: "Early warning signals"
+};
+
+const themes = (paper.themes ?? [])
+  .filter((t) => THEME_LABELS[t])
+  .map((t) => ({ id: t, label: THEME_LABELS[t] }));
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": isThesis ? "Thesis" : "ScholarlyArticle",
+  headline: stripMath(paper.title ?? ""),
+  name: stripMath(paper.title ?? ""),
+  author: authorList.map((a) => {
+    const [family, given] = a.includes(",") ? a.split(",") : [a, ""];
+    return {
+      "@type": "Person",
+      familyName: family.trim(),
+      givenName: given.trim() || undefined,
+      name: given.trim() ? `${given.trim()} ${family.trim()}` : family.trim()
+    };
+  }),
+  datePublished: paper.year ? String(paper.year) : undefined,
+  isPartOf: venue && !isThesis ? { "@type": "Periodical", name: venue } : undefined,
+  publisher: paper.publisher ? { "@type": "Organization", name: paper.publisher } : undefined,
+  identifier: doiBare ? `https://doi.org/${doiBare}` : undefined,
+  sameAs: doiURL ?? undefined,
+  url: canonical,
+  abstract: plainAbstract || undefined
+};
+---
+
+<Layout title={stripMath(paper.title)} description={description}>
+
+  <Fragment slot="head">
+    <meta name="citation_title" content={stripMath(paper.title ?? "")} />
+    {authorList.map((a) => <meta name="citation_author" content={a} />)}
+    {paper.year && <meta name="citation_publication_date" content={String(paper.year)} />}
+    {venue && !isThesis && <meta name="citation_journal_title" content={venue} />}
+    {isThesis && venue && <meta name="citation_dissertation_institution" content={venue} />}
+    {paper.publisher && <meta name="citation_publisher" content={paper.publisher} />}
+    {paper.volume && <meta name="citation_volume" content={String(paper.volume)} />}
+    {paper.number && <meta name="citation_issue" content={String(paper.number)} />}
+    {pageParts[0] && <meta name="citation_firstpage" content={pageParts[0]} />}
+    {pageParts[1] && <meta name="citation_lastpage" content={pageParts[1]} />}
+    {doiBare && <meta name="citation_doi" content={doiBare} />}
+    {pdfURL && <meta name="citation_pdf_url" content={pdfURL} />}
+    <meta name="citation_abstract_html_url" content={canonical} />
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </Fragment>
+
+  <a class="back" href="/publications">&larr; All publications</a>
+
+  <article class="paper">
+
+    <h1 set:html={withMath(paper.title)}></h1>
+
+    <p class="authors" set:html={formattedAuthors}></p>
+
+    <p class="venue">
+      {venue && <span class="venue-name">{venue}</span>}
+      {paper.volume && <span>, {paper.volume}</span>}
+      {paper.number && <span>({paper.number})</span>}
+      {paper.pages && <span>, {paper.pages}</span>}
+      {paper.year && <span class="year">, {paper.year}</span>}
+    </p>
+
+    <div class="actions">
+      {doiURL && (
+        <a class="action-btn" href={doiURL} target="_blank" rel="noopener noreferrer">
+          DOI
+        </a>
+      )}
+      {paper.pdf && (
+        <a class="action-btn" href={paper.pdf}>PDF</a>
+      )}
+      {paper.url && !doiURL && (
+        <a class="action-btn" href={paper.url} target="_blank" rel="noopener noreferrer">
+          Publisher
+        </a>
+      )}
+      <button class="action-btn" id="copy-bib" type="button">Copy BibTeX</button>
+    </div>
+
+    {themes.length > 0 && (
+      <p class="themes">
+        Part of my work on{" "}
+        {themes.map((t, i) => (
+          <>
+            {i > 0 && (i === themes.length - 1 ? " and " : ", ")}
+            <a href={`/research/${t.id}`}>{t.label}</a>
+          </>
+        ))}.
+      </p>
+    )}
+
+    {paper.abstract && (
+      <section class="abstract">
+        <h2>Abstract</h2>
+        <p set:html={withMath(paper.abstract)}></p>
+      </section>
+    )}
+
+    <section class="bibtex">
+      <h2>BibTeX</h2>
+      <pre id="bib-source">{paper.bibtex}</pre>
+    </section>
+
+    <p class="status" id="copy-status" role="status" aria-live="polite"></p>
+
+  </article>
+
+</Layout>
+
+<script>
+  const btn = document.getElementById("copy-bib");
+  const src = document.getElementById("bib-source");
+  const status = document.getElementById("copy-status");
+
+  btn?.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(src.textContent);
+      status.textContent = "BibTeX copied to the clipboard.";
+    } catch {
+      status.textContent = "Could not copy — select the text below instead.";
+    }
+  });
+</script>
+
+<style>
+  .back {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+
+  .back:hover {
+    color: var(--accent);
+  }
+
+  .paper {
+    max-width: 70ch;
+  }
+
+  .paper h1 {
+    font-size: 1.65rem;
+    line-height: 1.25;
+    margin-bottom: 0.6rem;
+  }
+
+  .authors {
+    font-size: 0.98rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .venue {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-bottom: 1.1rem;
+  }
+
+  .venue-name {
+    font-style: italic;
+  }
+
+  .actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 1.2rem;
+  }
+
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border-ui);
+    background: transparent;
+    color: var(--text);
+    font-size: 0.85rem;
+    font-family: inherit;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .action-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .themes {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  .abstract h2,
+  .bibtex h2 {
+    font-size: 1.05rem;
+    margin-top: 2rem;
+  }
+
+  .abstract p {
+    font-size: 0.95rem;
+  }
+
+  pre {
+    overflow-x: auto;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    white-space: pre;
+  }
+
+  .status {
+    font-size: 0.85rem;
+    color: var(--accent);
+    min-height: 1.2em;
+  }
+</style>

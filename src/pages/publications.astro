@@ -208,6 +208,7 @@ const publicationsSchema = {
 
           {byYear.get(year).map((paper) => (
             <Publication
+              key={paper.key}
               title={paper.title}
               themes={paper.themes}
               bibtex={paper.bibtex}

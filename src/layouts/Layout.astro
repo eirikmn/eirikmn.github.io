@@ -18,7 +18,7 @@ import education from "../data/education.json";
 const {
   title = "Eirik Myrvoll-Nilsen",
   description = "Eirik Myrvoll-Nilsen is a postdoctoral research fellow at UiT The Arctic University of Norway, working on Bayesian statistics for climate: long-range dependence, age-depth modeling and early warning signals.",
-  image = "/og-image.png",
+  image = "/og-image.jpg",
   standaloneTitle = false,
   noindex = false
 } = Astro.props;
@@ -143,6 +143,7 @@ const personSchema = {
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content={`${AUTHOR}, ${SITE_NAME}`} />
+  <meta property="og:image:type" content="image/jpeg" />
   <meta property="og:locale" content="en_GB" />
 
   <meta name="twitter:card" content="summary_large_image" />
@@ -156,6 +157,11 @@ const personSchema = {
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
   <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+
+  {/* Names the site and points at icon-192/icon-512 when someone
+      adds it to a phone home screen. Without it those two files
+      were in public/ referenced by nothing. */}
+  <link rel="manifest" href="/site.webmanifest" />
 
   <meta name="theme-color" content="#faf9f7" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)" />
@@ -861,6 +867,11 @@ const personSchema = {
   :global(.cv-section) { scroll-margin-top: 90px; }
   }
   </style>
+
+  {/* Per-page head content. The publication detail pages use this
+      for Google Scholar's citation_* meta tags, which describe ONE
+      article and therefore cannot live in a shared layout. */}
+  <slot name="head" />
 </head>
 
 <body>
@@ -941,19 +952,42 @@ const personSchema = {
     const root = document.documentElement;
     const btn = document.getElementById("themeToggle");
 
-    /* Three modes, cycled in this order. "system" is first
-       because it is the default: a visitor who has never touched
-       the button is following their OS, and the button should say
-       so rather than claiming a choice they never made. */
-    const ORDER = ["system", "light", "dark"];
+    /* Three modes. "system" is the default: a visitor who has
+       never touched the button is following their OS, and the
+       button should say so rather than claiming a choice they
+       never made. */
+    const MODES = ["system", "light", "dark"];
 
     const media = window.matchMedia("(prefers-color-scheme: dark)");
 
     let mode = localStorage.getItem("theme");
-    if (!ORDER.includes(mode)) mode = "system";
+    if (!MODES.includes(mode)) mode = "system";
 
+    /* Deliberately not a fixed cycle. Advancing system -> light ->
+       dark looks orderly written down, but on a machine set to
+       light the first press moves system -> light and NOTHING ON
+       SCREEN CHANGES: the mode is now explicit and the icon has
+       swapped, but the page is identical. A control whose first
+       press appears to do nothing is worse than no control.
+
+       So the cycle is defined relative to the OS instead. `opp` is
+       the explicit mode that differs from what the OS is asking
+       for, `same` is the one that matches it, and the order is
+       system -> opp -> same -> system. Leaving system therefore
+       always repaints the page, and so does the step after it.
+
+       Only the last step, back to system, cannot change the
+       picture — system and `same` render identically by
+       definition. That is the right one to be invisible: it is
+       the "stop overriding my OS" step, the icon says so, and
+       from then on the page follows the OS again. */
     function nextOf(current) {
-      return ORDER[(ORDER.indexOf(current) + 1) % ORDER.length];
+      const opp = media.matches ? "light" : "dark";
+      const same = media.matches ? "dark" : "light";
+
+      if (current === "system") return opp;
+      if (current === opp) return same;
+      return "system";
     }
 
     function apply() {

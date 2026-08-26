@@ -18,6 +18,20 @@ const {
 
 const idBase = name.replace(/\s+/g, "-").toLowerCase();
 
+/* Plots may be written in software.json either as a bare path or as
+   {src, alt}. Every plot on the site now carries its own alt text —
+   they all used to share alt="Demo plot", which tells a screen-reader
+   user which package they are on and nothing whatever about the
+   picture, and reads identically three times over.
+
+   The string form still works, so adding a plot without alt text
+   degrades to a generic label rather than breaking the page. */
+const demoPlots = (demo?.plots ?? []).map((plot) =>
+  typeof plot === "string"
+    ? { src: plot, alt: `${name} example output` }
+    : plot
+);
+
 const panels = {
   details: `${idBase}-details`,
   install: `${idBase}-install`,
@@ -257,12 +271,12 @@ const linkify = (text) => {
     and it is no longer a comment in a JSX child position but a
     second expression after one that has already been returned;
     Astro emits it verbatim and esbuild fails to parse the output. */}
-{demo?.plots?.length > 0 && (
+{demoPlots.length > 0 && (
   <>
     <div class="panel-title">Plots</div>
     <div class="demo-plots">
-      {demo.plots.map((p) => (
-        <img src={p} alt="Demo plot" loading="lazy" decoding="async" />
+      {demoPlots.map((plot) => (
+        <img src={plot.src} alt={plot.alt} loading="lazy" decoding="async" />
       ))}
     </div>
   </>

@@ -28,6 +28,12 @@ export function loadBib(path) {
       year: fields.year,
       journal: t(fields.journal || fields.booktitle),
 
+      /* Thesis entries carry `school` rather than `journal`.
+         publications.astro has always read `paper.school`; until
+         now nothing put it here, so it was silently undefined. */
+      school: t(fields.school),
+      publisher: t(fields.publisher),
+
       doi: fields.doi,
       url: fields.url,
       pdf: fields.pdf,

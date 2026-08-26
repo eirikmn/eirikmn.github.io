@@ -76,7 +76,10 @@
         "Marginal log-Likelihood: -664.50"
       ],
       "plots": [
-        "/plots/inla.ews_demo.png"
+        {
+          "src": "/plots/inla.ews_demo.png",
+          "alt": "Lag-one correlation phi estimated through time, climbing steadily from about 0.3 to 0.65 over 500 steps inside a red 95% credible band: the signature of a system losing resilience."
+        }
       ]
     },
     "cite": {
@@ -226,7 +229,10 @@
         "0.1959799, 0.3969849, 0.798995."
       ],
       "plots": [
-        "/plots/bremla_demo.png"
+        {
+          "src": "/plots/bremla_demo.png",
+          "alt": "Age offset from the original time scale plotted against depth. A black posterior mean sits inside a wide red credible band that pinches shut at three magenta tie-points and widens to roughly plus or minus 100 years at the bottom of the core."
+        }
       ]
     },
     "cite": {
@@ -327,7 +333,10 @@
         "Posterior marginals for linear predictor and fitted values computed"
       ],
       "plots": [
-        "/plots/INLA.climate_demo.png"
+        {
+          "src": "/plots/INLA.climate_demo.png",
+          "alt": "Fitted temperature response to radiative forcing. Grey observations scatter around a black posterior mean that rises from about -0.35 to +0.6 over 170 years, between dashed 95% credible bounds."
+        }
       ]
     },
     "cite": {
